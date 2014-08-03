@@ -4,9 +4,7 @@
 require '../../../vendor/autoload.php';
 
 use Elasticsearch\Client;
-use Illuminate\Container\Container;
 use Illuminate\Database\Capsule\Manager as Capsule;
-use Iverberk\Larasearch\Proxy;
 use Iverberk\Larasearch\Query;
 use Iverberk\Larasearch\Index;
 use Iverberk\Larasearch\Traits\MappableTrait;
@@ -59,11 +57,11 @@ $app->singleton('app', function ($app) {
         new Client($config['elasticsearch']['params'])
     );
 
-    $appMock->shouldReceive('make')->with('Index', Mockery::type('string') )->andReturnUsing(function($class, $name) {
+    $appMock->shouldReceive('make')->with('iverberk.larasearch.index', Mockery::type('string') )->andReturnUsing(function($class, $name) {
         return new Index($name);
     });
 
-    $appMock->shouldReceive('make')->with('Proxy', Mockery::type('Illuminate\Database\Eloquent\Model'))->andReturnUsing(function($class, $model) {
+    $appMock->shouldReceive('make')->with('iverberk.larasearch.proxy', Mockery::type('Illuminate\Database\Eloquent\Model'))->andReturnUsing(function($class, $model) {
         $proxyMock = Mockery::mock('Iverberk\Larasearch\Proxy', array($model))->makePartial();
 
         $proxyMock->shouldReceive('getConfig')->andReturn(true);
@@ -71,7 +69,7 @@ $app->singleton('app', function ($app) {
         return $proxyMock;
     });
 
-    $appMock->shouldReceive('make')->with('Query', Mockery::type('array'))->andReturnUsing(function($class, $params) {
+    $appMock->shouldReceive('make')->with('iverberk.larasearch.query', Mockery::type('array'))->andReturnUsing(function($class, $params) {
         return new Query($params['proxy'], $params['term'], $params['options']);
     });
 

@@ -24,6 +24,7 @@
         "codeception/verify": "*",
         "codeception/specify": "*",
         "codeception/mockery-module": "*",
+        "mockery/mockery": "dev-master",
         "illuminate/database": "*",
         "illuminate/config": "4.2.*"
     }

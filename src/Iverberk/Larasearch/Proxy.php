@@ -21,7 +21,7 @@ class Proxy {
         self::$config = property_exists($model, '__es_config') ? $model->__es_config : [];
 
         self::$config['model'] = $model;
-        self::$config['index'] = App::make('Index', Utils::findKey(self::$config, 'name', $model->getTable()));
+        self::$config['index'] = App::make('iverberk.larasearch.index', Utils::findKey(self::$config, 'name', $model->getTable()));
         self::$config['type'] = str_singular($model->getTable());
         self::$config['client'] = App::make('Elasticsearch');
     }
@@ -73,7 +73,7 @@ class Proxy {
      */
     public function search($term, $options = [])
     {
-        return App::make('Query', ['proxy' => $this, 'term' => $term, 'options' => $options])->execute();
+        return App::make('iverberk.larasearch.query', ['proxy' => $this, 'term' => $term, 'options' => $options])->execute();
     }
 
     /**

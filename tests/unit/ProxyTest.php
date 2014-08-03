@@ -58,7 +58,7 @@ class ProxyTest extends \Codeception\TestCase\Test
         $this->assertEquals([], $items);
 
         // Give Elasticsearch some time to process
-        sleep(1);
+        sleep(3);
     }
 
     public function testThatModelShouldIndex()

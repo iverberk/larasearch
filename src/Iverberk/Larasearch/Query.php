@@ -212,13 +212,13 @@ class Query {
         ];
 
         // Find the correct payload based on the options
-        $payload_key = array_intersect_key(array_keys($this->options), $payloads);
+        $payload_key = array_intersect_key($this->options, $payloads);
 
         $operator = Utils::findKey($this->options, 'operator', 'and');
 
         if (count($payload_key) == 1)
         {
-            $payload = $payloads[reset($payload_key)];
+            $payload = $payloads[key($payload_key)];
         }
         elseif (count($payload_key) == 0)
         {

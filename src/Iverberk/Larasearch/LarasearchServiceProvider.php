@@ -2,6 +2,7 @@
 
 use Elasticsearch\Client;
 use Illuminate\Support\ServiceProvider;
+use Iverberk\Larasearch\Commands\ReindexCommand;
 
 class LarasearchServiceProvider extends ServiceProvider {
 
@@ -12,6 +13,41 @@ class LarasearchServiceProvider extends ServiceProvider {
 	 */
 	protected $defer = false;
 
+    public function boot()
+    {
+        $this->package('iverberk/larasearch');
+
+        $this->bootContainerBindings();
+    }
+
+    /**
+     * Boot the container bindings.
+     *
+     * @return void
+     */
+    protected function bootContainerBindings()
+    {
+        $this->app->singleton('Elasticsearch', function()
+        {
+            return new Client(\Config::get('larasearch::elasticsearch.params'));
+        });
+
+        $this->app->bind('iverberk.larasearch.index', function($app, $name)
+        {
+            return new Index($name);
+        });
+
+        $this->app->bind('iverberk.larasearch.query', function($app, $params)
+        {
+            return new Query($params['proxy'], $params['term'], $params['options']);
+        });
+
+        $this->app->bind('iverberk.larasearch.proxy', function($app, $model)
+        {
+            return new Proxy($model);
+        });
+    }
+
 	/**
 	 * Register the service provider.
 	 *
@@ -19,34 +55,22 @@ class LarasearchServiceProvider extends ServiceProvider {
 	 */
 	public function register()
 	{
-        $this->package('Iverberk/larasearch');
-
-        $this->app->singleton('Elasticsearch', function()
-        {
-            return new Client(\Config::get('larasearch::elasticsearch.params'));
-        });
-
-        $this->app->bind('Index', function($app)
-        {
-            return new Index;
-        });
-
-        $this->app->bind('Proxy', function($app, $model)
-        {
-            return new Proxy($model);
-        });
-
-        $this->app->bind('Index', function($app, $name)
-        {
-            return new Index($name);
-        });
-
-        $this->app->bind('Query', function($app, $params)
-        {
-            return new Query($params['proxy'], $params['term'], $params['options']);
-        });
-
+        $this->registerCommands();
 	}
+
+    /**
+     * Register the commands.
+     *
+     * @return void
+     */
+    protected function registerCommands()
+    {
+        $this->app['iverberk.larasearch.commands.reindex'] = $this->app->share(function ($app) {
+            return new ReindexCommand();
+        });
+
+        $this->commands('iverberk.larasearch.commands.reindex');
+    }
 
 	/**
 	 * Get the services provided by the provider.

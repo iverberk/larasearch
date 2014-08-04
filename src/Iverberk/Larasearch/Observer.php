@@ -19,11 +19,21 @@ class Observer {
 
     public function saved(Model $model)
     {
-        $this->mutate($model);
+        $models = $this->mutate($model);
+
+        foreach($models as $model)
+        {
+            $model->refreshDoc($model);
+        }
     }
 
-    private function mutate(Model $model, $ancestor = '', &$seen = [])
+    private function mutate(Model $model, $ancestor = '', &$seen = [], $path = [], $start = null)
     {
+        if ($start == null) $start = $model;
+
+        $seen[] = $model;
+        $foundModels = [];
+
         // Check if we need to index the model
         if ($this->isSearchable($model))
         {
@@ -35,6 +45,9 @@ class Observer {
 
         foreach($methods as $method)
         {
+            $newPath = $path;
+            $newPath[] = $method->name;
+
             $docComment = $method->getDocComment();
 
             if ($method->class == get_class($model) &&
@@ -53,32 +66,43 @@ class Observer {
 
                         if ($this->isSearchable($related))
                         {
-                            $data = $relation->getResults();
-
-                            if ($data instanceof Collection)
+                            $resolveModels = function($paths, $start) use (&$resolveModels)
                             {
-                                foreach($data as $record)
+                                $resolvedModels = [];
+
+                                $path = array_shift($paths);
+
+                                $data = $start->$path;
+
+                                if ( ! empty($paths))
                                 {
-                                    call_user_func(array($related, 'refreshDoc'), $record);
-                                }
-                            }
-                            else
-                            {
-                                call_user_func(array($related, 'refreshDoc'), $data);
-                            }
+                                    $records = ($data instanceof Collection) ? $data : new Collection(array($data));
 
+                                    foreach($records as $record)
+                                    {
+                                        $resolvedModels = array_merge($resolvedModels, $resolveModels($paths, $record));
+                                    }
+                                }
+                                else
+                                {
+                                    $resolvedModels = ($data instanceof Collection) ? $data->toArray() : [$data];
+                                }
+
+                                return $resolvedModels;
+                            };
+
+                            $foundModels = $resolveModels($newPath, $start);
                         }
                         else
                         {
-                            if (  $relation instanceof Model &&
-                                ! $relation instanceof $ancestor &&
-                                ! in_array($relation, $seen) &&
-                                  $this->checkDocHints($docComment))
+                            if (  $related instanceof Model &&
+                                ! $related instanceof $ancestor &&
+                                ! in_array($related, $seen) &&
+                                  $this->checkDocHints($docComment, $start))
                             {
-                                $seen[] = $relation;
 
                                 // Recursively find a relation that implements the SearchableTrait
-                                $this->mutate($relation, $model, $seen);
+                                $foundModels = array_merge($foundModels, $this->mutate($related, $model, $seen, $newPath, $start));
                             }
                         }
                     }
@@ -89,13 +113,15 @@ class Observer {
                 }
             }
         }
+
+        return $foundModels;
     }
 
     /**
      * @param string $docComment
      * @return bool
      */
-    private function checkDocHints($docComment)
+    private function checkDocHints($docComment, $start)
     {
         // Check if we never follow this relation
         if (preg_match('/@follow NEVER/', $docComment)) return false;
@@ -103,7 +129,7 @@ class Observer {
         // Check if we follow the relation from the 'base' model
         if (preg_match('/@follow UNLESS ([\\\\0-9a-zA-Z]+)/', $docComment, $matches))
         {
-            if ($matches[1] === get_class($this->model)) return false;
+            if ($matches[1] === get_class($start)) return false;
         }
 
         // We follow the relation

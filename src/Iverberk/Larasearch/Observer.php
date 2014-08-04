@@ -9,12 +9,12 @@ class Observer {
 
     public function deleted(Model $model)
     {
-        $this->mutate($model);
+        // $this->mutate($model);
     }
 
     public function restored(Model $model)
     {
-        $this->mutate($model);
+        // $this->mutate($model);
     }
 
     public function saved(Model $model)

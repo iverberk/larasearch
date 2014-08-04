@@ -1,6 +1,7 @@
 <?php namespace Iverberk\Larasearch;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Config;
 
@@ -239,6 +240,28 @@ class Proxy {
     public function shouldIndex()
     {
         return true;
+    }
+
+    /**
+     * Reindex a specific database record to Elasticsearch
+     */
+    public function refreshDoc($model)
+    {
+        try
+        {
+            self::$config['client']->index(
+                [
+                    'id' => $model->id,
+                    'index' => $this->getIndex()->getName(),
+                    'type' => $this->getType(),
+                    'body' => $model->transform(true)
+                ]
+            );
+        }
+        catch (ModelNotFoundException $e)
+        {
+
+        }
     }
 
 }

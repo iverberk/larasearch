@@ -63,9 +63,7 @@ trait SearchableTrait {
 
         if (method_exists($proxy, $method))
         {
-            $result = call_user_func_array(array($proxy, $method), $parameters);
-
-            if ($result !== FALSE && $result !== null) return $result;
+            return call_user_func_array(array($proxy, $method), $parameters);
         }
 
         return parent::__call($method, $parameters);
@@ -84,9 +82,7 @@ trait SearchableTrait {
 
         if (method_exists($proxy, $method))
         {
-            $result = call_user_func_array(array($proxy, $method), $parameters);
-
-            if ($result !== FALSE && $result !== null) return $result;
+            return call_user_func_array(array($proxy, $method), $parameters);
         }
 
         return parent::__callStatic($method, $parameters);

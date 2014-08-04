@@ -93,15 +93,8 @@ trait MappableTrait {
      */
     public function transform($relations = false)
     {
-        if ($relations)
-        {
-            // Eager load all the relations and convert the models to an array structure
-            $doc = $this->load(self::$__es_paths)->toArray();
-        }
-        else
-        {
-            $doc = $this->toArray();
-        }
+        $relations = $relations ? with(new Introspect($this))->getPaths() : [];
+        $doc = $this->load($relations)->toArray();
 
         return $doc;
     }

@@ -89,7 +89,8 @@ class Proxy {
     {
         $analyzers = Config::get('larasearch::elasticsearch.analyzers');
         $params = Config::get('larasearch::elasticsearch.defaults.index');
-        $relations = $relations ? with(new Introspect(self::$config['model']))->getPaths() : [];
+        //$relations = $relations ? with(new Introspect(self::$config['model']))->getPaths() : [];
+        $relations = $relations ? Config::get('documents.' . get_class(self::$config['model'])) : [];
         $mapping = [];
 
         if ($force)

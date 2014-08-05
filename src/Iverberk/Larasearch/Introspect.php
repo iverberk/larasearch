@@ -1,7 +1,11 @@
 <?php namespace Iverberk\Larasearch;
 
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Queue as LaravelQueue;
+use Iverberk\Larasearch\Introspect\RelationMapCallback;
 
 class Introspect {
 
@@ -35,52 +39,51 @@ class Introspect {
      * Find all related Eloquent models that are in some way connected to the base model
      * and return them as an array
      *
-     * @param null $base
+     * @param \Iverberk\Larasearch\Introspect\RelationMapCallback $callBack
+     * @param null $model
      * @param string $ancestor
-     * @param array $seen
+     * @param array $path
+     * @param null $start
      * @return array
      */
-    public function getRelatedModels($base = null, $ancestor = '', &$seen = [])
+    public function relationMap(RelationMapCallback $callBack, $model = null , $ancestor = '', $path = [], $start = null)
     {
-        $model = $base ?: $this->model;
-        $reflectionClass = new \ReflectionClass($model);
+        if ($model == null && isset($this->model)) $model = $this->model;
+
+        if ($start == null) $start = $model;
 
         $relations = [];
-        $methods = $reflectionClass->getMethods();
+
+        $methods = with(new \ReflectionClass($model))->getMethods();
 
         foreach($methods as $method)
         {
+            $newPath = $path;
+            $newPath[] = $method->name;
+
             $docComment = $method->getDocComment();
 
-            // Check that the method is not inherited and read the docblock
-            // for a hint that it returns an Eloquent relation
-            if ($method->class == $reflectionClass->getName() &&
+            if ($method->class == get_class($model) &&
                 stripos($docComment, '@return \Illuminate\Database\Eloquent\Relations'))
             {
                 $camelKey = camel_case($method->name);
 
-                try {
+                try
+                {
                     $relation = $model->$camelKey();
 
                     if ($relation instanceof Relation)
                     {
                         $related = $relation->getRelated();
-                        $relatedClassName = get_class($related);
 
                         if ( ! $related instanceof $ancestor &&
-                             ! $related instanceof $this->model &&
-                             ! in_array($relatedClassName, $seen) &&
+                             ! $related instanceof $start &&
+                            $callBack->proceed($related) &&
                             $this->checkDocHints($docComment))
                         {
-                            $seen[] = $relatedClassName;
+                            $relations[] = $related;
 
-                            // Recursively find relations of the related model
-                            $relations[$relatedClassName] =
-                                [
-                                    'method' => $method->name,
-                                    'instance' => $related,
-                                    'related' => $this->getRelatedModels($related, $model, $seen)
-                                ];
+                            $this->relationMap($callBack, $related, $model, $newPath, $start);
                         }
                     }
                 }
@@ -91,39 +94,7 @@ class Introspect {
             }
         }
 
-        return $relations;
-    }
-
-    /**
-     * Get related Eloquent as dot separated paths
-     *
-     * @access public
-     * @param array $models
-     * @return array
-     */
-    public function getPaths($models = null)
-    {
-        $models = $models ?: $this->getRelatedModels();
-        $paths = [];
-
-        foreach($models as $model)
-        {
-            if(empty($model['related']))
-            {
-                $paths[] = $model['method'];
-            }
-            else
-            {
-                $childPaths = $this->getPaths($model['related']);
-
-                foreach($childPaths as $childPath)
-                {
-                    $paths[] = $model['method'] . "." . $childPath;
-                }
-            }
-        }
-
-        return $paths;
+        $callBack->callback($model, $path, $relations, $start);
     }
 
     /**

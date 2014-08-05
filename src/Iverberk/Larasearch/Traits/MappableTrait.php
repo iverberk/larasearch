@@ -1,6 +1,6 @@
 <?php namespace Iverberk\Larasearch\Traits;
 
-use Config;
+use Illuminate\Support\Facades\Config;
 use Iverberk\Larasearch\Introspect;
 
 trait MappableTrait {
@@ -93,7 +93,7 @@ trait MappableTrait {
      */
     public function transform($relations = false)
     {
-        $relations = $relations ? with(new Introspect($this))->getPaths() : [];
+        $relations = $relations ? Config::get('documents.' . get_class($this)) : [];
         $doc = $this->load($relations)->toArray();
 
         return $doc;

@@ -1,8 +1,10 @@
-<?php namespace Iverberk\Larasearch\Queues;
+<?php namespace Iverberk\Larasearch\Jobs;
 
-class ReindexQueue {
+use Illuminate\Queue\Jobs\Job;
 
-    public function fire($job, $models)
+class ReindexJob {
+
+    public function fire(Job $job, $models)
     {
         try
         {

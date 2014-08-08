@@ -1,6 +1,8 @@
 <?php namespace Iverberk\Larasearch\Commands;
 
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\File;
+use Iverberk\Larasearch\Utils;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
 
@@ -27,33 +29,35 @@ class ReindexCommand extends Command {
 	 */
 	public function fire()
 	{
-        $model = $this->argument('model');
-
-        $this->info("---> Reindexing the ${model} to Elasticsearch\n");
-
-        try
+        if ($models = $this->argument('model'))
         {
-            list($errors, $items) = $model::reindex(
-                $this->option('force'),
-                $this->option('relations'),
-                $this->option('batch'),
-                function($batch) {
-                    $this->info("---> Batch ${batch}");
-                }
-            );
-
-            if ($errors)
+            foreach($models as $model)
             {
-                $this->error('Errors occured during reindexing!');
-                if ($this->confirm('Would you like to see a dump of the erroneous items? [yes|no]'))
-                {
-                    dd($items);
-                }
+                $this->reindexModel(new $model);
             }
         }
-        catch (\BadMethodCallException $e)
+        elseif ($directories = $this->option('dir'))
         {
-            $this->error('Oops, something went wrong! Did you include the SearchableTrait on the model?');
+            $models = Utils::findSearchableModels($directories);
+
+            if (empty($models))
+            {
+                $this->info("No models found that use the Searchable trait. Nothing to do!");
+
+                return;
+            }
+
+            foreach ($models as $model)
+            {
+                // Reindex model
+                $this->reindexModel($model);
+            }
+        }
+        else
+        {
+            $this->error("No directories or model specified. Nothing to do!");
+
+            return;
         }
 	}
 
@@ -65,7 +69,7 @@ class ReindexCommand extends Command {
 	protected function getArguments()
 	{
 		return array(
-			array('model', InputArgument::REQUIRED, 'Base Eloquent model to use for indexing.'),
+            array('model', InputOption::VALUE_OPTIONAL, 'Eloquent model to reindex', null),
 		);
 	}
 
@@ -77,10 +81,40 @@ class ReindexCommand extends Command {
 	protected function getOptions()
 	{
 		return array(
-			array('relations', null, InputOption::VALUE_NONE, 'Reindex related Eloquent models.', null),
-            array('batch', null, InputOption::VALUE_OPTIONAL, 'The number of records to index in a single batch.', 750),
-            array('force', null, InputOption::VALUE_NONE, 'Overwrite existing indices and documents.', null),
+			array('relations', null, InputOption::VALUE_NONE, 'Reindex related Eloquent models', null),
+			array('mapping', null, InputOption::VALUE_REQUIRED, 'A file containing custom mappings', null),
+			array('dir', null, InputOption::VALUE_IS_ARRAY | InputOption::VALUE_REQUIRED, 'Directory to scan for searchable models', null),
+            array('batch', null, InputOption::VALUE_OPTIONAL, 'The number of records to index in a single batch', 750),
+            array('force', null, InputOption::VALUE_NONE, 'Overwrite existing indices and documents', null),
 		);
 	}
+
+    private function reindexModel($model)
+    {
+        $mapping = $this->option('mapping') ? json_decode(File::get($this->option('mapping')), true) : null;
+
+        $this->info("---> Reindexing ${model}\n");
+
+        list($errors, $items) = $model::reindex(
+            $this->option('force'),
+            $this->option('relations'),
+            $this->option('batch'),
+            $mapping,
+            function($batch) {
+                $this->info("---> Batch ${batch}");
+            }
+        );
+
+        if ($errors)
+        {
+            $this->error('Errors occured during reindexing!');
+            if ($this->confirm('Would you like to see a dump of the erroneous items? [yes|no]'))
+            {
+                dd($items);
+            }
+        }
+
+        $this->info("");
+    }
 
 }

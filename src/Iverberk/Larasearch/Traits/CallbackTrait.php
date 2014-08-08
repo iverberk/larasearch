@@ -1,6 +1,7 @@
 <?php namespace Iverberk\Larasearch\Traits;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Iverberk\Larasearch\Observer;
 
 trait CallbackTrait {

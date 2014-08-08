@@ -1,5 +1,7 @@
 <?php namespace Iverberk\Larasearch;
 
+use DirectoryIterator;
+
 class Utils {
 
     /**
@@ -50,6 +52,51 @@ class Utils {
         }
 
         return $merged;
+    }
+
+    public static function findSearchableModels($directories)
+    {
+        $models = [];
+
+        // Iterate over each directory and inspect files for models
+        foreach($directories as $directory)
+        {
+            $dir = new DirectoryIterator($directory);
+            foreach ($dir as $fileinfo)
+            {
+                $namespace = '';
+
+                if (!$fileinfo->isDot() && $fileinfo->isReadable())
+                {
+                    $fileObj = $fileinfo->openFile('r');
+
+                    while (!$fileObj->eof())
+                    {
+                        $line = $fileObj->fgets();
+
+                        // Extract namespace
+                        if (preg_match('/namespace\s+([a-zA-z0-9]+)/', $line, $matches))
+                        {
+                            $namespace = $matches[1];
+                        }
+
+                        // Extract classname
+                        if (preg_match('/class\s+([a-zA-z0-9]+)/', $line, $matches))
+                        {
+                            $model = $namespace . '\\' . $matches[1];
+
+                            // Check if the model has the searchable trait
+                            if (in_array('Iverberk\\Larasearch\\Traits\\SearchableTrait', class_uses($model)))
+                            {
+                                $models[] = $model;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return $models;
     }
 
 }

@@ -2,6 +2,7 @@
 
 use Elasticsearch\Client;
 use Illuminate\Support\ServiceProvider;
+use Iverberk\Larasearch\Commands\PathsCommand;
 use Iverberk\Larasearch\Commands\ReindexCommand;
 
 class LarasearchServiceProvider extends ServiceProvider {
@@ -69,7 +70,12 @@ class LarasearchServiceProvider extends ServiceProvider {
             return new ReindexCommand();
         });
 
+        $this->app['iverberk.larasearch.commands.paths'] = $this->app->share(function ($app) {
+            return new PathsCommand();
+        });
+
         $this->commands('iverberk.larasearch.commands.reindex');
+        $this->commands('iverberk.larasearch.commands.paths');
     }
 
 	/**

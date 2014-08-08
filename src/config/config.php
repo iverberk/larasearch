@@ -2,7 +2,12 @@
 
 use Psr\Log\LogLevel;
 
-return array(
+$compiled = __DIR__ . '/paths.json';
+
+// Check for a json file that contains the compiled paths for model relations
+$pathConfig = file_exists($compiled) ? json_decode(file_get_contents($compiled), true) : [];
+
+return array_merge($pathConfig, array(
 
     'elasticsearch' => [
 
@@ -196,4 +201,4 @@ return array(
         ]
     ]
 
-);
+));

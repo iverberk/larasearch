@@ -81,106 +81,108 @@ class Proxy {
      * @param bool $force
      * @param bool $relations
      * @param int $batchSize
+     * @param array|null $mapping
      * @param callable $callback
      *
      * @return array
      */
-    public static function reindex($force = false, $relations = false, $batchSize = 750, Callable $callback = null)
+    public static function reindex($force = false, $relations = false, $batchSize = 750, $config = [], Callable $callback = null)
     {
         $analyzers = Config::get('larasearch::elasticsearch.analyzers');
-        $params = Config::get('larasearch::elasticsearch.defaults.index');
-        //$relations = $relations ? with(new Introspect(self::$config['model']))->getPaths() : [];
-        $relations = $relations ? Config::get('documents.' . get_class(self::$config['model'])) : [];
-        $mapping = [];
+        $relations = $relations ? Config::get('larasearch::paths.' . get_class(self::$config['model'])) : [];
+        $params = [];
 
         if ($force)
         {
             if (self::$config['index']->exists()) self::$config['index']->delete();
         }
 
-        $mapping_options = array_combine(
-            $analyzers,
-            array_map(function($type)
-                {
-                    return Utils::findKey(self::$config, $type, false) ?: [];
-                },
-                $analyzers
-            )
-        );
-
-        foreach(array_unique(array_flatten(array_values($mapping_options))) as $field)
+        if (empty($config))
         {
-            // Extract path segments from dot separated field
-            $pathSegments = explode('.', $field);
+            $params = Config::get('larasearch::elasticsearch.defaults.index');
 
-            // Last element is the field name
-            $fieldName = array_pop($pathSegments);
+            $mapping_options = array_combine(
+                $analyzers,
+                array_map(function ($type) {
+                        return Utils::findKey(self::$config, $type, false) ? : [];
+                    },
+                    $analyzers
+                )
+            );
 
-            // Apply default field mapping
-            $field_mapping = [
-                'type' => "multi_field",
-                'fields' => [
-                    $fieldName => [
-                        'type' => 'string',
-                        'index' => 'not_analyzed'
-                    ],
-                    'analyzed' => [
-                        'type'=> 'string',
-                        'index' => 'analyzed'
-                    ]
-                ]
-            ];
+            foreach (array_unique(array_flatten(array_values($mapping_options))) as $field) {
+                // Extract path segments from dot separated field
+                $pathSegments = explode('.', $field);
 
-            // Check if we need to add additional mappings
-            foreach($mapping_options as $type => $fields)
-            {
-                if (in_array($field, $fields))
-                {
-                    $field_mapping['fields'][$type] = [
-                        'type' => 'string',
-                        'index' => 'analyzed',
-                        'analyzer' => "larasearch_${type}_index"
-                    ];
-                }
-            }
+                // Last element is the field name
+                $fieldName = array_pop($pathSegments);
 
-            // Check if we are dealing with a nested field
-            if(!empty($pathSegments))
-            {
-                $nested = [];
-                $current = array_pop($pathSegments);
-
-                // Create the first level
-                $nested[$current] = [
-                    'type' => 'object',
-                    'properties' => [
-                        $fieldName => $field_mapping
+                // Apply default field mapping
+                $field_mapping = [
+                    'type' => "multi_field",
+                    'fields' => [
+                        $fieldName => [
+                            'type' => 'string',
+                            'index' => 'not_analyzed'
+                        ],
+                        'analyzed' => [
+                            'type' => 'string',
+                            'index' => 'analyzed'
+                        ]
                     ]
                 ];
 
-                // Add any additonal levels
-                foreach(array_reverse($pathSegments) as $pathSegment)
-                {
-                    $nested[$pathSegment] = [
-                        'type' => 'object',
-                        'properties' => $nested
-                    ];
-
-                    unset($nested[$current]);
-                    $current = $pathSegment;
+                // Check if we need to add additional mappings
+                foreach ($mapping_options as $type => $fields) {
+                    if (in_array($field, $fields)) {
+                        $field_mapping['fields'][$type] = [
+                            'type' => 'string',
+                            'index' => 'analyzed',
+                            'analyzer' => "larasearch_${type}_index"
+                        ];
+                    }
                 }
 
-                // Nested field
-                $mapping = Utils::array_merge_recursive_distinct($mapping, $nested);
-            }
-            else
-            {
-                // Root-level field
-                $mapping[$fieldName] = $field_mapping;
-            }
-        }
+                // Check if we are dealing with a nested field
+                if (!empty($pathSegments)) {
+                    $nested = [];
+                    $current = array_pop($pathSegments);
 
-        if (!empty($mapping)) $params['mappings']['_default_']['properties'] = $mapping;
+                    // Create the first level
+                    $nested[$current] = [
+                        'type' => 'object',
+                        'properties' => [
+                            $fieldName => $field_mapping
+                        ]
+                    ];
+
+                    // Add any additonal levels
+                    foreach (array_reverse($pathSegments) as $pathSegment) {
+                        $nested[$pathSegment] = [
+                            'type' => 'object',
+                            'properties' => $nested
+                        ];
+
+                        unset($nested[$current]);
+                        $current = $pathSegment;
+                    }
+
+                    // Nested field
+                    $mapping = Utils::array_merge_recursive_distinct($mapping, $nested);
+                }
+                else
+                {
+                    // Root-level field
+                    $mapping[$fieldName] = $field_mapping;
+                }
+            }
+
+            if (!empty($mapping)) $params['mappings']['_default_']['properties'] = $mapping;
+        }
+        else
+        {
+            $params = $config;
+        }
 
         self::$config['index']->create($params);
 
@@ -189,6 +191,8 @@ class Proxy {
 
         for ($batch = 1; $batch <= $batches; $batch++)
         {
+            $callback($batch);
+
             $records = self::$config['model']
                 ->with($relations)
                 ->skip($batchSize * ($batch-1))
@@ -227,8 +231,6 @@ class Proxy {
                 // Return items with errors
                 return [true, $errorItems];
             }
-
-            if (is_callable($callback)) $callback($batch);
         }
 
         // No items with errors

@@ -17,29 +17,37 @@ class Observer {
 
         foreach( (array) $paths as $path)
         {
-            $model = $model->load($path);
-            $path = explode('.', $path);
-
-            // Define a little recursive function to walk the relations of the model based on the path
-            // Eventually it will queue all affected searchable models for reindexing
-            $walk = function($relation) use (&$walk, &$path)
+            if ( ! empty($path))
             {
-                $segment = array_shift($path);
+                $model = $model->load($path);
 
-                if ($relation instanceof Model)
+                $path = explode('.', $path);
+
+                // Define a little recursive function to walk the relations of the model based on the path
+                // Eventually it will queue all affected searchable models for reindexing
+                $walk = function($relation) use (&$walk, &$path)
                 {
-                    Queue::push('Iverberk\Larasearch\Jobs\ReindexJob', [ get_class($relation) . ':' . $relation->getKey() ]);
-                }
-                else if ($relation instanceof Collection)
-                {
-                    foreach($relation as $record)
+                    $segment = array_shift($path);
+
+                    if ($relation instanceof Model)
                     {
-                        $walk($record->getRelation($segment));
+                        Queue::push('Iverberk\Larasearch\Jobs\ReindexJob', [ get_class($relation) . ':' . $relation->getKey() ]);
                     }
-                }
-            };
+                    else if ($relation instanceof Collection)
+                    {
+                        foreach($relation as $record)
+                        {
+                            $walk($record->getRelation($segment));
+                        }
+                    }
+                };
 
-            $walk($model->getRelation(array_shift($path)));
+                $walk($model->getRelation(array_shift($path)));
+            }
+            else
+            {
+                Queue::push('Iverberk\Larasearch\Jobs\ReindexJob', [ get_class($model) . ':' . $model->getKey() ]);
+            }
         }
     }
 

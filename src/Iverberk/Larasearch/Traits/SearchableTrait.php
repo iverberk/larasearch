@@ -1,12 +1,11 @@
 <?php namespace Iverberk\Larasearch\Traits;
 
-
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\App;
 
 trait SearchableTrait {
 
-    use MappableTrait;
+    use TransformableTrait;
     use CallbackTrait;
 
     /**

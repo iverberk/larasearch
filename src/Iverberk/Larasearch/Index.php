@@ -1,6 +1,9 @@
 <?php namespace Iverberk\Larasearch;
 
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Config;
+use Iverberk\Larasearch\Exceptions\ImportException;
 
 class Index {
 
@@ -19,12 +22,81 @@ class Index {
     private $client;
 
     /**
+     * Index parameters
+     *
+     * @var array
+     */
+    private $params;
+
+    /**
+     * Larasearch Eloquent proxy
+     *
+     * @var Proxy
+     */
+    private $proxy;
+
+    /**
      * Create an index instance
      */
-    public function __construct($name)
+    public function __construct(Proxy $proxy)
     {
         $this->client = App::make('Elasticsearch');
-        $this->name = $name;
+
+        $this->proxy = $proxy;
+        $this->name = $proxy->getModel()->getTable();
+        $this->params = $this->getDefaultIndexParams();
+    }
+
+    /**
+     * Import an Eloquent
+     *
+     * @param Model $model
+     * @param array $relations
+     * @param int $batchSize
+     * @param callable $callback
+     * @internal param $type
+     */
+    public function import(Model $model, $relations = [], $batchSize = 750, Callable $callback = null)
+    {
+        $this->create($this->params);
+
+        $batch = 0;
+
+        while(true)
+        {
+            // Increase the batch number
+            $batch += 1;
+
+            // Load records from the database
+            $records = $model
+                ->with($relations)
+                ->skip($batchSize * ($batch-1))
+                ->take($batchSize)
+                ->get();
+
+            // Break out of the loop if we are out of records
+            if (count($records) == 0) break;
+
+            // Call the callback function to provide feedback on the import process
+            $callback($batch);
+
+            // Transform each record before sending it to Elasticsearch
+            $data = [];
+
+            foreach($records as $record)
+            {
+                $data[] = [
+                    'index' => [
+                        '_id' => $record->id
+                    ]
+                ];
+
+                $data[] = $record->transform();
+            }
+
+            // Bulk import the data to Elasticsearch
+            $this->bulk($data);
+        }
     }
 
     /**
@@ -130,21 +202,6 @@ class Index {
     }
 
     /**
-     * Bulk import a set of data into the index
-     *
-     * @param $type
-     * @param $records
-     */
-    public function import($type, $records)
-    {
-        $params['index'] = $this->name;
-        $params['type'] = $type;
-        $params['body'] = $records;
-
-        $this->client->bulk($params);
-    }
-
-    /**
      * Inspect tokens returned from the analyzer
      *
      * @param string $text
@@ -153,6 +210,157 @@ class Index {
     public function tokens($text, $options = [])
     {
         $this->client->indices()->analyze(array_merge(['index' => $this->name, 'text' => $text], $options));
+    }
+
+    /**
+     * @return array
+     */
+    public function getParams()
+    {
+        return $this->params;
+    }
+
+    /**
+     * @param $params
+     */
+    public function setParams($params)
+    {
+        $this->params = $params;
+    }
+
+    /**
+     * @param $records
+     * @throws ImportException
+     */
+    public function bulk($records)
+    {
+        $params['index'] = $this->name;
+        $params['type'] = $this->proxy->getType();
+        $params['body'] = $records;
+
+        $results = $this->client->bulk($params);
+
+        if ($results['errors'])
+        {
+            $errorItems = [];
+
+            foreach($results['items'] as $item)
+            {
+                if (array_key_exists('error', $item['index']))
+                {
+                    $errorItems[] = $item;
+                }
+            }
+
+            throw new ImportException($errorItems);
+        }
+    }
+
+    /**
+     * Initialize the default index settings and mappings
+     *
+     * @return array
+     */
+    private function getDefaultIndexParams()
+    {
+        $analyzers = Config::get('larasearch::elasticsearch.analyzers');
+        $params = Config::get('larasearch::elasticsearch.defaults.index');
+
+        $mapping_options = array_combine(
+            $analyzers,
+            array_map(function ($type) {
+                    return Utils::findKey($this->proxy->getConfig(), $type, false) ? : [];
+                },
+                $analyzers
+            )
+        );
+
+        foreach (array_unique(array_flatten(array_values($mapping_options))) as $field)
+        {
+            // Extract path segments from dot separated field
+            $pathSegments = explode('.', $field);
+
+            // Last element is the field name
+            $fieldName = array_pop($pathSegments);
+
+            // Apply default field mapping
+            $fieldMapping = [
+                'type' => "multi_field",
+                'fields' => [
+                    $fieldName => [
+                        'type' => 'string',
+                        'index' => 'not_analyzed'
+                    ],
+                    'analyzed' => [
+                        'type' => 'string',
+                        'index' => 'analyzed'
+                    ]
+                ]
+            ];
+
+            // Check if we need to add additional mappings
+            foreach ($mapping_options as $type => $fields)
+            {
+                if (in_array($field, $fields))
+                {
+                    $fieldMapping['fields'][$type] = [
+                        'type' => 'string',
+                        'index' => 'analyzed',
+                        'analyzer' => "larasearch_${type}_index"
+                    ];
+                }
+            }
+
+            if ( ! empty($pathSegments))
+            {
+                $mapping[$fieldName] = $this->getNestedFieldMapping($fieldName, $fieldMapping, $pathSegments);
+            }
+            else
+            {
+                $mapping[$fieldName] = $fieldMapping;
+            }
+        }
+
+        if ( ! empty($mapping)) $this->params['mappings']['_default_']['properties'] = $mapping;
+
+        $params['index'] = $this->name;
+        $params['type'] = $this->proxy->getType();
+
+        return $params;
+    }
+
+    /**
+     * @param $fieldName
+     * @param $fieldMapping
+     * @param $pathSegments
+     * @return array
+     */
+    private function getNestedFieldMapping($fieldName, $fieldMapping, $pathSegments)
+    {
+        $nested = [];
+        $current = array_pop($pathSegments);
+
+        // Create the first level
+        $nested[$current] = [
+            'type' => 'object',
+            'properties' => [
+                $fieldName => $fieldMapping
+            ]
+        ];
+
+        // Add any additional levels
+        foreach (array_reverse($pathSegments) as $pathSegment)
+        {
+            $nested[$pathSegment] = [
+                'type' => 'object',
+                'properties' => $nested
+            ];
+
+            unset($nested[$current]);
+            $current = $pathSegment;
+        }
+
+        return Utils::array_merge_recursive_distinct($mapping, $nested);
     }
 
 }

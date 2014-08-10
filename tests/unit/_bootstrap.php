@@ -7,7 +7,7 @@ use Elasticsearch\Client;
 use Illuminate\Database\Capsule\Manager as Capsule;
 use Iverberk\Larasearch\Query;
 use Iverberk\Larasearch\Index;
-use Iverberk\Larasearch\Traits\MappableTrait;
+use Iverberk\Larasearch\Traits\TransformableTrait;
 use Iverberk\Larasearch\Traits\SearchableTrait;
 
 // Setup Mocks for Laravel specific components
@@ -135,7 +135,7 @@ class Husband extends Illuminate\Database\Eloquent\Model {
 
 class Wife extends Illuminate\Database\Eloquent\Model {
 
-    use MappableTrait;
+    use TransformableTrait;
 
     /**
      * @follow NEVER
@@ -159,7 +159,7 @@ class Wife extends Illuminate\Database\Eloquent\Model {
 
 class Child extends Illuminate\Database\Eloquent\Model {
 
-    use MappableTrait;
+    use TransformableTrait;
 
     /**
      * @return \Illuminate\Database\Eloquent\Relations
@@ -191,7 +191,7 @@ class Child extends Illuminate\Database\Eloquent\Model {
 
 class Toy extends Illuminate\Database\Eloquent\Model {
 
-    use MappableTrait;
+    use TransformableTrait;
 
     /**
      * @return \Illuminate\Database\Eloquent\Relations

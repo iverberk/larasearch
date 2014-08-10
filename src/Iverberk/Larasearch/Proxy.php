@@ -1,7 +1,6 @@
 <?php namespace Iverberk\Larasearch;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Config;
 
@@ -22,9 +21,10 @@ class Proxy {
         self::$config = property_exists($model, '__es_config') ? $model->__es_config : [];
 
         self::$config['model'] = $model;
-        self::$config['index'] = App::make('iverberk.larasearch.index', Utils::findKey(self::$config, 'name', $model->getTable()));
         self::$config['type'] = str_singular($model->getTable());
+
         self::$config['client'] = App::make('Elasticsearch');
+        self::$config['index'] = App::make('iverberk.larasearch.index', $this);
     }
 
     /**
@@ -81,160 +81,22 @@ class Proxy {
      * @param bool $force
      * @param bool $relations
      * @param int $batchSize
-     * @param array|null $mapping
      * @param callable $callback
-     *
-     * @return array
+     * @internal param array $params
      */
-    public static function reindex($force = false, $relations = false, $batchSize = 750, $config = [], Callable $callback = null)
+    public static function reindex($force = false, $relations = false, $batchSize = 750, Callable $callback = null)
     {
-        $analyzers = Config::get('larasearch::elasticsearch.analyzers');
-        $relations = $relations ? Config::get('larasearch::paths.' . get_class(self::$config['model'])) : [];
-        $params = [];
+        $index = self::$config['index'];
+        $model = self::$config['model'];
+
+        $relations = $relations ? Config::get('larasearch::paths.' . get_class($model)) : [];
 
         if ($force)
         {
-            if (self::$config['index']->exists()) self::$config['index']->delete();
+            if ($index->exists()) $index->delete();
         }
 
-        if (empty($config))
-        {
-            $params = Config::get('larasearch::elasticsearch.defaults.index');
-
-            $mapping_options = array_combine(
-                $analyzers,
-                array_map(function ($type) {
-                        return Utils::findKey(self::$config, $type, false) ? : [];
-                    },
-                    $analyzers
-                )
-            );
-
-            foreach (array_unique(array_flatten(array_values($mapping_options))) as $field) {
-                // Extract path segments from dot separated field
-                $pathSegments = explode('.', $field);
-
-                // Last element is the field name
-                $fieldName = array_pop($pathSegments);
-
-                // Apply default field mapping
-                $field_mapping = [
-                    'type' => "multi_field",
-                    'fields' => [
-                        $fieldName => [
-                            'type' => 'string',
-                            'index' => 'not_analyzed'
-                        ],
-                        'analyzed' => [
-                            'type' => 'string',
-                            'index' => 'analyzed'
-                        ]
-                    ]
-                ];
-
-                // Check if we need to add additional mappings
-                foreach ($mapping_options as $type => $fields) {
-                    if (in_array($field, $fields)) {
-                        $field_mapping['fields'][$type] = [
-                            'type' => 'string',
-                            'index' => 'analyzed',
-                            'analyzer' => "larasearch_${type}_index"
-                        ];
-                    }
-                }
-
-                // Check if we are dealing with a nested field
-                if (!empty($pathSegments)) {
-                    $nested = [];
-                    $current = array_pop($pathSegments);
-
-                    // Create the first level
-                    $nested[$current] = [
-                        'type' => 'object',
-                        'properties' => [
-                            $fieldName => $field_mapping
-                        ]
-                    ];
-
-                    // Add any additonal levels
-                    foreach (array_reverse($pathSegments) as $pathSegment) {
-                        $nested[$pathSegment] = [
-                            'type' => 'object',
-                            'properties' => $nested
-                        ];
-
-                        unset($nested[$current]);
-                        $current = $pathSegment;
-                    }
-
-                    // Nested field
-                    $mapping = Utils::array_merge_recursive_distinct($mapping, $nested);
-                }
-                else
-                {
-                    // Root-level field
-                    $mapping[$fieldName] = $field_mapping;
-                }
-            }
-
-            if (!empty($mapping)) $params['mappings']['_default_']['properties'] = $mapping;
-        }
-        else
-        {
-            $params = $config;
-        }
-
-        self::$config['index']->create($params);
-
-        $total = self::$config['model']->all()->count();
-        $batches = ceil($total / $batchSize);
-
-        for ($batch = 1; $batch <= $batches; $batch++)
-        {
-            $callback($batch);
-
-            $records = self::$config['model']
-                ->with($relations)
-                ->skip($batchSize * ($batch-1))
-                ->take($batchSize)
-                ->get();
-
-            $data = [];
-
-            foreach($records as $record)
-            {
-                $data[] = [
-                    'index' => [
-                        '_id' => $record->id
-                    ]
-                ];
-
-                $data[] = $record->transform();
-            }
-
-            $params['body'] = $data;
-
-            $results = self::$config['index']->import(self::$config['type'], $data);
-
-            if ($results['errors'])
-            {
-                $errorItems = [];
-
-                foreach($results['items'] as $item)
-                {
-                    if (array_key_exists('error', $item['index']))
-                    {
-                        $errorItems[] = $item;
-                    }
-                }
-
-                // Return items with errors
-                return [true, $errorItems];
-            }
-        }
-
-        // No items with errors
-        return [false, []];
+        $index->import($model, $relations, $batchSize, $callback);
     }
 
     /**
@@ -250,21 +112,14 @@ class Proxy {
      */
     public function refreshDoc($model)
     {
-        try
-        {
-            self::$config['client']->index(
-                [
-                    'id' => $model->id,
-                    'index' => $this->getIndex()->getName(),
-                    'type' => $this->getType(),
-                    'body' => $model->transform(true)
-                ]
-            );
-        }
-        catch (ModelNotFoundException $e)
-        {
-
-        }
+        self::$config['client']->index(
+            [
+                'id' => $model->id,
+                'index' => $this->getIndex()->getName(),
+                'type' => $this->getType(),
+                'body' => $model->transform(true)
+            ]
+        );
     }
 
 }

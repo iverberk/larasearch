@@ -1,11 +1,18 @@
 Larasearch
 ==========
 
+---
+
+**Caution: This package is under heavy development. Most of the functionaly is there but there might be some refactoring
+as the package matures. Be careful if you decide to use it in production at this point.**
+
+---
+
 Introduction
 ---
 
 
-Larasearch is a Laravel package that aims to seamlessly integrate Elasticsearch functionality with the Eloquent ORM. 
+Larasearch is a Laravel package that aims to seamlessly integrate Elasticsearch functionality with the Eloquent ORM.
 
 Features
 --------
@@ -24,10 +31,10 @@ Larasearch unlocks its functionality through PHP Traits. There are three Traits 
 **Searchable**
 
 Use it on the 'base' models that you wish to create indices from.
-   
-**Mappable**
 
-Use it on (related) models that you wish to have indexed and mapped.
+**Transformable**
+
+Use it on (related) models that you wish to have indexed.
 
 **Callable**
 
@@ -36,7 +43,7 @@ Use it on (related) models to let the 'base' model know that something has chang
 Indexing
 ---
 
-Larasearch exposes an Artisan command for indexing your models. Suppose we have the following Eloquent models:
+Larasearch exposes two Artisan command for indexing your models. Suppose we have the following Eloquent models:
 
 ```PHP
 class Husband extends Eloquent {
@@ -119,39 +126,9 @@ class Toy extends Eloquent {
 
 }
 ```
-
-**Indexing a model**
-
-Just include the SearchableTrait to enable indexing of the Husband model:
-
-```PHP
-class Husband extends Eloquent {
-
-    use Iverberk\Larasearch\SearchableTrait;
-    
-    ....
-```
-Run the following Artisan command to index the model: 
-
-```php artisan larasearch:reindex Husband```
-
-Use the ```--force``` flag to force recreation of the index. To automatically add all related models to the indexed documents you can use the ```--relations``` flag. By default Larasearch will use the database table as index name and the model name as type.
-
-**MappableTrait**
-
-Include the MappableTrait to get more control over the indexing proces:
-```PHP
-class Husband extends Eloquent {
-
-    use Iverberk\Larasearch\MappableTrait;
-    
-    ....
-```
-The MappableTrait overrides the Eloquent ***toArray*** function to correctly cast attributes to their appropriate datatypes. It also provides a basic transform function to convert attributes to an indexable property array. You can override this function in your model to gain full control over how the property array is built.
-
 **Related Models**
 
-Larasearch can automatically include related models as nested objects during indexing. It achieves this functionality by introspecting the models and finding relations. As specified in the above paragraph, every model has full control over its serialization by overriding the transform function. Sometimes you do not want related models to be included from a base model. Larasearch allows you to specify conditions in the comments of the relation function. It know the following options:
+Larasearch can automatically include related models as nested objects during indexing. It achieves this functionality by introspecting the models and finding relations. Every model has full control over its serialization by overriding the transform function (see below). Sometimes you do not want related models to be included from a base model. Larasearch allows you to specify conditions in the comments of the relation function. It knows the following options:
 
 1. @follow NEVER
 2. @follow UNLESS {base model}
@@ -174,7 +151,44 @@ class Child extends Eloquent {
 
 }
 ```
-!!IMPORTANT!!: make sure that you add the proper annotations to the relation functions so that Larasearch knows when a function defines an Eloquent relation. See the example models for the proper annotations.
+Mmake sure that you add the proper annotations to the relation functions so that Larasearch knows when a function defines an Eloquent relation. See the example models for the proper annotations.
+
+**Indexing a model**
+
+Just include the SearchableTrait to enable indexing of the Husband model:
+
+```PHP
+class Husband extends Eloquent {
+
+    use Iverberk\Larasearch\SearchableTrait;
+
+    ....
+```
+To index this model Larasearch needs to know what the paths are to the related models. A path is a dot seperated string of relation methods that are defined on the Eloquent models. It also needs to know the 'inverse' of this path to determine which Searchable model records should be reindexed when a change is made to one of its related models. To this end Larasearch exposes an Artisan 'paths' command. This command will generate the paths for you and optionaly write them to your local larasearch package config. **The paths command needs to be rerun when a change is made to the model relationships.** Also, the relationships need to be implemented properly with the relations defined in both directions.
+
+Run the following Artisan command to generate the paths for the model:
+
+```php artisan larasearch:paths Husband```
+
+To generate paths for relations you should add the ```--relations``` flag.
+
+Run the following Artisan command to index the model:
+
+```php artisan larasearch:reindex Husband```
+
+Use the ```--force``` flag to force recreation of the index. To automatically add all related models to the indexed documents you can use the ```--relations``` flag. By default Larasearch will use the database table as index name and the model name as type.
+
+**TransformableTrait**
+
+Include the TransformableTrait to get more control over the indexing proces:
+```PHP
+class Husband extends Eloquent {
+
+    use Iverberk\Larasearch\TransformableTrait;
+
+    ....
+```
+It provides a basic transform function to convert attributes to an indexable property array. You can override this function in your model to gain full control over how the property array is built.
 
 **Indexing Configuration**
 
@@ -184,9 +198,9 @@ You can specify how certain fields are analyzed by Elasticsearch during the inde
 class Husband extends Eloquent {
 
     public $__es_config = [
-    
+
     ];
-    
+
     ....
 ```
 This array contains analysis settings for different fields. It is possible to specify fields from related models using dot notation.
@@ -198,7 +212,7 @@ class Husband extends Eloquent {
     public $__es_config = [
         'autocomplete' => ['field1', 'field2', 'relation.field1', 'relation.field2', ...]
     ];
-    
+
     ...
 ```
 Instead of the generic 'autocomplete' analyzer you can also use more specific variants:
@@ -219,7 +233,7 @@ class Husband extends Eloquent {
     public $__es_config = [
         'suggest' => ['field1', 'field2', 'relation.field1', 'relation.field2', ...]
     ];
-    
+
     ...
 ```
 
@@ -242,11 +256,11 @@ foreach($results as $result)
     $result->getScore();
     $result->getSource();
     $result->getHit();
-    
+
     // Get results directly from the hit
     // Object notation
     $result->wife
-    
+
     // Array notation
     $result['_source.wife.name']
 }
@@ -260,11 +274,11 @@ $results = Husband::search('query_string', ['fields' => ['wife.name']])->getResu
 And also which fields to return in the response:
 ```PHP
 $results = Husband::search('query_string', [
-        'fields' => ['wife.name'], 
+        'fields' => ['wife.name'],
         'select' => ['name']
     ])->getResults();
-    
-$name = $results->first()->getFields(['name']);    
+
+$name = $results->first()->getFields(['name']);
 ```
 
 - **Highlighting**
@@ -272,7 +286,7 @@ $name = $results->first()->getFields(['name']);
 ```PHP
 $results = Husband::search('query_string', ['fields' => ['name'], 'highlight' => true])->getResults();
 
-$highlights = $results->first()->getHighlights(['name']);    
+$highlights = $results->first()->getHighlights(['name']);
 ```
 
 - **Suggestions**
@@ -284,8 +298,9 @@ $suggestios = $results->first()->getSuggestions(['name']);
 ```
 
 - **Aggregations**
+
 ```PHP
-$results = Husband::search('query_string', 
+$results = Husband::search('query_string',
         'aggs' => [
             'agg_name' => [
                 'type' => 'terms',
@@ -298,6 +313,7 @@ $suggestios = $results->first()->getAggregations('agg_name');
 ```
 
 - **Autocomplete**
+
 ```PHP
 // Autocomplete on all fields
 $results = Husband::search('query_string', ['autocomplete' => true])->getResults();
@@ -322,7 +338,7 @@ Todo
 
 Credits
 -------
-This package is very much inspired by these excellent packages that already exist for the Ruby/Rails ecosystem. 
+This package is very much inspired by these excellent packages that already exist for the Ruby/Rails ecosystem.
 
 * [Searchkick](https://github.com/ankane/searchkick)
 * [Elasticsearch Rails](https://github.com/elasticsearch/elasticsearch-rails)

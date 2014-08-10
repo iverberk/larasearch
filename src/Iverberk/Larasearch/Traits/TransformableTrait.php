@@ -2,7 +2,7 @@
 
 use Illuminate\Support\Facades\Config;
 
-trait MappableTrait {
+trait TransformableTrait {
 
     /**
      * Transform the Person model and its relations to an Elasticsearch document.

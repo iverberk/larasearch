@@ -50,7 +50,7 @@ class ReindexCommand extends Command {
             foreach ($models as $model)
             {
                 // Reindex model
-                $this->reindexModel($model);
+                $this->reindexModel(new $model);
             }
         }
         else
@@ -89,32 +89,26 @@ class ReindexCommand extends Command {
 		);
 	}
 
+    /**
+     * Reindex a model to Elasticsearch
+     *
+     * @param $model
+     */
     private function reindexModel($model)
     {
         $mapping = $this->option('mapping') ? json_decode(File::get($this->option('mapping')), true) : null;
 
-        $this->info("---> Reindexing ${model}\n");
+        $this->info('---> Reindexing ' . get_class($model));
 
-        list($errors, $items) = $model::reindex(
+        $model::reindex(
             $this->option('force'),
             $this->option('relations'),
             $this->option('batch'),
             $mapping,
             function($batch) {
-                $this->info("---> Batch ${batch}");
+                $this->info("* Batch ${batch}");
             }
         );
-
-        if ($errors)
-        {
-            $this->error('Errors occured during reindexing!');
-            if ($this->confirm('Would you like to see a dump of the erroneous items? [yes|no]'))
-            {
-                dd($items);
-            }
-        }
-
-        $this->info("");
     }
 
 }

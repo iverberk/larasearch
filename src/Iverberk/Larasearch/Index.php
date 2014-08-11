@@ -19,7 +19,7 @@ class Index {
      *
      * @var \Elasticsearch\Client
      */
-    private $client;
+    private static $client;
 
     /**
      * Index parameters
@@ -36,14 +36,15 @@ class Index {
     private $proxy;
 
     /**
-     * Create an index instance
+     * @param string $name
+     * @param Proxy $proxy
      */
-    public function __construct(Proxy $proxy)
+    public function __construct(Proxy $proxy, $name)
     {
-        $this->client = App::make('Elasticsearch');
+        self::$client = App::make('Elasticsearch');
 
         $this->proxy = $proxy;
-        $this->name = $proxy->getModel()->getTable();
+        $this->name = $name ?: $proxy->getModel()->getTable();
         $this->params = $this->getDefaultIndexParams();
     }
 
@@ -58,8 +59,6 @@ class Index {
      */
     public function import(Model $model, $relations = [], $batchSize = 750, Callable $callback = null)
     {
-        $this->create($this->params);
-
         $batch = 0;
 
         while(true)
@@ -129,7 +128,9 @@ class Index {
      */
     public function create($options = [])
     {
-        $this->client->indices()->create(['index' => $this->name, 'body' => $options]);
+        $body = empty($options) ? $this->getDefaultIndexParams() : $options;
+
+        self::$client->indices()->create(['index' => $this->name, 'body' => $body]);
     }
 
     /**
@@ -137,7 +138,7 @@ class Index {
      */
     public function delete()
     {
-        $this->client->indices()->delete(['index' => $this->name]);
+        self::$client->indices()->delete(['index' => $this->name]);
     }
 
     /**
@@ -147,15 +148,45 @@ class Index {
      */
     public function exists()
     {
-        return $this->client->indices()->exists(['index' => $this->name]);
+        return self::$client->indices()->exists(['index' => $this->name]);
     }
 
     /**
+     * Check if an alias exists
+     *
+     * @param $alias
+     * @return bool
+     */
+    public function aliasExists($alias)
+    {
+        return self::$client->indices()->existsAlias(['name' => $alias]);
+    }
+
+    /**
+     * Retrieve aliases
+     *
+     * @param $name
+     * @return array
+     */
+    public static function getAlias($name)
+    {
+        $response = self::$client->indices()->getAlias(['name' => $name]);
+
+        return $response;
+    }
+
+    public static function updateAliases(array $actions)
+    {
+        $params['body'] = $actions;
+
+        self::$client->indices()->updateAliases($params);
+    }
+    /**
      * Refresh an index
      */
-    public function refresh()
+    public static function refresh($index)
     {
-        $this->client->indices()->refresh(['index' => $this->name]);
+        self::$client->indices()->refresh(['index' => $index]);
     }
 
     /**
@@ -170,7 +201,7 @@ class Index {
         $params['id'] = $record['id'];
         $params['body'] = $record['data'];
 
-        $this->client->index($params);
+        self::$client->index($params);
     }
 
     /**
@@ -184,7 +215,7 @@ class Index {
         $params['type'] = $record['type'];
         $params['id'] = $record['id'];
 
-        $this->client->get($params);
+        self::$client->get($params);
     }
 
     /**
@@ -198,7 +229,25 @@ class Index {
         $params['type'] = $record['type'];
         $params['id'] = $record['id'];
 
-        $this->client->delete($params);
+        self::$client->delete($params);
+    }
+
+    /**
+     * Clean old indices that start with $name
+     *
+     * @param $name
+     */
+    public static function clean($name)
+    {
+        $indices = self::$client->indices()->getAliases();
+
+        foreach($indices as $index => $value)
+        {
+            if (empty($value['aliases']) && preg_match("/^${name}_\\d{14,17}$/", $index))
+            {
+                self::$client->indices()->delete(['index' => $index]);
+            }
+        }
     }
 
     /**
@@ -209,7 +258,7 @@ class Index {
      */
     public function tokens($text, $options = [])
     {
-        $this->client->indices()->analyze(array_merge(['index' => $this->name, 'text' => $text], $options));
+        self::$client->indices()->analyze(array_merge(['index' => $this->name, 'text' => $text], $options));
     }
 
     /**
@@ -238,7 +287,7 @@ class Index {
         $params['type'] = $this->proxy->getType();
         $params['body'] = $records;
 
-        $results = $this->client->bulk($params);
+        $results = self::$client->bulk($params);
 
         if ($results['errors'])
         {

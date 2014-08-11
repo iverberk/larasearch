@@ -1,15 +1,15 @@
 <?php namespace Iverberk\Larasearch;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\App;
-use Illuminate\Support\Facades\Config;
+use App;
+use Config;
 
 class Proxy {
 
     /**
      * @var array
      */
-    private static $config;
+    private $config;
 
     /**
      * Construct the Elasticsearch proxy based on an Eloquent model
@@ -18,13 +18,13 @@ class Proxy {
      */
     public function __construct(Model $model)
     {
-        self::$config = property_exists($model, '__es_config') ? $model->__es_config : [];
+        $this->config = property_exists($model, '__es_config') ? $model->__es_config : [];
 
-        self::$config['model'] = $model;
-        self::$config['type'] = str_singular($model->getTable());
+        $this->config['model'] = $model;
+        $this->config['type'] = str_singular($model->getTable());
 
-        self::$config['client'] = App::make('Elasticsearch');
-        self::$config['index'] = App::make('iverberk.larasearch.index', $this);
+        $this->config['client'] = App::make('Elasticsearch');
+        $this->config['index'] = App::make('iverberk.larasearch.index', array('proxy' => $this));
     }
 
     /**
@@ -32,7 +32,7 @@ class Proxy {
      */
     public function getConfig()
     {
-        return self::$config;
+        return $this->config;
     }
 
     /**
@@ -40,7 +40,7 @@ class Proxy {
      */
     public function getModel()
     {
-        return self::$config['model'];
+        return $this->config['model'];
     }
 
     /**
@@ -48,7 +48,7 @@ class Proxy {
      */
     public function getIndex()
     {
-        return self::$config['index'];
+        return $this->config['index'];
     }
 
     /**
@@ -56,7 +56,7 @@ class Proxy {
      */
     public function getType()
     {
-        return self::$config['type'];
+        return $this->config['type'];
     }
 
     /**
@@ -64,7 +64,7 @@ class Proxy {
      */
     public function getClient()
     {
-        return self::$config['client'];
+        return $this->config['client'];
     }
 
     /**
@@ -81,22 +81,70 @@ class Proxy {
      * @param bool $force
      * @param bool $relations
      * @param int $batchSize
+     * @param array $mapping
      * @param callable $callback
      * @internal param array $params
      */
-    public static function reindex($force = false, $relations = false, $batchSize = 750, Callable $callback = null)
+    public function reindex($force = false, $relations = false, $batchSize = 750, $mapping = [], Callable $callback = null)
     {
-        $index = self::$config['index'];
-        $model = self::$config['model'];
+        $model = $this->config['model'];
+        $name = $this->config['index']->getName();
 
+        $newName = $name . '_' . date("YmdHis");
         $relations = $relations ? Config::get('larasearch::paths.' . get_class($model)) : [];
 
-        if ($force)
+        Index::clean($name);
+
+        $index = App::make('iverberk.larasearch.index', array('name' => $newName, 'proxy' => $this));
+        $index->create($mapping);
+
+        if ($index->aliasExists($name))
         {
-            if ($index->exists()) $index->delete();
+            $index->import($model, $relations, $batchSize, $callback);
+            $remove = [];
+
+            foreach($index->getAlias($name) as $index => $aliases)
+            {
+                $remove = [
+                    'remove' => [
+                        'index' => $index,
+                        'alias' => $name
+                    ]
+                ];
+            }
+
+            $add = [
+                'add' => [
+                    'index' => $newName,
+                    'alias' => $name
+                ]
+            ];
+
+            $actions[] = array_merge($remove, $add);
+
+            Index::updateAliases(['actions' => $actions]);
+            Index::clean($name);
+        }
+        else
+        {
+            if ($this->config['index']->exists()) $this->config['index']->delete();
+
+            $actions[] =
+            [
+                'add' => [
+                    'index' => $newName,
+                    'alias' => $name
+                ]
+            ];
+
+            Index::updateAliases([
+                'actions' => $actions
+            ]);
+
+            $index->import($model, $relations, $batchSize, $callback);
         }
 
-        $index->import($model, $relations, $batchSize, $callback);
+        Index::refresh($name);
     }
 
     /**
@@ -112,7 +160,7 @@ class Proxy {
      */
     public function refreshDoc($model)
     {
-        self::$config['client']->index(
+        $this->config['client']->index(
             [
                 'id' => $model->id,
                 'index' => $this->getIndex()->getName(),

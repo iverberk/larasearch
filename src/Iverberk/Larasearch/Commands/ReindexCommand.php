@@ -2,6 +2,7 @@
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
+use Iverberk\Larasearch\Proxy;
 use Iverberk\Larasearch\Utils;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
@@ -100,7 +101,7 @@ class ReindexCommand extends Command {
 
         $this->info('---> Reindexing ' . get_class($model));
 
-        $model::reindex(
+        with(new Proxy($model))->reindex(
             $this->option('force'),
             $this->option('relations'),
             $this->option('batch'),

@@ -33,9 +33,11 @@ class LarasearchServiceProvider extends ServiceProvider {
             return new Client(\Config::get('larasearch::elasticsearch.params'));
         });
 
-        $this->app->bind('iverberk.larasearch.index', function($app, $name)
+        $this->app->bind('iverberk.larasearch.index', function($app, $params)
         {
-            return new Index($name);
+            $name = isset($params['name']) ? $params['name'] : '';
+
+            return new Index($params['proxy'], $name);
         });
 
         $this->app->bind('iverberk.larasearch.query', function($app, $params)

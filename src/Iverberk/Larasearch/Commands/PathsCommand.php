@@ -125,7 +125,6 @@ class PathsCommand extends Command {
 		);
 	}
 
-
     /**
      * Inspect all relations and build a (reverse) path for every relation.
      * This information is used to quickly determine which relations need to

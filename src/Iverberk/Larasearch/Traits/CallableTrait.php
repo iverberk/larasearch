@@ -3,7 +3,7 @@
 use Illuminate\Database\Eloquent\Model;
 use Iverberk\Larasearch\Observer;
 
-trait CallbackTrait {
+trait CallableTrait {
 
     /**
      * Boot the trait by registering the Larasearch observer with the model

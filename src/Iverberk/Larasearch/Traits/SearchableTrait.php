@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\App;
 trait SearchableTrait {
 
     use TransformableTrait;
-    use CallbackTrait;
+    use CallableTrait;
 
     /**
      * The Elasticsearch proxy class

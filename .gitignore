@@ -6,3 +6,4 @@ composer.lock
 tests/_output/*
 tests/_output/*
 .idea/
+atlassian-ide-plugin.xml

@@ -45,7 +45,6 @@ class Index {
 
         $this->proxy = $proxy;
         $this->name = $name ?: $proxy->getModel()->getTable();
-        $this->params = $this->getDefaultIndexParams();
     }
 
     /**

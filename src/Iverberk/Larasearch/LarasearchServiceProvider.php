@@ -26,25 +26,54 @@ class LarasearchServiceProvider extends ServiceProvider {
      *
      * @return void
      */
-    protected function bootContainerBindings()
+    public function bootContainerBindings()
     {
-        $this->app->singleton('Elasticsearch', function()
-        {
-            return new Client(\Config::get('larasearch::elasticsearch.params'));
-        });
+        $this->bindElasticsearch();
+        $this->bindIndex();
+        $this->bindQuery();
+        $this->bindProxy();
+    }
 
+    /**
+     * Bind the Elasticsearch client to the container
+     */
+    protected function bindElasticsearch()
+    {
+        $this->app->singleton('Elasticsearch', function($app)
+        {
+            return new Client($app->make('config')->get('larasearch::elasticsearch.params'));
+        });
+    }
+
+    /**
+     * Bind the Larasearch index to the container
+     */
+    protected function bindIndex()
+    {
         $this->app->bind('iverberk.larasearch.index', function($app, $params)
         {
             $name = isset($params['name']) ? $params['name'] : '';
 
             return new Index($params['proxy'], $name);
         });
+    }
 
+    /**
+     * Bind the Larasearch Query to the container
+     */
+    protected function bindQuery()
+    {
         $this->app->bind('iverberk.larasearch.query', function($app, $params)
         {
             return new Query($params['proxy'], $params['term'], $params['options']);
         });
+    }
 
+    /**
+     * Bind the Larasearch proxy to the container
+     */
+    protected function bindProxy()
+    {
         $this->app->bind('iverberk.larasearch.proxy', function($app, $model)
         {
             return new Proxy($model);

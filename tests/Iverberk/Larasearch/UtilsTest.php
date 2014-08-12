@@ -58,7 +58,7 @@ class UtilsTest extends PHPUnit_Framework_TestCase {
 
     public function testThatSearchableModelsAreFoundInDirectories()
     {
-        $models = Utils::findSearchableModels(array(__DIR__ . '/../../Stubs'));
+        $models = Utils::findSearchableModels(array(__DIR__ . '/../../Support/Stubs'));
 
         $this->assertContains('\\Husband', $models);
     }

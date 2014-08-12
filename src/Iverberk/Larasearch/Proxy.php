@@ -1,8 +1,7 @@
 <?php namespace Iverberk\Larasearch;
 
 use Illuminate\Database\Eloquent\Model;
-use App;
-use Config;
+use Illuminate\Support\Facades\App;
 
 class Proxy {
 

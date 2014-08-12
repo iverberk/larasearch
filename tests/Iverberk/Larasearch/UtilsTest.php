@@ -2,20 +2,7 @@
 
 use Iverberk\Larasearch\Utils;
 
-class UtilsTest extends \Codeception\TestCase\Test
-{
-   /**
-    * @var \UnitTester
-    */
-    protected $tester;
-
-    protected function _before()
-    {
-    }
-
-    protected function _after()
-    {
-    }
+class UtilsTest extends PHPUnit_Framework_TestCase {
 
     public function testThatKeysCanBeFoundInAnArray()
     {
@@ -67,6 +54,13 @@ class UtilsTest extends \Codeception\TestCase\Test
 
         $this->assertEquals('value_override_1', $arr['key1']);
         $this->assertEquals('value_override_4', $arr['key3']['key4']);
+    }
+
+    public function testThatSearchableModelsAreFoundInDirectories()
+    {
+        $models = Utils::findSearchableModels(array(__DIR__ . '/../../Stubs'));
+
+        $this->assertContains('\\Husband', $models);
     }
 
 }

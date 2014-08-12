@@ -39,7 +39,7 @@ class Index {
      * @param string $name
      * @param Proxy $proxy
      */
-    public function __construct(Proxy $proxy, $name)
+    public function __construct(Proxy $proxy, $name = '')
     {
         self::$client = App::make('Elasticsearch');
 
@@ -163,33 +163,6 @@ class Index {
     }
 
     /**
-     * Retrieve aliases
-     *
-     * @param $name
-     * @return array
-     */
-    public static function getAlias($name)
-    {
-        $response = self::$client->indices()->getAlias(['name' => $name]);
-
-        return $response;
-    }
-
-    public static function updateAliases(array $actions)
-    {
-        $params['body'] = $actions;
-
-        self::$client->indices()->updateAliases($params);
-    }
-    /**
-     * Refresh an index
-     */
-    public static function refresh($index)
-    {
-        self::$client->indices()->refresh(['index' => $index]);
-    }
-
-    /**
      * Store a record in the index
      *
      * @param $record
@@ -230,24 +203,6 @@ class Index {
         $params['id'] = $record['id'];
 
         self::$client->delete($params);
-    }
-
-    /**
-     * Clean old indices that start with $name
-     *
-     * @param $name
-     */
-    public static function clean($name)
-    {
-        $indices = self::$client->indices()->getAliases();
-
-        foreach($indices as $index => $value)
-        {
-            if (empty($value['aliases']) && preg_match("/^${name}_\\d{14,17}$/", $index))
-            {
-                self::$client->indices()->delete(['index' => $index]);
-            }
-        }
     }
 
     /**
@@ -303,6 +258,55 @@ class Index {
 
             throw new ImportException($errorItems);
         }
+    }
+
+    /**
+     * Clean old indices that start with $name
+     *
+     * @param $name
+     */
+    public static function clean($name)
+    {
+        $indices = self::$client->indices()->getAliases();
+
+        foreach($indices as $index => $value)
+        {
+            if (empty($value['aliases']) && preg_match("/^${name}_\\d{14,17}$/", $index))
+            {
+                self::$client->indices()->delete(['index' => $index]);
+            }
+        }
+    }
+
+    /**
+     * Retrieve aliases
+     *
+     * @param $name
+     * @return array
+     */
+    public static function getAlias($name)
+    {
+        return self::$client->indices()->getAlias(['name' => $name]);
+    }
+
+    /**
+     * @param array $actions
+     * @return array
+     */
+    public static function updateAliases(array $actions)
+    {
+        return self::$client->indices()->updateAliases(['body' => $actions]);
+    }
+
+    /**
+     * Refresh an index
+     *
+     * @param $index
+     * @return array
+     */
+    public static function refresh($index)
+    {
+        return self::$client->indices()->refresh(['index' => $index]);
     }
 
     /**
@@ -362,7 +366,10 @@ class Index {
 
             if ( ! empty($pathSegments))
             {
-                $mapping[$fieldName] = $this->getNestedFieldMapping($fieldName, $fieldMapping, $pathSegments);
+                $mapping = Utils::array_merge_recursive_distinct(
+                    $mapping,
+                    $this->getNestedFieldMapping($fieldName, $fieldMapping, $pathSegments)
+                );
             }
             else
             {
@@ -409,7 +416,7 @@ class Index {
             $current = $pathSegment;
         }
 
-        return Utils::array_merge_recursive_distinct($mapping, $nested);
+        return $nested;
     }
 
 }

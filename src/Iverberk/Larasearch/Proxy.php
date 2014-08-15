@@ -78,14 +78,14 @@ class Proxy {
     }
 
     /**
-     * @param bool $force
      * @param bool $relations
      * @param int $batchSize
      * @param array $mapping
      * @param callable $callback
+     * @internal param bool $force
      * @internal param array $params
      */
-    public function reindex($force = false, $relations = false, $batchSize = 750, $mapping = [], Callable $callback = null)
+    public function reindex($relations = false, $batchSize = 750, $mapping = [], Callable $callback = null)
     {
         $model = $this->config['model'];
         $name = $this->config['index']->getName();
@@ -103,7 +103,7 @@ class Proxy {
             $index->import($model, $relations, $batchSize, $callback);
             $remove = [];
 
-            foreach($index->getAlias($name) as $index => $aliases)
+            foreach(Index::getAlias($name) as $index => $aliases)
             {
                 $remove = [
                     'remove' => [

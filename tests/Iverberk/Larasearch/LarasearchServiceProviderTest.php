@@ -5,6 +5,9 @@ require __DIR__ . '/../../../vendor/phpunit/phpunit/src/Framework/Assert/Functio
 use Illuminate\Support\Facades\App as App;
 use Mockery as m;
 
+/**
+ * Class LarasearchServiceProviderTest
+ */
 class LarasearchServiceProviderTest extends PHPUnit_Framework_TestCase {
 
     protected function tearDown()
@@ -182,7 +185,6 @@ class LarasearchServiceProviderTest extends PHPUnit_Framework_TestCase {
                 }
             );
 
-
         /**
          * Assertion
          */
@@ -225,6 +227,68 @@ class LarasearchServiceProviderTest extends PHPUnit_Framework_TestCase {
         $sp->bindProxy();
     }
 
+    /**
+     * @test
+     */
+    public function it_should_register_commands()
+    {
+        /**
+         * Set
+         */
+        $app = m::mock('Illuminate\Container\Container');
+        $sp = m::mock('Iverberk\Larasearch\LarasearchServiceProvider[registerCommands, commands]', [$app]);
 
+        /**
+         * Expectation
+         */
+        $app->shouldReceive('offsetSet')->andReturn(true);
+        $app->shouldReceive('offsetGet')->andReturn(true);
+
+        $app->shouldReceive('share')
+            ->once()
+            ->andReturnUsing(function ($closure) use ($app)
+            {
+                assertInstanceOf('Iverberk\Larasearch\Commands\ReindexCommand', $closure($app));
+            });
+
+        $app->shouldReceive('share')
+            ->once()
+            ->andReturnUsing(function ($closure) use ($app)
+            {
+                assertInstanceOf('Iverberk\Larasearch\Commands\PathsCommand', $closure($app));
+            });
+
+        $sp->shouldReceive('commands')
+            ->with('iverberk.larasearch.commands.reindex')
+            ->once()
+            ->andReturn(true);
+
+        $sp->shouldReceive('commands')
+            ->with('iverberk.larasearch.commands.paths')
+            ->once()
+            ->andReturn(true);
+
+        /**
+         * Assertion
+         */
+        $sp->registerCommands();
+    }
+
+    /**
+     * @test
+     */
+    public function it_should_provide_services()
+    {
+        /**
+         * Set
+         */
+        $app = m::mock('LaravelApp');
+
+        /**
+         * Assertion
+         */
+        $sp = new Iverberk\Larasearch\LarasearchServiceProvider($app);
+        assertEquals([], $sp->provides());
+    }
 
 }

@@ -1,12 +1,14 @@
 <?php
 
-use Iverberk\Larasearch\Traits\TransformableTrait;
+use Iverberk\Larasearch\Traits\SearchableTrait;
 
 class Child extends Illuminate\Database\Eloquent\Model {
 
-    use TransformableTrait;
+    use SearchableTrait;
 
     /**
+     * @follow UNLESS Husband
+     *
      * @return \Illuminate\Database\Eloquent\Relations
      */
     public function mother()
@@ -15,6 +17,9 @@ class Child extends Illuminate\Database\Eloquent\Model {
     }
 
     /**
+     * @follow UNLESS Husband
+     * @follow UNLESS Wife
+     *
      * @return \Illuminate\Database\Eloquent\Relations
      */
     public function father()
@@ -23,8 +28,6 @@ class Child extends Illuminate\Database\Eloquent\Model {
     }
 
     /**
-     * @follow UNLESS Wife
-     *
      * @return \Illuminate\Database\Eloquent\Relations
      */
     public function toys()

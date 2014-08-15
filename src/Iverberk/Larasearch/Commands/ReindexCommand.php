@@ -1,10 +1,11 @@
 <?php namespace Iverberk\Larasearch\Commands;
 
 use Illuminate\Console\Command;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\File;
 use Iverberk\Larasearch\Proxy;
 use Iverberk\Larasearch\Utils;
-use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
 
 class ReindexCommand extends Command {
@@ -30,35 +31,28 @@ class ReindexCommand extends Command {
 	 */
 	public function fire()
 	{
-        if ($models = $this->argument('model'))
+        $models = $this->argument('model');
+
+        foreach($models as $model)
         {
-            foreach($models as $model)
+            $instance = $this->getModelInstance($model);
+            $this->reindexModel($instance);
+        }
+
+        if ($directories = $this->option('dir'))
+        {
+            $directoryModels = array_diff(Utils::findSearchableModels($directories), $models);
+
+            foreach ($directoryModels as $model)
             {
-                $this->reindexModel(new $model);
+                $instance = $this->getModelInstance($model);
+                $this->reindexModel($instance);
             }
         }
-        elseif ($directories = $this->option('dir'))
+
+        if (empty($models))
         {
-            $models = Utils::findSearchableModels($directories);
-
-            if (empty($models))
-            {
-                $this->info("No models found that use the Searchable trait. Nothing to do!");
-
-                return;
-            }
-
-            foreach ($models as $model)
-            {
-                // Reindex model
-                $this->reindexModel(new $model);
-            }
-        }
-        else
-        {
-            $this->error("No directories or model specified. Nothing to do!");
-
-            return;
+            $this->info('No models found.');
         }
 	}
 
@@ -70,7 +64,7 @@ class ReindexCommand extends Command {
 	protected function getArguments()
 	{
 		return array(
-            array('model', InputOption::VALUE_OPTIONAL, 'Eloquent model to reindex', null),
+            array('model', InputOption::VALUE_OPTIONAL, 'Eloquent model to reindex', null)
 		);
 	}
 
@@ -93,15 +87,15 @@ class ReindexCommand extends Command {
     /**
      * Reindex a model to Elasticsearch
      *
-     * @param $model
+     * @param Model $model
      */
-    private function reindexModel($model)
+    protected function reindexModel(Model $model)
     {
         $mapping = $this->option('mapping') ? json_decode(File::get($this->option('mapping')), true) : null;
 
         $this->info('---> Reindexing ' . get_class($model));
 
-        with(new Proxy($model))->reindex(
+        $model->reindex(
             $this->option('force'),
             $this->option('relations'),
             $this->option('batch'),
@@ -110,6 +104,17 @@ class ReindexCommand extends Command {
                 $this->info("* Batch ${batch}");
             }
         );
+    }
+
+    /**
+     * Simple method to create instances of classes on the fly
+     * It's primarily here to enable unit-testing
+     *
+     * @param string $model
+     */
+    protected function getModelInstance($model)
+    {
+        return new $model;
     }
 
 }

@@ -1,5 +1,6 @@
 <?php namespace Iverberk\Larasearch\Jobs;
 
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Queue\Jobs\Job;
 
 class ReindexJob {
@@ -19,7 +20,7 @@ class ReindexJob {
 
             $job->delete();
         }
-        catch (\Exception $e)
+        catch (ModelNotFoundException $e)
         {
             $job->release(60);
         }

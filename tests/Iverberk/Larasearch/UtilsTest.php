@@ -1,8 +1,6 @@
-<?php
+<?php namespace Iverberk\Larasearch;
 
-use Iverberk\Larasearch\Utils;
-
-class UtilsTest extends PHPUnit_Framework_TestCase {
+class UtilsTest extends \PHPUnit_Framework_TestCase {
 
     public function testThatKeysCanBeFoundInAnArray()
     {
@@ -60,7 +58,10 @@ class UtilsTest extends PHPUnit_Framework_TestCase {
     {
         $models = Utils::findSearchableModels(array(__DIR__ . '/../../Support/Stubs'));
 
-        $this->assertContains('\\Husband', $models);
+        $this->assertContains('Husband', $models);
+        $this->assertContains('Wife', $models);
+        $this->assertContains('Toy', $models);
+        $this->assertContains('Child', $models);
     }
 
 }

@@ -1,13 +1,14 @@
 <?php
 
-use Iverberk\Larasearch\Traits\TransformableTrait;
+use Iverberk\Larasearch\Traits\SearchableTrait;
 
 class Wife extends Illuminate\Database\Eloquent\Model {
 
-    use TransformableTrait;
+    use SearchableTrait;
 
     /**
-     * @follow NEVER
+     * @follow UNLESS Toy
+     * @follow UNLESS Child
      *
      * @return \Illuminate\Database\Eloquent\Relations
      */

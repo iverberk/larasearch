@@ -76,7 +76,10 @@ class Index {
             if (count($records) == 0) break;
 
             // Call the callback function to provide feedback on the import process
-            $callback($batch);
+            if ($callback)
+            {
+                $callback($batch);
+            }
 
             // Transform each record before sending it to Elasticsearch
             $data = [];
@@ -255,7 +258,7 @@ class Index {
                 }
             }
 
-            throw new ImportException($errorItems);
+            throw new ImportException('Bulk import with errors', 1, $errorItems);
         }
     }
 

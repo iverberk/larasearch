@@ -8,7 +8,7 @@ trait CallableTrait {
     /**
      * Boot the trait by registering the Larasearch observer with the model
      */
-    public static function bootCallbackTrait()
+    public static function bootCallableTrait()
     {
         if (new static instanceof Model)
         {

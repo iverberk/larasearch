@@ -110,6 +110,7 @@ class Response {
     }
 
     /**
+     * @param array $fields
      * @return mixed
      */
     public function getSuggestions($fields = [])

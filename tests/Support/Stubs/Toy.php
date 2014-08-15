@@ -1,10 +1,10 @@
 <?php
 
-use Iverberk\Larasearch\Traits\TransformableTrait;
+use Iverberk\Larasearch\Traits\SearchableTrait;
 
 class Toy extends Illuminate\Database\Eloquent\Model {
 
-    use TransformableTrait;
+    use SearchableTrait;
 
     /**
      * @return \Illuminate\Database\Eloquent\Relations

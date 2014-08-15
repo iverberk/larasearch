@@ -110,14 +110,14 @@ class Result implements \ArrayAccess, ArrayableInterface {
      */
     public function getHighlights($fields = [])
     {
-        if (!empty($fields))
+        if ( ! empty($fields))
         {
             $results = [];
             foreach($fields as $field)
             {
                 foreach($this->hit['highlight'] as $key => $value)
                 {
-                    if (preg_match("/^${field}.*/", $key) !== false)
+                    if (preg_match("/^${field}.*/", $key) === 1)
                     {
                         $results[$field] = $value;
                     }

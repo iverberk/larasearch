@@ -21,6 +21,9 @@ class Husband extends Illuminate\Database\Eloquent\Model {
     ];
 
     /**
+     * @follow UNLESS Toy
+     * @follow UNLESS Child
+     *
      * @return \Illuminate\Database\Eloquent\Relations
      */
     public function wife()
@@ -29,6 +32,8 @@ class Husband extends Illuminate\Database\Eloquent\Model {
     }
 
     /**
+     * @follow NEVER
+     *
      * @return \Illuminate\Database\Eloquent\Relations
      */
     public function children()

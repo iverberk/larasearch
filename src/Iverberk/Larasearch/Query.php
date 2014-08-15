@@ -44,13 +44,6 @@ class Query {
         $this->proxy = $proxy;
         $this->term = $term;
         $this->options = $options;
-
-        $this->getFields();
-        $this->getPagination();
-        $this->getHighlight();
-        $this->getSuggest();
-        $this->getAggregations();
-        $this->getPayload();
     }
 
     /**
@@ -304,6 +297,13 @@ class Query {
      */
     public function execute()
     {
+        $this->getFields();
+        $this->getPagination();
+        $this->getHighlight();
+        $this->getSuggest();
+        $this->getAggregations();
+        $this->getPayload();
+
         $params = [
             'index' => Utils::findKey($this->options, 'index', false) ?: $this->proxy->getIndex()->getName(),
             'type' => Utils::findKey($this->options, 'type', false) ?: $this->proxy->getType(),

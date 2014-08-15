@@ -30,12 +30,13 @@ class Utils {
 
     /**
      * Taken from http://php.net/manual/en/function.array-merge-recursive.php#92195
+     * Removed the pass-by-reference to accomdate unit-testing
      *
      * @param array $array1
      * @param array $array2
      * @return array
      */
-    public static function array_merge_recursive_distinct ( array &$array1, array &$array2 )
+    public static function array_merge_recursive_distinct ( array $array1, array $array2 )
     {
         $merged = $array1;
 
@@ -83,7 +84,7 @@ class Utils {
                         // Extract classname
                         if (preg_match('/class\s+([a-zA-z0-9]+)/', $line, $matches))
                         {
-                            $model = $namespace . '\\' . $matches[1];
+                            $model = $namespace ? $namespace . '\\' . $matches[1] : $matches[1];
 
                             // Check if the model has the searchable trait
                             if (in_array('Iverberk\\Larasearch\\Traits\\SearchableTrait', class_uses($model)))

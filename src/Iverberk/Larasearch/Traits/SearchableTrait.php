@@ -30,7 +30,7 @@ trait SearchableTrait {
      */
     public static function getProxy()
     {
-        if (! static::$__es_proxy)
+        if ( ! static::$__es_proxy)
         {
             $instance = new static;
 
@@ -47,25 +47,6 @@ trait SearchableTrait {
         }
 
         return static::$__es_proxy;
-    }
-
-    /**
-     * Catch dynamic method calls intended for the Elasticsearch proxy
-     *
-     * @param  string  $method
-     * @param  array   $parameters
-     * @return mixed
-     */
-    public function __call($method, $parameters)
-    {
-        $proxy = static::getProxy();
-
-        if (method_exists($proxy, $method))
-        {
-            return call_user_func_array(array($proxy, $method), $parameters);
-        }
-
-        return parent::__call($method, $parameters);
     }
 
     /**

@@ -37,7 +37,15 @@ class Observer {
                     {
                         foreach($relation as $record)
                         {
-                            $walk($record->getRelation($segment));
+                            if ( ! empty($segment))
+                            {
+                                $walk($record->getRelation($segment));
+                            }
+                            else
+                            {
+                                Queue::push('Iverberk\Larasearch\Jobs\ReindexJob', [ get_class($record) . ':' . $record->getKey() ]);
+                            }
+
                         }
                     }
                 };

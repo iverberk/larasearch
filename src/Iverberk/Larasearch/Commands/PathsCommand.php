@@ -3,7 +3,6 @@
 use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
-use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\File;
 use Iverberk\Larasearch\Utils;
 use Symfony\Component\Console\Input\InputArgument;
@@ -25,79 +24,78 @@ class PathsCommand extends Command {
 	 */
 	protected $description = 'Generate paths from Eloquent models';
 
+    /**
+     * @var array
+     */
     private $relationClassMethods = [];
 
+    /**
+     * @var array
+     */
     private $relatedModels = [];
 
-    private $paths;
+    /**
+     * @var array
+     */
+    private $paths = [];
 
-    private $reversedPaths;
+    /**
+     * @var array
+     */
+    private $reversedPaths = [];
 
 	/**
 	 * Scan directories for Eloquent models that use the SearchableTrait.
-     * Generate paths for all these models so that we can reindex these
+     * Generate paths for all these models so that we can (re)index these
 	 * models.
      *
 	 * @return void
 	 */
 	public function fire()
 	{
-        if ($models = $this->argument('model'))
+        $models = $this->argument('model');
+
+        foreach($models as $model)
         {
-            foreach($models as $model)
-            {
-                $this->compilePaths(new $model);
-            }
+            $this->compilePaths(new $model);
         }
-        elseif ($directories = $this->option('dir'))
+
+        if ($directories = $this->option('dir'))
         {
-            $models = Utils::findSearchableModels($directories);
+            $directoryModels = array_diff(Utils::findSearchableModels($directories), $models);
 
-            if (empty($models))
-            {
-                $this->info("No models found that use the Searchable trait. Nothing to do!");
-
-                return;
-            }
-
-            foreach ($models as $model)
+            foreach ($directoryModels as $model)
             {
                 // Find paths for related models
                 $this->compilePaths(new $model);
             }
         }
-        else
+
+        if ( ! empty($models))
         {
-            $this->error("No directories or model specified. Nothing to do!");
-
-            return;
-        }
-
-        if ($this->option('write-config'))
-        {
-            $configDir = app_path() . '/config/packages/iverberk/larasearch';
-
-            if (!File::exists($configDir))
-            {
-                if ($this->confirm('It appears that you have not yet published the larasearch config. Would you like to do this now?', false))
-                {
-                    $this->call('config:publish', ['package' => 'iverberk/larasearch']);
-                }
-                else
-                {
-                    return;
-                }
-            }
-
-            File::put("${configDir}/paths.json", json_encode(['paths' => $this->paths, 'reversedPaths' => $this->reversedPaths], JSON_PRETTY_PRINT));
-
-            $this->info('Paths file written to local package configuration');
+            $this->writeConfig();
         }
         else
         {
-            $this->info(json_encode(['paths' => $this->paths, 'reversedPaths' => $this->reversedPaths], JSON_PRETTY_PRINT));
+            $this->info('No models found.');
         }
 	}
+
+    /**
+     * @return array
+     */
+    public function getPaths()
+    {
+        return $this->paths;
+    }
+
+    /**
+     * @return array
+     */
+    public function getReversedPaths()
+    {
+        return $this->reversedPaths;
+    }
 
 	/**
 	 * Get the console command arguments.
@@ -107,7 +105,7 @@ class PathsCommand extends Command {
 	protected function getArguments()
 	{
 		return array(
-            array('model', InputOption::VALUE_OPTIONAL, 'Eloquent model to reindex', null),
+            array('model', InputArgument::OPTIONAL, 'Eloquent model to find paths for', []),
         );
 	}
 
@@ -137,7 +135,7 @@ class PathsCommand extends Command {
      * @param array $reversedPath
      * @param null $start
      */
-    public function compilePaths(Model $model, $ancestor = null, $path = [], $reversedPath = [], $start = null)
+    protected function compilePaths(Model $model, $ancestor = null, $path = [], $reversedPath = [], $start = null)
     {
         // Initialize some variables if this is the first call
         if ($ancestor == null) $ancestor = $model;
@@ -198,7 +196,7 @@ class PathsCommand extends Command {
      * @param $model
      * @return bool
      */
-    private function checkDocHints($docComment, $model)
+    protected function checkDocHints($docComment, $model)
     {
         // Check if we never follow this relation
         if (preg_match('/@follow NEVER/', $docComment)) return false;
@@ -219,7 +217,7 @@ class PathsCommand extends Command {
      * @param $model
      * @return array
      */
-    private function getRelatedModels(Model $model)
+    protected function getRelatedModels(Model $model)
     {
         // Store the class name
         $modelClass = get_class($model);
@@ -268,6 +266,39 @@ class PathsCommand extends Command {
         {
             // Return from cache
             return $this->relatedModels[$modelClass];
+        }
+    }
+
+    /**
+     * Write the paths config to a file or to standard output
+     *
+     * @return void
+     */
+    private function writeConfig()
+    {
+        if ($this->option('write-config'))
+        {
+            $configDir = app_path() . '/config/packages/iverberk/larasearch';
+
+            if ( ! File::exists($configDir))
+            {
+                if ($this->confirm('It appears that you have not yet published the larasearch config. Would you like to do this now?', false))
+                {
+                    $this->call('config:publish', ['package' => 'iverberk/larasearch']);
+                }
+                else
+                {
+                    return;
+                }
+            }
+
+            File::put("${configDir}/paths.json", json_encode(['paths' => $this->paths, 'reversedPaths' => $this->reversedPaths], JSON_PRETTY_PRINT));
+
+            $this->info('Paths file written to local package configuration');
+        }
+        else
+        {
+            $this->info(json_encode(['paths' => $this->paths, 'reversedPaths' => $this->reversedPaths], JSON_PRETTY_PRINT));
         }
     }
 

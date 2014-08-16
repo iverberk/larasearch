@@ -19,7 +19,11 @@
     "autoload": {
         "psr-0": {
             "Iverberk\\Larasearch": "src/"
-        }
+        },
+        "classmap": [
+            "tests/Support/Stubs",
+            "tests/Support"
+        ]
     },
     "require-dev": {
         "mockery/mockery": "dev-master",

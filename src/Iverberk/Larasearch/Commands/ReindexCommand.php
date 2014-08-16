@@ -96,7 +96,6 @@ class ReindexCommand extends Command {
         $this->info('---> Reindexing ' . get_class($model));
 
         $model->reindex(
-            $this->option('force'),
             $this->option('relations'),
             $this->option('batch'),
             $mapping,

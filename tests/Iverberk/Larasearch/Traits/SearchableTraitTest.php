@@ -86,6 +86,11 @@ class SearchableTraitTest extends \PHPUnit_Framework_TestCase {
         $proxy->shouldReceive('search')
             ->with('*')
             ->once()
+            ->andReturn('result_static');
+
+        $proxy->shouldReceive('search')
+            ->with('**')
+            ->once()
             ->andReturn('result');
 
         /**
@@ -94,6 +99,10 @@ class SearchableTraitTest extends \PHPUnit_Framework_TestCase {
          *
          */
         $result = \Husband::search('*');
+
+        $this->assertEquals('result_static', $result);
+
+        $result = \Husband::search('**');
 
         $this->assertEquals('result', $result);
 

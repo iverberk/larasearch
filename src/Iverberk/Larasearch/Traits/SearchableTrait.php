@@ -50,6 +50,25 @@ trait SearchableTrait {
     }
 
     /**
+     * Catch dynamic method calls intended for the Elasticsearch proxy
+     *
+     * @param  string  $method
+     * @param  array   $parameters
+     * @return mixed
+     */
+    public function __call($method, $parameters)
+    {
+        $proxy = static::getProxy();
+
+        if (method_exists($proxy, $method))
+        {
+            return call_user_func_array(array($proxy, $method), $parameters);
+        }
+
+        return parent::__call($method, $parameters);
+    }
+
+    /**
      * Catch dynamic static method calls intended for the Elasticsearch proxy
      *
      * @param  string  $method

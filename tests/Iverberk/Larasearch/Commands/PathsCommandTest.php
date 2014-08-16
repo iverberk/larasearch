@@ -81,7 +81,7 @@ class PathsCommandTest extends \PHPUnit_Framework_TestCase {
          **/
         $command = m::mock('Iverberk\Larasearch\Commands\PathsCommand');
         $arguments = array(
-            array('model', InputArgument::OPTIONAL, 'Eloquent model to find paths for', []),
+            array('model', InputOption::VALUE_OPTIONAL, 'Eloquent model to find paths for', null)
         );
 
         /**

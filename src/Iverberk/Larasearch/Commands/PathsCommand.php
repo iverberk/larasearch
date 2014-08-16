@@ -105,7 +105,7 @@ class PathsCommand extends Command {
 	protected function getArguments()
 	{
 		return array(
-            array('model', InputArgument::OPTIONAL, 'Eloquent model to find paths for', []),
+            array('model', InputOption::VALUE_OPTIONAL, 'Eloquent model to find paths for', null)
         );
 	}
 

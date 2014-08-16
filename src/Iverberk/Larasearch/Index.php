@@ -320,6 +320,7 @@ class Index {
     {
         $analyzers = Config::get('larasearch::elasticsearch.analyzers');
         $params = Config::get('larasearch::elasticsearch.defaults.index');
+        $mapping = [];
 
         $mapping_options = array_combine(
             $analyzers,
@@ -379,7 +380,7 @@ class Index {
             }
         }
 
-        if ( ! empty($mapping)) $this->params['mappings']['_default_']['properties'] = $mapping;
+        if ( ! empty($mapping)) $params['mappings']['_default_']['properties'] = $mapping;
 
         $params['index'] = $this->name;
         $params['type'] = $this->proxy->getType();

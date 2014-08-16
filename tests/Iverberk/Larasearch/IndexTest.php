@@ -6,7 +6,8 @@ use Illuminate\Support\Facades\Facade;
 use Mockery as m;
 use AspectMock\Test as am;
 
-class IndexTest extends \PHPUnit_Framework_Testcase {
+
+class IndexTest extends \PHPUnit_Framework_TestCase {
 
     protected function tearDown()
     {
@@ -35,7 +36,7 @@ class IndexTest extends \PHPUnit_Framework_Testcase {
          */
 
         /* @var \Mockery\Mock $model */
-        $model = m::mock('Husband')->makePartial();
+        $model = m::mock('Illuminate\Database\Eloquent\Model')->makePartial();
 
         $model->shouldReceive('with->skip->take->get')
             ->twice()
@@ -259,190 +260,321 @@ class IndexTest extends \PHPUnit_Framework_Testcase {
 
         $client->shouldReceive('indices->create')
             ->andReturnUsing(function($params) use ($test) {
-                $test->assertEquals(
-                    ['body' => json_decode(
+                $test->assertEquals(json_decode(
                         '{
-                          "settings": {
-                            "number_of_shards": 1,
-                            "number_of_replicas": 0,
-                            "analysis": {
-                              "analyzer": {
-                                "larasearch_keyword": {
-                                  "type": "custom",
-                                  "tokenizer": "keyword",
-                                  "filter": [
-                                    "lowercase",
-                                    "larasearch_stemmer"
-                                  ]
+                          "index": "Husband",
+                          "body": {
+                            "settings": {
+                              "number_of_shards": 1,
+                              "number_of_replicas": 0,
+                              "analysis": {
+                                "analyzer": {
+                                  "larasearch_keyword": {
+                                    "type": "custom",
+                                    "tokenizer": "keyword",
+                                    "filter": [
+                                      "lowercase",
+                                      "larasearch_stemmer"
+                                    ]
+                                  },
+                                  "default_index": {
+                                    "type": "custom",
+                                    "tokenizer": "standard",
+                                    "filter": [
+                                      "standard",
+                                      "lowercase",
+                                      "asciifolding",
+                                      "larasearch_index_shingle",
+                                      "larasearch_stemmer"
+                                    ]
+                                  },
+                                  "larasearch_search": {
+                                    "type": "custom",
+                                    "tokenizer": "standard",
+                                    "filter": [
+                                      "standard",
+                                      "lowercase",
+                                      "asciifolding",
+                                      "larasearch_search_shingle",
+                                      "larasearch_stemmer"
+                                    ]
+                                  },
+                                  "larasearch_search2": {
+                                    "type": "custom",
+                                    "tokenizer": "standard",
+                                    "filter": [
+                                      "standard",
+                                      "lowercase",
+                                      "asciifolding",
+                                      "larasearch_stemmer"
+                                    ]
+                                  },
+                                  "larasearch_autocomplete_index": {
+                                    "type": "custom",
+                                    "tokenizer": "larasearch_autocomplete_ngram",
+                                    "filter": [
+                                      "lowercase",
+                                      "asciifolding"
+                                    ]
+                                  },
+                                  "larasearch_autocomplete_search": {
+                                    "type": "custom",
+                                    "tokenizer": "keyword",
+                                    "filter": [
+                                      "lowercase",
+                                      "asciifolding"
+                                    ]
+                                  },
+                                  "larasearch_word_search": {
+                                    "type": "custom",
+                                    "tokenizer": "standard",
+                                    "filter": [
+                                      "lowercase",
+                                      "asciifolding"
+                                    ]
+                                  },
+                                  "larasearch_suggest_index": {
+                                    "type": "custom",
+                                    "tokenizer": "standard",
+                                    "filter": [
+                                      "lowercase",
+                                      "asciifolding",
+                                      "larasearch_suggest_shingle"
+                                    ]
+                                  },
+                                  "larasearch_text_start_index": {
+                                    "type": "custom",
+                                    "tokenizer": "keyword",
+                                    "filter": [
+                                      "lowercase",
+                                      "asciifolding",
+                                      "larasearch_edge_ngram"
+                                    ]
+                                  },
+                                  "larasearch_text_middle_index": {
+                                    "type": "custom",
+                                    "tokenizer": "keyword",
+                                    "filter": [
+                                      "lowercase",
+                                      "asciifolding",
+                                      "larasearch_ngram"
+                                    ]
+                                  },
+                                  "larasearch_text_end_index": {
+                                    "type": "custom",
+                                    "tokenizer": "keyword",
+                                    "filter": [
+                                      "lowercase",
+                                      "asciifolding",
+                                      "reverse",
+                                      "larasearch_edge_ngram",
+                                      "reverse"
+                                    ]
+                                  },
+                                  "larasearch_word_start_index": {
+                                    "type": "custom",
+                                    "tokenizer": "standard",
+                                    "filter": [
+                                      "lowercase",
+                                      "asciifolding",
+                                      "larasearch_edge_ngram"
+                                    ]
+                                  },
+                                  "larasearch_word_middle_index": {
+                                    "type": "custom",
+                                    "tokenizer": "standard",
+                                    "filter": [
+                                      "lowercase",
+                                      "asciifolding",
+                                      "larasearch_ngram"
+                                    ]
+                                  },
+                                  "larasearch_word_end_index": {
+                                    "type": "custom",
+                                    "tokenizer": "standard",
+                                    "filter": [
+                                      "lowercase",
+                                      "asciifolding",
+                                      "reverse",
+                                      "larasearch_edge_ngram",
+                                      "reverse"
+                                    ]
+                                  }
                                 },
-                                "default_index": {
-                                  "type": "custom",
-                                  "tokenizer": "standard",
-                                  "filter": [
-                                    "standard",
-                                    "lowercase",
-                                    "asciifolding",
-                                    "larasearch_index_shingle",
-                                    "larasearch_stemmer"
-                                  ]
+                                "filter": {
+                                  "larasearch_index_shingle": {
+                                    "type": "shingle",
+                                    "token_separator": ""
+                                  },
+                                  "larasearch_search_shingle": {
+                                    "type": "shingle",
+                                    "token_separator": "",
+                                    "output_unigrams": false,
+                                    "output_unigrams_if_no_shingles": true
+                                  },
+                                  "larasearch_suggest_shingle": {
+                                    "type": "shingle",
+                                    "max_shingle_size": 5
+                                  },
+                                  "larasearch_edge_ngram": {
+                                    "type": "edgeNGram",
+                                    "min_gram": 1,
+                                    "max_gram": 50
+                                  },
+                                  "larasearch_ngram": {
+                                    "type": "nGram",
+                                    "min_gram": 1,
+                                    "max_gram": 50
+                                  },
+                                  "larasearch_stemmer": {
+                                    "type": "snowball",
+                                    "language": "English"
+                                  }
                                 },
-                                "larasearch_search": {
-                                  "type": "custom",
-                                  "tokenizer": "standard",
-                                  "filter": [
-                                    "standard",
-                                    "lowercase",
-                                    "asciifolding",
-                                    "larasearch_search_shingle",
-                                    "larasearch_stemmer"
-                                  ]
-                                },
-                                "larasearch_search2": {
-                                  "type": "custom",
-                                  "tokenizer": "standard",
-                                  "filter": [
-                                    "standard",
-                                    "lowercase",
-                                    "asciifolding",
-                                    "larasearch_stemmer"
-                                  ]
-                                },
-                                "larasearch_autocomplete_index": {
-                                  "type": "custom",
-                                  "tokenizer": "larasearch_autocomplete_ngram",
-                                  "filter": [
-                                    "lowercase",
-                                    "asciifolding"
-                                  ]
-                                },
-                                "larasearch_autocomplete_search": {
-                                  "type": "custom",
-                                  "tokenizer": "keyword",
-                                  "filter": [
-                                    "lowercase",
-                                    "asciifolding"
-                                  ]
-                                },
-                                "larasearch_word_search": {
-                                  "type": "custom",
-                                  "tokenizer": "standard",
-                                  "filter": [
-                                    "lowercase",
-                                    "asciifolding"
-                                  ]
-                                },
-                                "larasearch_suggest_index": {
-                                  "type": "custom",
-                                  "tokenizer": "standard",
-                                  "filter": [
-                                    "lowercase",
-                                    "asciifolding",
-                                    "larasearch_suggest_shingle"
-                                  ]
-                                },
-                                "larasearch_text_start_index": {
-                                  "type": "custom",
-                                  "tokenizer": "keyword",
-                                  "filter": [
-                                    "lowercase",
-                                    "asciifolding",
-                                    "larasearch_edge_ngram"
-                                  ]
-                                },
-                                "larasearch_text_middle_index": {
-                                  "type": "custom",
-                                  "tokenizer": "keyword",
-                                  "filter": [
-                                    "lowercase",
-                                    "asciifolding",
-                                    "larasearch_ngram"
-                                  ]
-                                },
-                                "larasearch_text_end_index": {
-                                  "type": "custom",
-                                  "tokenizer": "keyword",
-                                  "filter": [
-                                    "lowercase",
-                                    "asciifolding",
-                                    "reverse",
-                                    "larasearch_edge_ngram",
-                                    "reverse"
-                                  ]
-                                },
-                                "larasearch_word_start_index": {
-                                  "type": "custom",
-                                  "tokenizer": "standard",
-                                  "filter": [
-                                    "lowercase",
-                                    "asciifolding",
-                                    "larasearch_edge_ngram"
-                                  ]
-                                },
-                                "larasearch_word_middle_index": {
-                                  "type": "custom",
-                                  "tokenizer": "standard",
-                                  "filter": [
-                                    "lowercase",
-                                    "asciifolding",
-                                    "larasearch_ngram"
-                                  ]
-                                },
-                                "larasearch_word_end_index": {
-                                  "type": "custom",
-                                  "tokenizer": "standard",
-                                  "filter": [
-                                    "lowercase",
-                                    "asciifolding",
-                                    "reverse",
-                                    "larasearch_edge_ngram",
-                                    "reverse"
-                                  ]
-                                }
-                              },
-                              "filter": {
-                                "larasearch_index_shingle": {
-                                  "type": "shingle",
-                                  "token_separator": ""
-                                },
-                                "larasearch_search_shingle": {
-                                  "type": "shingle",
-                                  "token_separator": "",
-                                  "output_unigrams": false,
-                                  "output_unigrams_if_no_shingles": true
-                                },
-                                "larasearch_suggest_shingle": {
-                                  "type": "shingle",
-                                  "max_shingle_size": 5
-                                },
-                                "larasearch_edge_ngram": {
-                                  "type": "edgeNGram",
-                                  "min_gram": 1,
-                                  "max_gram": 50
-                                },
-                                "larasearch_ngram": {
-                                  "type": "nGram",
-                                  "min_gram": 1,
-                                  "max_gram": 50
-                                },
-                                "larasearch_stemmer": {
-                                  "type": "snowball",
-                                  "language": "English"
-                                }
-                              },
-                              "tokenizer": {
-                                "larasearch_autocomplete_ngram": {
-                                  "type": "edgeNGram",
-                                  "min_gram": 1,
-                                  "max_gram": 50
+                                "tokenizer": {
+                                  "larasearch_autocomplete_ngram": {
+                                    "type": "edgeNGram",
+                                    "min_gram": 1,
+                                    "max_gram": 50
+                                  }
                                 }
                               }
-                            }
-                          },
-                          "index": "Husband",
-                          "type": "Husband"
-                        }', true),
-                        'index' => 'Husband'
-                    ],
+                            },
+                            "mappings": {
+                              "_default_": {
+                                "properties": {
+                                  "name": {
+                                    "type": "multi_field",
+                                    "fields": {
+                                      "name": {
+                                        "type": "string",
+                                        "index": "not_analyzed"
+                                      },
+                                      "analyzed": {
+                                        "type": "string",
+                                        "index": "analyzed"
+                                      },
+                                      "autocomplete": {
+                                        "type": "string",
+                                        "index": "analyzed",
+                                        "analyzer": "larasearch_autocomplete_index"
+                                      },
+                                      "suggest": {
+                                        "type": "string",
+                                        "index": "analyzed",
+                                        "analyzer": "larasearch_suggest_index"
+                                      },
+                                      "text_start": {
+                                        "type": "string",
+                                        "index": "analyzed",
+                                        "analyzer": "larasearch_text_start_index"
+                                      },
+                                      "text_middle": {
+                                        "type": "string",
+                                        "index": "analyzed",
+                                        "analyzer": "larasearch_text_middle_index"
+                                      },
+                                      "text_end": {
+                                        "type": "string",
+                                        "index": "analyzed",
+                                        "analyzer": "larasearch_text_end_index"
+                                      },
+                                      "word_start": {
+                                        "type": "string",
+                                        "index": "analyzed",
+                                        "analyzer": "larasearch_word_start_index"
+                                      },
+                                      "word_middle": {
+                                        "type": "string",
+                                        "index": "analyzed",
+                                        "analyzer": "larasearch_word_middle_index"
+                                      },
+                                      "word_end": {
+                                        "type": "string",
+                                        "index": "analyzed",
+                                        "analyzer": "larasearch_word_end_index"
+                                      }
+                                    }
+                                  },
+                                  "wife": {
+                                    "type": "object",
+                                    "properties": {
+                                      "name": {
+                                        "type": "multi_field",
+                                        "fields": {
+                                          "name": {
+                                            "type": "string",
+                                            "index": "not_analyzed"
+                                          },
+                                          "analyzed": {
+                                            "type": "string",
+                                            "index": "analyzed"
+                                          },
+                                          "autocomplete": {
+                                            "type": "string",
+                                            "index": "analyzed",
+                                            "analyzer": "larasearch_autocomplete_index"
+                                          }
+                                        }
+                                      },
+                                      "children": {
+                                        "type": "object",
+                                        "properties": {
+                                          "name": {
+                                            "type": "multi_field",
+                                            "fields": {
+                                              "name": {
+                                                "type": "string",
+                                                "index": "not_analyzed"
+                                              },
+                                              "analyzed": {
+                                                "type": "string",
+                                                "index": "analyzed"
+                                              },
+                                              "text_start": {
+                                                "type": "string",
+                                                "index": "analyzed",
+                                                "analyzer": "larasearch_text_start_index"
+                                              },
+                                              "text_middle": {
+                                                "type": "string",
+                                                "index": "analyzed",
+                                                "analyzer": "larasearch_text_middle_index"
+                                              },
+                                              "text_end": {
+                                                "type": "string",
+                                                "index": "analyzed",
+                                                "analyzer": "larasearch_text_end_index"
+                                              },
+                                              "word_start": {
+                                                "type": "string",
+                                                "index": "analyzed",
+                                                "analyzer": "larasearch_word_start_index"
+                                              },
+                                              "word_middle": {
+                                                "type": "string",
+                                                "index": "analyzed",
+                                                "analyzer": "larasearch_word_middle_index"
+                                              },
+                                              "word_end": {
+                                                "type": "string",
+                                                "index": "analyzed",
+                                                "analyzer": "larasearch_word_end_index"
+                                              }
+                                            }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            "index": "Husband",
+                            "type": "Husband"
+                          }
+                        }', true)
+                    ,
                     $params);
             });
 

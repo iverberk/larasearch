@@ -2,7 +2,7 @@
 
 use Mockery as m;
 
-class ResultsTest extends \PHPUnit_Framework_Testcase {
+class ResultsTest extends \PHPUnit_Framework_TestCase {
 
     protected function tearDown()
     {

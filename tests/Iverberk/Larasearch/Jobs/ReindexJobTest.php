@@ -3,7 +3,7 @@
 use Mockery as m;
 use AspectMock\Test as am;
 
-class ReindexJobTest extends \PHPUnit_Framework_Testcase {
+class ReindexJobTest extends \PHPUnit_Framework_TestCase {
 
     protected function tearDown()
     {

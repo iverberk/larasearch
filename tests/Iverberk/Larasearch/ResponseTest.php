@@ -2,8 +2,7 @@
 
 use Mockery as m;
 
-
-class ResponseTest extends \PHPUnit_Framework_Testcase {
+class ResponseTest extends \PHPUnit_Framework_TestCase {
 
     private $responseFixture = [
         'took' => 'took',

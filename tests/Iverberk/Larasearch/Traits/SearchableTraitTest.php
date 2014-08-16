@@ -6,7 +6,7 @@ use Iverberk\Larasearch\Proxy;
 use Mockery as m;
 use AspectMock\Test as am;
 
-class SearchableTraitTest extends \PHPUnit_Framework_Testcase {
+class SearchableTraitTest extends \PHPUnit_Framework_TestCase {
 
     protected function tearDown()
     {

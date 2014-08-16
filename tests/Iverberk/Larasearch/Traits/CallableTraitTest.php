@@ -3,7 +3,7 @@
 use Mockery as m;
 use AspectMock\Test as am;
 
-class CallableTraitTest extends \PHPUnit_Framework_Testcase {
+class CallableTraitTest extends \PHPUnit_Framework_TestCase {
 
     protected function tearDown()
     {

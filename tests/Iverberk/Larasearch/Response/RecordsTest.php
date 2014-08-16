@@ -2,7 +2,7 @@
 
 use Mockery as m;
 
-class RecordsTest extends \PHPUnit_Framework_Testcase {
+class RecordsTest extends \PHPUnit_Framework_TestCase {
 
     protected function tearDown()
     {

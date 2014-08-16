@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Queue;
 use Mockery as m;
 use AspectMock\Test as am;
 
-class ObserverTest extends \PHPUnit_Framework_Testcase {
+class ObserverTest extends \PHPUnit_Framework_TestCase {
 
     protected function tearDown()
     {

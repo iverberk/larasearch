@@ -2,7 +2,7 @@
 
 use Mockery as m;
 
-class ResultTest extends \PHPUnit_Framework_Testcase {
+class ResultTest extends \PHPUnit_Framework_TestCase {
 
     /**
      * @var \Mockery\Mock

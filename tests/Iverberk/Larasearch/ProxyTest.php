@@ -10,7 +10,7 @@ function date()
     return ProxyTest::$functions->date();
 }
 
-class ProxyTest extends \PHPUnit_Framework_Testcase {
+class ProxyTest extends \PHPUnit_Framework_TestCase {
 
     /**
      * @var \Mockery\Mock

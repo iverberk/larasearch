@@ -3,7 +3,7 @@
 use Mockery as m;
 use AspectMock\Test as am;
 
-class QueryTest extends \PHPUnit_Framework_Testcase {
+class QueryTest extends \PHPUnit_Framework_TestCase {
 
     protected function tearDown()
     {
@@ -941,7 +941,7 @@ class QueryTest extends \PHPUnit_Framework_Testcase {
     private function getMocks()
     {
         $client = m::mock('Elasticsearch\Client');
-        $model = m::mock('Husband');
+        $model = m::mock('Illuminate\Database\Eloquent\Model');
 
         $proxy = m::mock('Iverberk\Larasearch\Proxy');
         $proxy->shouldReceive('getClient')

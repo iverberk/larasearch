@@ -23,6 +23,19 @@ Features
   - Load Eloquent models based on Elasticsearch queries
   - Automatic reindexing on updates of (related) Eloquent models
 
+Installation
+------------
+
+Add Larasearch to your composer.json file:
+
+```"iverberk/larasearch": "0.6.*"```
+
+Add the service provider to your Laravel application config:
+
+```PHP
+'Iverberk\Larasearch\LarasearchServiceProvider'
+```
+
 Usage
 -----
 

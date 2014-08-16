@@ -332,7 +332,6 @@ $results = Husband::search('query_string')->getRecords();
 
 Todo
 ---
-* write tests!!
 * add additional functionality (boosting, etc.)
 * Polish, polish, polish...
 

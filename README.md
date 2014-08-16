@@ -189,7 +189,8 @@ Run the following Artisan command to index the model:
 
 ```php artisan larasearch:reindex Husband```
 
-Use the ```--force``` flag to force recreation of the index. To automatically add all related models to the indexed documents you can use the ```--relations``` flag. By default Larasearch will use the database table as index name and the model name as type.
+To automatically add all related models to the indexed documents you can use the ```--relations``` flag. By default Larasearch will use the database table as index name and the model name as type.
+There are some more options on the commands to you can inspect by reading the ```--help``` output.
 
 **TransformableTrait**
 

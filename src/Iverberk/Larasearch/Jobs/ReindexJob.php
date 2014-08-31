@@ -5,25 +5,24 @@ use Illuminate\Queue\Jobs\Job;
 
 class ReindexJob {
 
-    public function fire(Job $job, $models)
-    {
-        try
-        {
-            foreach($models as $model)
-            {
-                list($class, $id) = explode(':', $model);
+	public function fire(Job $job, $models)
+	{
+		try
+		{
+			foreach ($models as $model)
+			{
+				list($class, $id) = explode(':', $model);
 
-                $model = $class::findOrFail($id);
+				$model = $class::findOrFail($id);
 
-                $model->refreshDoc($model);
-            }
+				$model->refreshDoc($model);
+			}
 
-            $job->delete();
-        }
-        catch (ModelNotFoundException $e)
-        {
-            $job->release(60);
-        }
-    }
+			$job->delete();
+		} catch (ModelNotFoundException $e)
+		{
+			$job->release(60);
+		}
+	}
 
 } 

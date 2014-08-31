@@ -343,6 +343,9 @@ Larasearch can load Eloquent models directly based on Elasticsearch queries. Jus
 ```PHP
 $results = Husband::search('query_string')->getRecords();
 ```
+Automatic reindexing on changes
+---
+By including the CallableTrait on your models you make them observable for Larasearch. Any changes to the model will be automatically propagated to the related searchable models. The searchable model and it relations (thus including the changed model) are automatically reindexed to Elasticsearch. This way you never have to worry about your Elasticsearch documents being out of sync. The functionality is actually implemented as a queue so you can (and probably should) process the change asynchronously.
 
 Todo
 ---

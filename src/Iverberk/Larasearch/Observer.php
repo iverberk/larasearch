@@ -13,6 +13,8 @@ class Observer {
 
 	public function saved(Model $model)
 	{
+        $reindexModels = [];
+
 		$paths = Config::get('larasearch::reversedPaths.' . get_class($model), []);
 
 		foreach ((array)$paths as $path)
@@ -25,13 +27,13 @@ class Observer {
 
 				// Define a little recursive function to walk the relations of the model based on the path
 				// Eventually it will queue all affected searchable models for reindexing
-				$walk = function ($relation) use (&$walk, &$path)
+				$walk = function ($relation) use (&$walk, &$path, &$reindexModels)
 				{
 					$segment = array_shift($path);
 
 					if ($relation instanceof Model)
 					{
-						Queue::push('Iverberk\Larasearch\Jobs\ReindexJob', [get_class($relation) . ':' . $relation->getKey()]);
+                        $reindexModels[] = get_class($relation) . ':' . $relation->getKey();
 					}
 					else if ($relation instanceof Collection)
 					{
@@ -43,9 +45,8 @@ class Observer {
 							}
 							else
 							{
-								Queue::push('Iverberk\Larasearch\Jobs\ReindexJob', [get_class($record) . ':' . $record->getKey()]);
+                                $reindexModels[] = get_class($relation) . ':' . $relation->getKey();
 							}
-
 						}
 					}
 				};
@@ -54,9 +55,11 @@ class Observer {
 			}
 			else
 			{
-				Queue::push('Iverberk\Larasearch\Jobs\ReindexJob', [get_class($model) . ':' . $model->getKey()]);
+                $reindexModels[] = get_class($model) . ':' . $model->getKey();
 			}
 		}
+
+        Queue::push('Iverberk\Larasearch\Jobs\ReindexJob', array_unique($reindexModels));
 	}
 
 }

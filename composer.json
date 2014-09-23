@@ -30,6 +30,7 @@
         "phpunit/phpunit": "4.4.*@dev",
         "phpunit/php-code-coverage": "3.0.*@dev",
         "phpunit/phpunit-mock-objects": "2.3.*@dev",
+        "sebastian/global-state": "1.0.*@dev",
         "codeception/aspect-mock": "*"
     }
 }

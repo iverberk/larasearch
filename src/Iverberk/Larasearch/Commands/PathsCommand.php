@@ -1,5 +1,6 @@
 <?php namespace Iverberk\Larasearch\Commands;
 
+use Guzzle\Common\Exception\RuntimeException;
 use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
@@ -165,8 +166,26 @@ class PathsCommand extends Command {
 					// that we can build a reversed path for this relation
 					$this->getRelatedModels($related['model']);
 
-					$newReversedPath = $reversedPath;
-					$newReversedPath[] = $this->relationClassMethods[get_class($related['model'])][$modelClass];
+                    $newReversedPath = $reversedPath;
+
+                    // Check if a reciprocal relation is found back to the original model
+                    if ( ! isset($this->relationClassMethods[get_class($related['model'])][$modelClass]))
+                    {
+                        // Are we dealing with a polymorphic relation?
+                        if (array_key_exists(get_class($related['model']), $this->relationClassMethods[get_class($related['model'])]))
+                        {
+                            $model = get_class($related['model']);
+                            $newReversedPath[] = $this->relationClassMethods[$model][$model];
+                        }
+                        else
+                        {
+                            throw new \RuntimeException("Reciprocal relation not found for model '" . get_class($related['model']) . "'");
+                        }
+                    }
+                    else
+                    {
+                        $newReversedPath[] = $this->relationClassMethods[get_class($related['model'])][$modelClass];
+                    }
 
 					// Add this relation
 					$relations[] = $related;

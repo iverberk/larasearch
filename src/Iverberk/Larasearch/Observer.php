@@ -13,13 +13,14 @@ class Observer {
 
 	public function saved(Model $model)
 	{
-        $reindexModels = [];
+		// Temporary array to store affected models
+		$reindexModels = [];
 
 		$paths = Config::get('larasearch::reversedPaths.' . get_class($model), []);
 
 		foreach ((array)$paths as $path)
 		{
-			if (!empty($path))
+			if ( ! empty($path))
 			{
 				$model = $model->load($path);
 
@@ -27,29 +28,32 @@ class Observer {
 
 				// Define a little recursive function to walk the relations of the model based on the path
 				// Eventually it will queue all affected searchable models for reindexing
-				$walk = function ($relation) use (&$walk, &$path, &$reindexModels)
-				{
-					$segment = array_shift($path);
+                $walk = function ($relation) use (&$walk, &$path, &$reindexModels)
+                {
+                    $segment = array_shift($path);
 
-					if ($relation instanceof Model)
-					{
-                        $reindexModels[] = get_class($relation) . ':' . $relation->getKey();
-					}
-					else if ($relation instanceof Collection)
-					{
-						foreach ($relation as $record)
-						{
-							if (!empty($segment))
-							{
-								$walk($record->getRelation($segment));
-							}
-							else
-							{
-                                $reindexModels[] = get_class($relation) . ':' . $relation->getKey();
-							}
-						}
-					}
-				};
+                    $relation = $relation instanceof Collection ? $relation : new Collection([$relation]);
+
+                    foreach ($relation as $record)
+                    {
+                        if ( ! empty($segment))
+                        {
+                            if (array_key_exists($segment, $record->getRelations()))
+                            {
+                                $walk($record->getRelation($segment));
+                            }
+                            else
+                            {
+	                            // Apparently the relation doesn't exist on this model, so skip the rest of the path as well
+                                return;
+                            }
+                        }
+                        else
+                        {
+                            $reindexModels[] = get_class($record) . ':' . $record->getKey();
+                        }
+                    }
+                };
 
 				$walk($model->getRelation(array_shift($path)));
 			}
@@ -59,6 +63,7 @@ class Observer {
 			}
 		}
 
+		// Clean up duplicate entries and push the job on to the queue
         Queue::push('Iverberk\Larasearch\Jobs\ReindexJob', array_unique($reindexModels));
 	}
 

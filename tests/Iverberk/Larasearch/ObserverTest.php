@@ -29,22 +29,10 @@ class ObserverTest extends \PHPUnit_Framework_TestCase {
         Config::shouldReceive('get')
             ->with('/^larasearch::reversedPaths\..*$/', array())
             ->once()
-            ->andReturn(['', 'children', 'children.toys', 'wife']);
+            ->andReturn(['', 'wife', 'children', 'children.toys']);
 
         Queue::shouldReceive('push')
-            ->with('Iverberk\Larasearch\Jobs\ReindexJob', [ 'Husband:2' ])
-            ->once();
-
-        Queue::shouldReceive('push')
-            ->with('Iverberk\Larasearch\Jobs\ReindexJob', [ 'Child:2' ])
-            ->once();
-
-        Queue::shouldReceive('push')
-            ->with('Iverberk\Larasearch\Jobs\ReindexJob', [ 'Wife:2' ])
-            ->once();
-
-        Queue::shouldReceive('push')
-            ->with('Iverberk\Larasearch\Jobs\ReindexJob', [ 'Toy:2' ])
+            ->with('Iverberk\Larasearch\Jobs\ReindexJob', [ 'Husband:2', 'Wife:2', 'Child:2', 'Toy:2' ])
             ->once();
 
         /**

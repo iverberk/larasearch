@@ -171,7 +171,7 @@ class PathsCommand extends Command {
                     // Check if a reciprocal relation is found back to the original model
                     if ( ! isset($this->relationClassMethods[get_class($related['model'])][$modelClass]))
                     {
-                        // Are we dealing with a polymorphic relation?
+                        // Check if we are possibly dealing with a polymorphic relation (reference to itself)
                         if (array_key_exists(get_class($related['model']), $this->relationClassMethods[get_class($related['model'])]))
                         {
                             $model = get_class($related['model']);

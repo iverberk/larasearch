@@ -19,7 +19,8 @@ class ReindexJob {
 			}
 
 			$job->delete();
-		} catch (ModelNotFoundException $e)
+		}
+		catch (ModelNotFoundException $e)
 		{
 			$job->release(60);
 		}

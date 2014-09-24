@@ -13,13 +13,14 @@ class Observer {
 
 	public function saved(Model $model)
 	{
-        $reindexModels = [];
+		// Temporary array to store affected models
+		$reindexModels = [];
 
 		$paths = Config::get('larasearch::reversedPaths.' . get_class($model), []);
 
 		foreach ((array)$paths as $path)
 		{
-			if (!empty($path))
+			if ( ! empty($path))
 			{
 				$model = $model->load($path);
 
@@ -32,16 +33,18 @@ class Observer {
                     $segment = array_shift($path);
 
                     $relation = $relation instanceof Collection ? $relation : new Collection([$relation]);
+
                     foreach ($relation as $record)
                     {
-                        if (!empty($segment))
+                        if ( ! empty($segment))
                         {
-                            if (in_array($segment, $record->getRelations()))
+                            if (array_key_exists($segment, $record->getRelations()))
                             {
                                 $walk($record->getRelation($segment));
                             }
                             else
                             {
+	                            // Apparently the relation doesn't exist on this model, so skip the rest of the path as well
                                 return;
                             }
                         }
@@ -60,6 +63,7 @@ class Observer {
 			}
 		}
 
+		// Clean up duplicate entries and push the job on to the queue
         Queue::push('Iverberk\Larasearch\Jobs\ReindexJob', array_unique($reindexModels));
 	}
 

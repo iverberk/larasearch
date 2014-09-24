@@ -305,4 +305,33 @@ class ProxyTest extends \PHPUnit_Framework_TestCase {
         $this->proxy->refreshDoc($this->model);
     }
 
+	/**
+	 * @test
+	 */
+	public function it_should_delete_docs()
+	{
+		/**
+		 *
+		 * Expectation
+		 *
+		 */
+		$this->client->shouldReceive('delete')
+			->with([
+				'id' => 1,
+				'index' => 'Husband',
+				'type' => 'Husband'
+			])
+			->andReturn();
+
+		$this->index->shouldReceive('getName')
+			->andReturn('Husband');
+
+		/**
+		 *
+		 * Assertion
+		 *
+		 */
+		$this->proxy->deleteDoc(1);
+	}
+
 }

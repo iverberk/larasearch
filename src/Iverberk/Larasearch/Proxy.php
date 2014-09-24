@@ -170,4 +170,20 @@ class Proxy {
 		);
 	}
 
+    /**
+     * Delete a specific database record within Elasticsearch
+     *
+     * @param $id Eloquent id of model object
+     */
+    public function deleteDoc($id)
+    {
+        $this->config['client']->delete(
+            [
+                'id' => $id,
+                'index' => $this->getIndex()->getName(),
+                'type' => $this->getType()
+            ]
+        );
+    }
+
 }

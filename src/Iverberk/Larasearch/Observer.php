@@ -56,6 +56,9 @@ class Observer {
 
 					$relation = $relation instanceof Collection ? $relation : new Collection([$relation]);
 
+					// Clean up empty records before iterating
+					$relation = $relation->filter(function($elem) { return !empty($elem);});
+
 					foreach ($relation as $record)
 					{
 						if ( ! empty($segment))

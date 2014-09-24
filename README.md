@@ -314,16 +314,17 @@ $suggestios = $results->first()->getSuggestions(['name']);
 - **Aggregations**
 
 ```PHP
-$results = Husband::search('query_string',
+$response = Husband::search('query_string',
         'aggs' => [
             'agg_name' => [
                 'type' => 'terms',
                 'field' => 'name'
             ]
         ]
-    )->getResults();
+    );
 
-$suggestios = $results->first()->getAggregations('agg_name');
+$results = $response->getResults();
+$aggregations = $response->getAggregations('agg_name');
 ```
 
 - **Autocomplete**

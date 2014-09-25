@@ -56,26 +56,26 @@ class Observer {
 
 					$relation = $relation instanceof Collection ? $relation : new Collection([$relation]);
 
-					// Clean up empty records before iterating
-					$relation = $relation->filter(function($elem) { return !empty($elem);});
-
 					foreach ($relation as $record)
 					{
-						if ( ! empty($segment))
+						if ($record instanceof Model)
 						{
-							if (array_key_exists($segment, $record->getRelations()))
+							if (!empty($segment))
 							{
-								$walk($record->getRelation($segment));
+								if (array_key_exists($segment, $record->getRelations()))
+								{
+									$walk($record->getRelation($segment));
+								}
+								else
+								{
+									// Apparently the relation doesn't exist on this model, so skip the rest of the path as well
+									return;
+								}
 							}
 							else
 							{
-								// Apparently the relation doesn't exist on this model, so skip the rest of the path as well
-								return;
+								$affectedModels[] = get_class($record) . ':' . $record->getKey();
 							}
-						}
-						else
-						{
-							$affectedModels[] = get_class($record) . ':' . $record->getKey();
 						}
 					}
 				};

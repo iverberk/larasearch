@@ -60,7 +60,7 @@ class Observer {
 					{
 						if ($record instanceof Model)
 						{
-							if (!empty($segment))
+							if ( ! empty($segment))
 							{
 								if (array_key_exists($segment, $record->getRelations()))
 								{

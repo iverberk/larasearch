@@ -221,7 +221,7 @@ class PathsCommand extends Command {
 		if (preg_match('/@follow\s+NEVER/', $docComment)) return false;
 
 		// Check if we follow the relation from the 'base' model
-		if (preg_match_all('/@follow\s+UNLESS\s+' . str_replace('\\', '\\\\', get_class($model)) . '\b/', $docComment, $matches))
+		if (preg_match('/@follow\s+UNLESS\s+' . str_replace('\\', '\\\\', get_class($model)) . '\b/', $docComment))
 		{
 			return false;
 		}

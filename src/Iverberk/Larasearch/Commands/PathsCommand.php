@@ -218,10 +218,10 @@ class PathsCommand extends Command {
 	protected function checkDocHints($docComment, $model)
 	{
 		// Check if we never follow this relation
-		if (preg_match('/@follow NEVER/', $docComment)) return false;
+		if (preg_match('/@follow\s+NEVER/', $docComment)) return false;
 
 		// Check if we follow the relation from the 'base' model
-		if (preg_match_all('/@follow UNLESS ' . str_replace('\\', '\\\\', get_class($model)) . '\b/', $docComment, $matches))
+		if (preg_match_all('/@follow\s+UNLESS\s+' . str_replace('\\', '\\\\', get_class($model)) . '\b/', $docComment, $matches))
 		{
 			return false;
 		}
@@ -253,9 +253,8 @@ class PathsCommand extends Command {
 			{
 				// Check if this method returns an Eloquent relation
 				if ($method->class == $modelClass &&
-					stripos($method->getDocComment(), '@return \Illuminate\Database\Eloquent\Relations')
+					preg_match('/@return\s+\\\\Illuminate\\\\Database\\\\Eloquent\\\\Relations/', $method->getDocComment())
 				)
-
 				{
 					// Get the method name, so that we can call it on the model
 					$relationMethod = $method->name;

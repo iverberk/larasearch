@@ -144,7 +144,7 @@ class Toy extends Eloquent {
 Larasearch can automatically include related models as nested objects during indexing. It achieves this functionality by introspecting the models and finding relations. Every model has full control over its serialization by overriding the transform function (see below). Sometimes you do not want related models to be included from a base model. Larasearch allows you to specify conditions in the comments of the relation function. It knows the following options:
 
 1. @follow NEVER
-2. @follow UNLESS {base model}
+2. @follow UNLESS {base model} (write as many UNLESS lines as base models to exclude)
 
 Use the first annotation to never follow the relation. Use the second annotation to specify that the relation should not be included when you are coming from a specific base model. For example, if you do not want the toys to be included on the Husband model you would specify is as follows:
 

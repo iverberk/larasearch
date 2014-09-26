@@ -203,13 +203,13 @@ Run the following Artisan command to generate the paths for the model:
 
 ```php artisan larasearch:paths Husband```
 
-To generate paths for relations you should add the ```--relations``` flag.
+To generate paths for relations you should add the ```--relations``` flag. Use the ```--dir=app/models``` option (or other path) to lookup all Models having a SearchableTrait.
 
 Run the following Artisan command to index the model:
 
 ```php artisan larasearch:reindex Husband```
 
-To automatically add all related models to the indexed documents you can use the ```--relations``` flag. By default Larasearch will use the database table as index name and the model name as type.
+To automatically add all related models to the indexed documents you can use the ```--relations``` flag. The ```--dir=``` parameter may also help. By default Larasearch will use the database table as index name and the model name as type.
 There are some more options on the commands to you can inspect by reading the ```--help``` output.
 
 **TransformableTrait**

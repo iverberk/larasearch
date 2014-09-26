@@ -191,7 +191,7 @@ class PathsCommand extends Command {
 					$relations[] = $related;
 
 					$this->reversedPaths[$modelClass][] = implode('.', array_reverse($reversedPath));
-					$this->reversedPaths[$modelClass] = array_values(array_filter(array_unique($this->reversedPaths[$modelClass])));
+					$this->reversedPaths[$modelClass] = array_values(array_unique($this->reversedPaths[$modelClass]));
 
 					$this->compilePaths($related['model'], $model, $newPath, $newReversedPath, $start);
 				}
@@ -213,7 +213,7 @@ class PathsCommand extends Command {
 			}
 
 			$this->reversedPaths[$modelClass][] = implode('.', array_reverse($reversedPath));
-			$this->reversedPaths[$modelClass] = array_values(array_filter(array_unique($this->reversedPaths[$modelClass])));
+			$this->reversedPaths[$modelClass] = array_values(array_unique($this->reversedPaths[$modelClass]));
 		}
 	}
 

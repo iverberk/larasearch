@@ -145,6 +145,7 @@ Larasearch can automatically include related models as nested objects during ind
 
 1. @follow NEVER
 2. @follow UNLESS {base model} (write as many UNLESS lines as base models to exclude)
+3. @follow FROM {base model} (write as many FROM lines as base models to include)
 
 Use the first annotation to never follow the relation. Use the second annotation to specify that the relation should not be included when you are coming from a specific base model. For example, if you do not want the toys to be included on the Husband model you would specify is as follows:
 
@@ -155,6 +156,24 @@ class Child extends Eloquent {
 
     /**
      * @follow UNLESS Husband
+     * @return \Illuminate\Database\Eloquent\Relations
+     */
+    public function toys()
+    {
+        return $this->belongsToMany('Toy');
+    }
+
+}
+```
+Use the third annotation to specify that the relation should only be included when you are coming from a specific base model. For example, if you want the toys to be included only from the Wife model you would specify is as follows:
+
+```PHP
+class Child extends Eloquent {
+
+    ...
+
+    /**
+     * @follow FROM Wife
      * @return \Illuminate\Database\Eloquent\Relations
      */
     public function toys()

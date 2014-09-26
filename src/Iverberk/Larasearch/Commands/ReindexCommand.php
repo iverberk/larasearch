@@ -29,6 +29,7 @@ class ReindexCommand extends Command {
 	 */
 	public function fire()
 	{
+		$directoryModels = [];
 		$models = $this->argument('model');
 
 		foreach ($models as $model)
@@ -48,7 +49,7 @@ class ReindexCommand extends Command {
 			}
 		}
 
-		if (empty($models))
+		if (empty($models) && empty($directoryModels))
 		{
 			$this->info('No models found.');
 		}

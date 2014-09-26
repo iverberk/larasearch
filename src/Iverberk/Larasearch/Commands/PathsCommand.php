@@ -225,6 +225,11 @@ class PathsCommand extends Command {
 		{
 			return false;
 		}
+		
+		if (preg_match('/@follow\s+FROM\b/', $docComment) && ! preg_match('/@follow\s+FROM\s+' . str_replace('\\', '\\\\', get_class($model)) . '\b/', $docComment))
+		{
+			return false;
+		}
 
 		// We follow the relation
 		return true;

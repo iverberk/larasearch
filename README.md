@@ -184,7 +184,7 @@ class Child extends Eloquent {
 }
 ```
 
-Mmake sure that you add the proper annotations to the relation functions so that Larasearch knows when a function defines an Eloquent relation. See the example models for the proper annotations.
+Make sure that you add the proper annotations to the relation functions so that Larasearch knows when a function defines an Eloquent relation. See the example models for the proper annotations.
 
 **Indexing a model**
 

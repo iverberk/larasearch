@@ -179,7 +179,7 @@ class PathsCommand extends Command {
                         }
                         else
                         {
-                            throw new \RuntimeException("Reciprocal relation not found for model '" . get_class($related['model']) . "'");
+                            throw new \RuntimeException("Reciprocal relation not found for model '" . get_class($related['model']) . "' from within '$modelClass' model");
                         }
                     }
                     else

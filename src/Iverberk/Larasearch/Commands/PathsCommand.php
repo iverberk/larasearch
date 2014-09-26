@@ -71,7 +71,7 @@ class PathsCommand extends Command {
 			}
 		}
 
-		if (!empty($models))
+		if ( ! empty($models) || ! empty($directoryModels))
 		{
 			$this->writeConfig();
 		}

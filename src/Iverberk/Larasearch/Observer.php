@@ -14,7 +14,9 @@ class Observer {
 	 */
 	public function deleted(Model $model)
 	{
-		Queue::push('Iverberk\Larasearch\Jobs\DeleteJob', $this->findAffectedModels($model));
+		Queue::push('Iverberk\Larasearch\Jobs\DeleteJob', [get_class($model) . ':' . $model->getKey()]);
+
+		Queue::push('Iverberk\Larasearch\Jobs\ReindexJob', $this->findAffectedModels($model, true));
 	}
 
 	/**
@@ -33,7 +35,7 @@ class Observer {
 	 * @param Model $model
 	 * @return array
 	 */
-	private function findAffectedModels(Model $model)
+	private function findAffectedModels(Model $model, $excludeCurrent = false)
 	{
 		// Temporary array to store affected models
 		$affectedModels = [];
@@ -82,7 +84,7 @@ class Observer {
 
 				$walk($model->getRelation(array_shift($path)));
 			}
-			else
+			else if ( ! $excludeCurrent)
 			{
 				$affectedModels[] = get_class($model) . ':' . $model->getKey();
 			}

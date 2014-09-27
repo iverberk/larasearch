@@ -217,7 +217,7 @@ class Result implements \ArrayAccess, ArrayableInterface {
 	 */
 	public function toArray()
 	{
-		return $this->hit['_source'];
+		return isset($this->hit['fields']) ? $this->hit['fields'] : $this->hit['_source'];
 	}
 
 }

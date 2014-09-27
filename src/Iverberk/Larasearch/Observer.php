@@ -8,14 +8,16 @@ use Illuminate\Support\Facades\Queue;
 class Observer {
 
 	/**
-	 * Model delete event hanlder
+	 * Model delete event handler
 	 *
 	 * @param Model $model
 	 */
 	public function deleted(Model $model)
 	{
+        // Delete corresponding $model document from Elasticsearch
 		Queue::push('Iverberk\Larasearch\Jobs\DeleteJob', [get_class($model) . ':' . $model->getKey()]);
 
+        // Update all related model documents to reflect that $model has been removed
 		Queue::push('Iverberk\Larasearch\Jobs\ReindexJob', $this->findAffectedModels($model, true));
 	}
 

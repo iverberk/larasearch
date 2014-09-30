@@ -358,6 +358,17 @@ $results = Husband::search('query_string', ['autocomplete' => true])->getResults
 $results = Husband::search('query_string', ['fields' => ['wife.name' => 'word_start']])->getResults();
 ```
 
+- **Free-form searching**
+
+You can always pass a query array or json structure to the elasticsearch client. This way you have total freedom on how to construct the query.
+
+```PHP
+$query['query']['match']['name'] = 'Raymundo';
+$husband = Husband::search(null, ['query' => $query])->getResults();
+
+$wife = Wife::search(null, ['json' => '{"query": {"match": {"name": "Lisa"}}}'])->getResults();
+```
+
 - **Loading Eloquent models**
 
 Larasearch can load Eloquent models directly based on Elasticsearch queries. Just ask for records instead of results:

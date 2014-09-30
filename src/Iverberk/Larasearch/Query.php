@@ -320,4 +320,24 @@ class Query {
 		return new Response($this->proxy->getModel(), $this->proxy->getClient()->search($params));
 	}
 
+	/**
+	 * Execute the query and return the response in a rich wrapper class
+	 *
+	 * @return Response
+	 */
+	public function executeBare()
+	{
+		$options = $this->options;
+		unset($options['index']);
+		unset($options['type']);
+
+		$params = [
+			'index' => Utils::findKey($this->options, 'index', false) ?: $this->proxy->getIndex()->getName(),
+			'type' => Utils::findKey($this->options, 'type', false) ?: $this->proxy->getType(),
+			'body' => $options
+		];
+
+		return new Response($this->proxy->getModel(), $this->proxy->getClient()->search($params));
+	}
+
 }

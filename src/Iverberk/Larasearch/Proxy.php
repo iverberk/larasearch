@@ -78,6 +78,16 @@ class Proxy {
 	}
 
 	/**
+	 * @param       $term
+	 * @param array $options
+	 * @return \Iverberk\Larasearch\Response
+	 */
+	public function searchBare($options = [])
+	{
+		return App::make('iverberk.larasearch.query', ['proxy' => $this, 'term' => null, 'options' => $options])->executeBare();
+	}
+
+	/**
 	 * @param bool     $relations
 	 * @param int      $batchSize
 	 * @param array    $mapping

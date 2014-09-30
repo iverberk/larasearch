@@ -133,8 +133,11 @@ class ResultTest extends \PHPUnit_Framework_TestCase {
     public function it_should_convert_to_array()
     {
         $this->assertEquals([
-            'id' => 5,
-            'foo' => 'bar'
+	        'field1' => 'value1',
+	        'field2' => 'value2',
+	        'nested' => [
+		        'nested_field' => 'nested_value'
+	        ]
         ],
         $this->result->toArray());
     }

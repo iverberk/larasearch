@@ -187,19 +187,23 @@ class Query {
 			'json' => Utils::findKey($this->options, 'json', false),
 			'query' => Utils::findKey($this->options, 'query', false),
 			'similar' => [
-				'more_like_this' => [
-					'fields' => $this->fields,
-					'like_text' => $this->term,
-					'min_doc_freq' => 1,
-					'min_term_freq' => 1,
-					'analyzer' => "larasearch_search2"
+				'query' => [
+					'more_like_this' => [
+						'fields' => $this->fields,
+						'like_text' => $this->term,
+						'min_doc_freq' => 1,
+						'min_term_freq' => 1,
+						'analyzer' => "larasearch_search2"
+					]
 				]
 			],
 			'autocomplete' => [
-				'multi_match' => [
-					'fields' => $this->fields,
-					'query' => $this->term,
-					'analyzer' => "larasearch_autocomplete_search"
+				'query' => [
+					'multi_match' => [
+						'fields' => $this->fields,
+						'query' => $this->term,
+						'analyzer' => "larasearch_autocomplete_search"
+					]
 				]
 			]
 		];
@@ -211,7 +215,7 @@ class Query {
 
 		if (count($payload_key) == 1)
 		{
-			$payload = $payloads[key($payload_key)];
+			$this->payload = array_merge($this->payload, $payloads[key($payload_key)]);
 		}
 		elseif (count($payload_key) == 0)
 		{
@@ -274,14 +278,14 @@ class Query {
 
 				$payload = ['dis_max' => ['queries' => $queries]];
 			}
+
+			$this->payload['query'] = $payload;
 		}
 		else
 		{
 			// We have multiple query definitions, so abort
 			throw new \InvalidArgumentException('Cannot use multiple query definitions.');
 		}
-
-		$this->payload['query'] = $payload;
 
 		if ($load = Utils::findKey($this->options, 'load', false))
 		{

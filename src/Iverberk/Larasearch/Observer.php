@@ -78,7 +78,10 @@ class Observer {
 							}
 							else
 							{
-								$affectedModels[] = get_class($record) . ':' . $record->getKey();
+								if (in_array('Iverberk\Larasearch\Traits\SearchableTrait', class_uses($record)))
+								{
+									$affectedModels[] = get_class($record) . ':' . $record->getKey();
+								}
 							}
 						}
 					}
@@ -88,7 +91,10 @@ class Observer {
 			}
 			else if ( ! $excludeCurrent)
 			{
-				$affectedModels[] = get_class($model) . ':' . $model->getKey();
+				if (in_array('Iverberk\Larasearch\Traits\SearchableTrait', class_uses($model)))
+				{
+					$affectedModels[] = get_class($model) . ':' . $model->getKey();
+				}
 			}
 		}
 

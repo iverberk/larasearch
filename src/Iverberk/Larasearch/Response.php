@@ -56,7 +56,7 @@ class Response {
 	 */
 	public function getRecords()
 	{
-		if($this->getTotal() > 0)
+		if(count($this->getHits()) > 0)
 		{
 			$ids = array_map(function ($hit)
 				{

@@ -52,16 +52,23 @@ class Response {
 	}
 
 	/**
-	 * @return mixed
+	 * @return \Illuminate\Database\Eloquent\Collection|static[]
 	 */
 	public function getRecords()
 	{
-		$ids = array_map(function ($hit)
-			{
-				return $hit['_id'];
-			}, $this->getHits());
+		if(count($this->getHits()) > 0)
+		{
+			$ids = array_map(function ($hit)
+				{
+					return $hit['_id'];
+				}, $this->getHits());
 
-		return call_user_func_array(array($this->model, 'whereIn'), array('id', $ids))->get();
+			return call_user_func_array(array($this->model, 'whereIn'), array('id', $ids))->get();
+		}
+		else
+		{
+			return call_user_func(array($this->model, 'newCollection'));
+		}
 	}
 
 	/**

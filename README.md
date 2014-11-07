@@ -218,7 +218,7 @@ Include the TransformableTrait to get more control over the indexing proces:
 ```PHP
 class Husband extends Eloquent {
 
-    use Iverberk\Larasearch\TransformableTrait;
+    use Iverberk\Larasearch\Traits\TransformableTrait;
 
     ....
 ```

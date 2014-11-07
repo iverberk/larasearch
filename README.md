@@ -193,7 +193,7 @@ Just include the SearchableTrait to enable indexing of the Husband model:
 ```PHP
 class Husband extends Eloquent {
 
-    use Iverberk\Larasearch\SearchableTrait;
+    use Iverberk\Larasearch\Traits\SearchableTrait;
 
     ....
 ```

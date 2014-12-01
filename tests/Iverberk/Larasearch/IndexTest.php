@@ -72,7 +72,7 @@ class IndexTest extends \PHPUnit_Framework_TestCase {
          *
          * @var \Mockery\Mock $index
          */
-        list($index) = $this->getMocks();
+        list($index) = $this->getMocks('bar_');
 
         /**
          *
@@ -80,7 +80,7 @@ class IndexTest extends \PHPUnit_Framework_TestCase {
          *
          */
         $this->assertEquals($index, $index->setName('Mock'));
-        $this->assertEquals('Mock', $index->getName());
+        $this->assertEquals('bar_Mock', $index->getName());
     }
 
     /**
@@ -125,7 +125,6 @@ class IndexTest extends \PHPUnit_Framework_TestCase {
          * Expectation
          *
          */
-        Facade::clearResolvedInstances();
         Config::shouldReceive('get')
             ->with('larasearch::elasticsearch.analyzers')
             ->andReturn([
@@ -1029,7 +1028,7 @@ class IndexTest extends \PHPUnit_Framework_TestCase {
          */
         $client->shouldReceive('indices->updateAliases')
             ->with([
-                'body' => ['actions']
+                'body' => ['actions' => []]
             ]);
 
         /**
@@ -1037,7 +1036,7 @@ class IndexTest extends \PHPUnit_Framework_TestCase {
          * Assertion
          *
          */
-        Index::updateAliases(['actions']);
+        Index::updateAliases(['actions' => []]);
     }
 
     /**
@@ -1117,11 +1116,20 @@ class IndexTest extends \PHPUnit_Framework_TestCase {
      *
      * @return array
      */
-    private function getMocks()
+    private function getMocks($index_prefix = null)
     {
+        /**
+         *
+         * Expectation
+         *
+         */
+        Facade::clearResolvedInstances();
+        Config::shouldReceive('get')
+            ->with('larasearch::elasticsearch.index_prefix', '')
+            ->andReturn($index_prefix);
+
         $client = m::mock('Elasticsearch\Client');
 
-        Facade::clearResolvedInstances();
         App::shouldReceive('make')
             ->with('Elasticsearch')
             ->andReturn($client);

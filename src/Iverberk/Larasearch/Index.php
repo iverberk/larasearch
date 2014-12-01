@@ -3,6 +3,7 @@
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Str;
 use Iverberk\Larasearch\Exceptions\ImportException;
 
 class Index {
@@ -120,7 +121,13 @@ class Index {
 	 */
 	public function getName()
 	{
-		return $this->name;
+        if (!is_null($this->name))
+        {
+            $index_prefix = Config::get('larasearch::elasticsearch.index_prefix', '');
+            if ($index_prefix && !Str::startsWith($this->name, $index_prefix)) $this->name = $index_prefix . $this->name;
+
+            return $this->name;
+        }
 	}
 
 	/**
@@ -132,7 +139,7 @@ class Index {
 	{
 		$body = empty($options) ? $this->getDefaultIndexParams() : $options;
 
-		self::$client->indices()->create(['index' => $this->name, 'body' => $body]);
+		self::$client->indices()->create(['index' => $this->getName(), 'body' => $body]);
 	}
 
 	/**
@@ -140,7 +147,7 @@ class Index {
 	 */
 	public function delete()
 	{
-		self::$client->indices()->delete(['index' => $this->name]);
+		self::$client->indices()->delete(['index' => $this->getName()]);
 	}
 
 	/**
@@ -150,7 +157,7 @@ class Index {
 	 */
 	public function exists()
 	{
-		return self::$client->indices()->exists(['index' => $this->name]);
+		return self::$client->indices()->exists(['index' => $this->getName()]);
 	}
 
 	/**
@@ -171,7 +178,7 @@ class Index {
 	 */
 	public function store($record)
 	{
-		$params['index'] = $this->name;
+		$params['index'] = $this->getName();
 		$params['type'] = $record['type'];
 		$params['id'] = $record['id'];
 		$params['body'] = $record['data'];
@@ -186,7 +193,7 @@ class Index {
 	 */
 	public function retrieve($record)
 	{
-		$params['index'] = $this->name;
+		$params['index'] = $this->getName();
 		$params['type'] = $record['type'];
 		$params['id'] = $record['id'];
 
@@ -200,7 +207,7 @@ class Index {
 	 */
 	public function remove($record)
 	{
-		$params['index'] = $this->name;
+		$params['index'] = $this->getName();
 		$params['type'] = $record['type'];
 		$params['id'] = $record['id'];
 
@@ -215,7 +222,7 @@ class Index {
 	 */
 	public function tokens($text, $options = [])
 	{
-		self::$client->indices()->analyze(array_merge(['index' => $this->name, 'text' => $text], $options));
+		self::$client->indices()->analyze(array_merge(['index' => $this->getName(), 'text' => $text], $options));
 	}
 
 	/**
@@ -240,7 +247,7 @@ class Index {
 	 */
 	public function bulk($records)
 	{
-		$params['index'] = $this->name;
+		$params['index'] = $this->getName();
 		$params['type'] = $this->proxy->getType();
 		$params['body'] = $records;
 
@@ -269,7 +276,10 @@ class Index {
 	 */
 	public static function clean($name)
 	{
-		$indices = self::$client->indices()->getAliases();
+        $index_prefix = Config::get('larasearch::elasticsearch.index_prefix', '');
+		if ($index_prefix && !Str::startsWith($name, $index_prefix)) $name = $index_prefix . $name;
+
+        $indices = self::$client->indices()->getAliases();
 
 		foreach ($indices as $index => $value)
 		{
@@ -288,7 +298,10 @@ class Index {
 	 */
 	public static function getAlias($name)
 	{
-		return self::$client->indices()->getAlias(['name' => $name]);
+        $index_prefix = Config::get('larasearch::elasticsearch.index_prefix', '');
+        if ($index_prefix && !Str::startsWith($name, $index_prefix)) $name = $index_prefix . $name;
+
+        return self::$client->indices()->getAlias(['name' => $name]);
 	}
 
 	/**
@@ -297,6 +310,15 @@ class Index {
 	 */
 	public static function updateAliases(array $actions)
 	{
+        if (isset($actions['actions']) && ($index_prefix = Config::get('larasearch::elasticsearch.index_prefix', '')))
+        {
+            foreach ($actions['actions'] as &$action)
+            {
+                list($verb, $data) = each($action);
+                if (!Str::startsWith($data['index'], $index_prefix)) $action[$verb]['index'] = $index_prefix . $data['index'];
+                if (!Str::startsWith($data['alias'], $index_prefix)) $action[$verb]['alias'] = $index_prefix . $data['alias'];
+            }
+        }
 		return self::$client->indices()->updateAliases(['body' => $actions]);
 	}
 
@@ -308,7 +330,10 @@ class Index {
 	 */
 	public static function refresh($index)
 	{
-		return self::$client->indices()->refresh(['index' => $index]);
+        $index_prefix = Config::get('larasearch::elasticsearch.index_prefix', '');
+        if ($index_prefix && !Str::startsWith($index, $index_prefix)) $index = $index_prefix . $index;
+
+        return self::$client->indices()->refresh(['index' => $index]);
 	}
 
 	/**
@@ -383,7 +408,7 @@ class Index {
 
 		if (!empty($mapping)) $params['mappings']['_default_']['properties'] = $mapping;
 
-		$params['index'] = $this->name;
+		$params['index'] = $this->getName();
 		$params['type'] = $this->proxy->getType();
 
 		return $params;

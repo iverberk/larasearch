@@ -121,10 +121,10 @@ class Index {
 	 */
 	public function getName()
 	{
-        if (!is_null($this->name))
-        {
-            return Config::get('larasearch::elasticsearch.index_prefix', '') . $this->name;
-        }
+		if ( ! is_null($this->name))
+		{
+			return Config::get('larasearch::elasticsearch.index_prefix', '') . $this->name;
+		}
 	}
 
 	/**
@@ -273,10 +273,10 @@ class Index {
 	 */
 	public static function clean($name)
 	{
-        $index_prefix = Config::get('larasearch::elasticsearch.index_prefix', '');
-		if ($index_prefix && !Str::startsWith($name, $index_prefix)) $name = $index_prefix . $name;
+		$index_prefix = Config::get('larasearch::elasticsearch.index_prefix', '');
+		if ($index_prefix && ! Str::startsWith($name, $index_prefix)) $name = $index_prefix . $name;
 
-        $indices = self::$client->indices()->getAliases();
+		$indices = self::$client->indices()->getAliases();
 
 		foreach ($indices as $index => $value)
 		{
@@ -295,10 +295,10 @@ class Index {
 	 */
 	public static function getAlias($name)
 	{
-        $index_prefix = Config::get('larasearch::elasticsearch.index_prefix', '');
-        if ($index_prefix && !Str::startsWith($name, $index_prefix)) $name = $index_prefix . $name;
+		$index_prefix = Config::get('larasearch::elasticsearch.index_prefix', '');
+		if ($index_prefix && !Str::startsWith($name, $index_prefix)) $name = $index_prefix . $name;
 
-        return self::$client->indices()->getAlias(['name' => $name]);
+		return self::$client->indices()->getAlias(['name' => $name]);
 	}
 
 	/**
@@ -307,15 +307,16 @@ class Index {
 	 */
 	public static function updateAliases(array $actions)
 	{
-        if (isset($actions['actions']) && ($index_prefix = Config::get('larasearch::elasticsearch.index_prefix', '')))
-        {
-            foreach ($actions['actions'] as &$action)
-            {
-                list($verb, $data) = each($action);
-                $action[$verb]['index'] = $index_prefix . $data['index'];
-                $action[$verb]['alias'] = $index_prefix . $data['alias'];
-            }
-        }
+		if (isset($actions['actions']) && ($index_prefix = Config::get('larasearch::elasticsearch.index_prefix', '')))
+		{
+			foreach ($actions['actions'] as &$action)
+			{
+				list($verb, $data) = each($action);
+				$action[$verb]['index'] = $index_prefix . $data['index'];
+				$action[$verb]['alias'] = $index_prefix . $data['alias'];
+			}
+		}
+
 		return self::$client->indices()->updateAliases(['body' => $actions]);
 	}
 
@@ -327,10 +328,10 @@ class Index {
 	 */
 	public static function refresh($index)
 	{
-        $index_prefix = Config::get('larasearch::elasticsearch.index_prefix', '');
-        if ($index_prefix && !Str::startsWith($index, $index_prefix)) $index = $index_prefix . $index;
+		$index_prefix = Config::get('larasearch::elasticsearch.index_prefix', '');
+		if ($index_prefix && ! Str::startsWith($index, $index_prefix)) $index = $index_prefix . $index;
 
-        return self::$client->indices()->refresh(['index' => $index]);
+		return self::$client->indices()->refresh(['index' => $index]);
 	}
 
 	/**

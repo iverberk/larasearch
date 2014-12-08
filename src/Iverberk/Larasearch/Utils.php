@@ -74,27 +74,35 @@ class Utils {
 
 				if (!$fileinfo->isDot() && $fileinfo->isReadable())
 				{
-					$fileObj = $fileinfo->openFile('r');
 
-					while (!$fileObj->eof())
-					{
-						$line = $fileObj->fgets();
+    				if ($fileinfo->isDir())
+    				{
+        				$models = array_merge($models, static::findSearchableModels([$fileinfo->getPathname()]));
+        			}
+    				else
+    				{
+						$fileObj = $fileinfo->openFile('r');
 
-						// Extract namespace
-						if (preg_match('/namespace\s+([a-zA-z0-9]+)/', $line, $matches))
+						while (!$fileObj->eof())
 						{
-							$namespace = $matches[1];
-						}
+							$line = $fileObj->fgets();
 
-						// Extract classname
-						if (preg_match('/class\s+([a-zA-z0-9]+)/', $line, $matches))
-						{
-							$model = $namespace ? $namespace . '\\' . $matches[1] : $matches[1];
-
-							// Check if the model has the searchable trait
-							if (in_array('Iverberk\\Larasearch\\Traits\\SearchableTrait', class_uses($model)))
+							// Extract namespace
+							if (preg_match('/^(?:<\?(?:[Pp][Hh][Pp])?)?\s+namespace\s+([a-zA-z0-9_]+)/', $line, $matches))
 							{
-								$models[] = $model;
+								$namespace = $matches[1];
+							}
+
+							// Extract classname
+							if (preg_match('/^(?:<\?(?:[Pp][Hh][Pp])?)?\s*class\s+([a-zA-z0-9_]+)/', $line, $matches))
+							{
+								$model = $namespace ? $namespace . '\\' . $matches[1] : $matches[1];
+
+								// Check if the model has the searchable trait
+								if (in_array('Iverberk\\Larasearch\\Traits\\SearchableTrait', class_uses($model)))
+								{
+									$models[] = $model;
+								}
 							}
 						}
 					}

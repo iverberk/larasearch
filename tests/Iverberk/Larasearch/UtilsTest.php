@@ -63,6 +63,7 @@ class UtilsTest extends \PHPUnit_Framework_TestCase {
         $this->assertContains('Wife', $models);
         $this->assertContains('Toy', $models);
         $this->assertContains('Child', $models);
+        $this->assertContains('House\\Item', $models);
     }
 
 }

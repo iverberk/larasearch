@@ -1,16 +1,5 @@
-Larasearch
-==========
-
----
-
-**Caution: This package is under heavy development. Most of the functionaly is there but there might be some refactoring
-as the package matures. Be careful if you decide to use it in production at this point.**
-
----
-
 Introduction
 ---
-
 
 Larasearch is a Laravel package that aims to seamlessly integrate Elasticsearch functionality with the Eloquent ORM.
 

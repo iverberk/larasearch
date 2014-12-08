@@ -199,7 +199,8 @@ return array_merge($pathConfig, array(
                 ]
             ]
         ],
-        'index_prefix' => Illuminate\Support\Facades\App::environment() . '_'
+	    
+        'index_prefix' => ''
     ]
 
 ));

@@ -51,9 +51,9 @@ class Index {
 	/**
 	 * Import an Eloquent
 	 *
-	 * @param Model    $model
-	 * @param array    $relations
-	 * @param int      $batchSize
+	 * @param Model	$model
+	 * @param array	$relations
+	 * @param int	  $batchSize
 	 * @param callable $callback
 	 * @internal param $type
 	 */
@@ -277,7 +277,6 @@ class Index {
 		if ($index_prefix && ! Str::startsWith($name, $index_prefix)) $name = $index_prefix . $name;
 
 		$indices = self::$client->indices()->getAliases();
-
 		foreach ($indices as $index => $value)
 		{
 			if (empty($value['aliases']) && preg_match("/^${name}_\\d{14,17}$/", $index))
@@ -296,7 +295,7 @@ class Index {
 	public static function getAlias($name)
 	{
 		$index_prefix = Config::get('larasearch::elasticsearch.index_prefix', '');
-		if ($index_prefix && !Str::startsWith($name, $index_prefix)) $name = $index_prefix . $name;
+		if ($index_prefix && ! Str::startsWith($name, $index_prefix)) $name = $index_prefix . $name;
 
 		return self::$client->indices()->getAlias(['name' => $name]);
 	}
@@ -312,8 +311,8 @@ class Index {
 			foreach ($actions['actions'] as &$action)
 			{
 				list($verb, $data) = each($action);
-				$action[$verb]['index'] = $index_prefix . $data['index'];
-				$action[$verb]['alias'] = $index_prefix . $data['alias'];
+				if ( ! Str::startsWith($data['index'], $index_prefix)) $action[$verb]['index'] = $index_prefix . $data['index'];
+				if ( ! Str::startsWith($data['alias'], $index_prefix)) $action[$verb]['alias'] = $index_prefix . $data['alias'];
 			}
 		}
 

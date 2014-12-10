@@ -27,13 +27,17 @@ class ObserverTest extends \PHPUnit_Framework_TestCase {
          */
         Facade::clearResolvedInstances();
         Config::shouldReceive('get')
-            ->with('/^larasearch::reversedPaths\..*$/', array())
+            ->with('/^larasearch::reversedPaths\.Husband$/', array())
             ->once()
             ->andReturn(['', 'wife', 'children', 'children.toys']);
 
         Queue::shouldReceive('push')
-            ->with('Iverberk\Larasearch\Jobs\ReindexJob', [ 'Husband:2', 'Wife:2', 'Child:2', 'Toy:2' ])
-            ->once();
+            ->with('Iverberk\Larasearch\Jobs\ReindexJob', [
+	            'Husband:2',
+	            'Wife:2',
+	            'Child:2',
+	            'Toy:2'
+            ])->once();
 
         /**
          *
@@ -44,6 +48,38 @@ class ObserverTest extends \PHPUnit_Framework_TestCase {
         $husband = \Husband::find(2);
 
         with(new Observer)->saved($husband);
+
+	    /**
+	     *
+	     * Expectation
+	     *
+	     */
+	    Facade::clearResolvedInstances();
+	    Config::shouldReceive('get')
+		    ->with('/^larasearch::reversedPaths\.Toy$/', array())
+		    ->once()
+		    ->andReturn(['', 'children', 'children.mother.husband', 'children.mother']);
+
+	    Queue::shouldReceive('push')
+		    ->with('Iverberk\Larasearch\Jobs\ReindexJob', [
+			    'Toy:2',
+			    'Child:8',
+			    'Child:2',
+			    'Husband:8',
+			    'Husband:2',
+			    'Wife:8',
+			    'Wife:2'
+		    ])->once();
+
+	    /**
+	     *
+	     *
+	     * Assertion
+	     *
+	     */
+	    $toy = \Toy::find(2);
+
+	    with(new Observer)->saved($toy);
     }
 
     /**

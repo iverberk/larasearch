@@ -50,11 +50,12 @@ class Observer {
 			{
 				$model = $model->load($path);
 
+				// Explode the path into an array
 				$path = explode('.', $path);
 
 				// Define a little recursive function to walk the relations of the model based on the path
 				// Eventually it will queue all affected searchable models for reindexing
-				$walk = function ($relation) use (&$walk, &$path, &$affectedModels)
+				$walk = function ($relation, array $path) use (&$walk, &$affectedModels)
 				{
 					$segment = array_shift($path);
 
@@ -68,7 +69,7 @@ class Observer {
 							{
 								if (array_key_exists($segment, $record->getRelations()))
 								{
-									$walk($record->getRelation($segment));
+									$walk($record->getRelation($segment), $path);
 								}
 								else
 								{
@@ -87,7 +88,7 @@ class Observer {
 					}
 				};
 
-				$walk($model->getRelation(array_shift($path)));
+				$walk($model->getRelation(array_shift($path)), $path);
 			}
 			else if ( ! $excludeCurrent)
 			{

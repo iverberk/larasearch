@@ -123,7 +123,7 @@ class Index {
 	{
 		if ( ! is_null($this->name))
 		{
-			return Config::get('larasearch::elasticsearch.index_prefix', '') . $this->name;
+			return Config::get('larasearch::elasticsearch.index_prefix', '') . strtolower($this->name);
 		}
 	}
 

@@ -1,6 +1,5 @@
 <?php namespace Iverberk\Larasearch\Commands;
 
-use Guzzle\Common\Exception\RuntimeException;
 use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;

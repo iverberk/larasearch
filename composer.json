@@ -14,7 +14,8 @@
         "illuminate/database": "~4.2|~5.0",
         "illuminate/console": "~4.2|~5.0",
         "doctrine/dbal": "~2.3",
-        "elasticsearch/elasticsearch": "~1.0"
+        "elasticsearch/elasticsearch": "~1.0",
+        "nikic/php-parser": "*"
     },
     "autoload": {
         "psr-0": {
@@ -27,7 +28,7 @@
     },
     "require-dev": {
         "mockery/mockery": "dev-master",
-        "phpunit/phpunit": "4.5.*@dev",
+        "phpunit/phpunit": "4.6.*@dev",
         "phpunit/php-code-coverage": "3.0.*@dev",
         "phpunit/phpunit-mock-objects": "2.4.*@dev",
         "sebastian/global-state": "1.0.*@dev",

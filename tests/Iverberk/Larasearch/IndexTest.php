@@ -1291,6 +1291,7 @@ class IndexTest extends \PHPUnit_Framework_TestCase {
          *
          */
         $client->shouldReceive('indices->existsAlias')
+            ->twice()
             ->with(['name' => 'bar_Alias'])
             ->andReturn();
 
@@ -1300,6 +1301,7 @@ class IndexTest extends \PHPUnit_Framework_TestCase {
          *
          */
         $index->aliasExists('Alias');
+        $index->aliasExists('bar_Alias');
     }
 
     /**
@@ -1364,6 +1366,7 @@ class IndexTest extends \PHPUnit_Framework_TestCase {
          *
          */
         $client->shouldReceive('index')
+            ->twice()
             ->with([
                 'index' => 'bar_Husband',
                 'type' => 'Husband',
@@ -1371,12 +1374,17 @@ class IndexTest extends \PHPUnit_Framework_TestCase {
                 'body' => 'data'
             ])
             ->andReturn();
-
         /**
          *
          * Assertion
          *
          */
+        $index->store([
+            'type' => 'Husband',
+            'id' => 1,
+            'data' => 'data'
+        ]);
+        $index->setName('bar_Husband');
         $index->store([
             'type' => 'Husband',
             'id' => 1,
@@ -1445,6 +1453,7 @@ class IndexTest extends \PHPUnit_Framework_TestCase {
          *
          */
         $client->shouldReceive('get')
+            ->twice()
             ->with([
                 'index' => 'bar_Husband',
                 'type' => 'Husband',
@@ -1457,6 +1466,12 @@ class IndexTest extends \PHPUnit_Framework_TestCase {
          * Assertion
          *
          */
+        $index->retrieve([
+            'type' => 'Husband',
+            'id' => 1,
+            'data' => 'data'
+        ]);
+        $index->setName('bar_Husband');
         $index->retrieve([
             'type' => 'Husband',
             'id' => 1,
@@ -1524,6 +1539,7 @@ class IndexTest extends \PHPUnit_Framework_TestCase {
          *
          */
         $client->shouldReceive('delete')
+            ->twice()
             ->with([
                 'index' => 'bar_Husband',
                 'type' => 'Husband',
@@ -1536,6 +1552,11 @@ class IndexTest extends \PHPUnit_Framework_TestCase {
          * Assertion
          *
          */
+        $index->remove([
+            'type' => 'Husband',
+            'id' => 1
+        ]);
+        $index->setName('bar_Husband');
         $index->remove([
             'type' => 'Husband',
             'id' => 1
@@ -1603,6 +1624,7 @@ class IndexTest extends \PHPUnit_Framework_TestCase {
          *
          */
         $client->shouldReceive('indices->analyze')
+            ->twice()
             ->with([
                 'index' => 'bar_Husband',
                 'text' => 'text',
@@ -1616,6 +1638,11 @@ class IndexTest extends \PHPUnit_Framework_TestCase {
          * Assertion
          *
          */
+        $index->tokens('text', [
+            'option1' => 1,
+            'option2' => 2
+        ]);
+        $index->setName('bar_Husband');
         $index->tokens('text', [
             'option1' => 1,
             'option2' => 2
@@ -1693,7 +1720,7 @@ class IndexTest extends \PHPUnit_Framework_TestCase {
      * @test
      * @expectedException \Iverberk\Larasearch\Exceptions\ImportException
      */
-    public function it_should_store_a_records_having_prefix_in_bulk_with_errors()
+    public function it_should_store_records_having_prefix_in_bulk_with_errors()
     {
         /**
          *
@@ -1703,7 +1730,7 @@ class IndexTest extends \PHPUnit_Framework_TestCase {
          * @var \Mockery\Mock $proxy
          * @var \Mockery\Mock $client
          */
-        list($index, $proxy, $client) = $this->getMocks();
+        list($index, $proxy, $client) = $this->getMocks('bar_');
 
         /**
          *
@@ -1714,7 +1741,7 @@ class IndexTest extends \PHPUnit_Framework_TestCase {
 
         $client->shouldReceive('bulk')
             ->with([
-                'index' => 'Husband',
+                'index' => 'bar_Husband',
                 'type' => 'Husband',
                 'body' => 'records'
             ])
@@ -1735,6 +1762,57 @@ class IndexTest extends \PHPUnit_Framework_TestCase {
          *
          */
         $index->bulk('records');
+        $index->setName('bar_Husband');
+        $index->bulk('records');;
+    }
+
+    /**
+     * @test
+     * @expectedException \Iverberk\Larasearch\Exceptions\ImportException
+     */
+    public function it_should_store_records_having_explicit_prefix_in_bulk_with_errors()
+    {
+        /**
+         *
+         * Set
+         *
+         * @var \Mockery\Mock $index
+         * @var \Mockery\Mock $proxy
+         * @var \Mockery\Mock $client
+         */
+        list($index, $proxy, $client) = $this->getMocks('bar_');
+
+        /**
+         *
+         * Expectation
+         *
+         */
+        $proxy->shouldReceive('getType')->andReturn('Husband');
+
+        $client->shouldReceive('bulk')
+            ->with([
+                'index' => 'bar_Husband',
+                'type' => 'Husband',
+                'body' => 'records'
+            ])
+            ->andReturn([
+                'errors' => true,
+                'items' => [
+                    [
+                        'index' => [
+                            'error' => true
+                        ]
+                    ]
+                ]
+            ]);
+
+        /**
+         *
+         * Assertion
+         *
+         */
+        $index->setName('bar_Husband');
+        $index->bulk('records');;
     }
 
     /**
@@ -1800,6 +1878,7 @@ class IndexTest extends \PHPUnit_Framework_TestCase {
         $proxy->shouldReceive('getType')->andReturn('Husband');
 
         $client->shouldReceive('bulk')
+            ->twice()
             ->with([
                 'index' => 'bar_Husband',
                 'type' => 'Husband',
@@ -1814,6 +1893,8 @@ class IndexTest extends \PHPUnit_Framework_TestCase {
          * Assertion
          *
          */
+        $index->bulk('records');
+        $index->setName('bar_Husband');
         $index->bulk('records');
     }
 
@@ -1884,6 +1965,7 @@ class IndexTest extends \PHPUnit_Framework_TestCase {
          *
          */
         $client->shouldReceive('indices->getAliases')
+            ->twice()
             ->andReturn([
                 'bar_index_123456789101112' => [
                     'aliases' => []
@@ -1891,6 +1973,7 @@ class IndexTest extends \PHPUnit_Framework_TestCase {
             ]);
 
         $client->shouldReceive('indices->delete')
+            ->twice()
             ->with([
                 'index' => 'bar_index_123456789101112'
             ]);
@@ -1901,6 +1984,7 @@ class IndexTest extends \PHPUnit_Framework_TestCase {
          *
          */
         Index::clean('index');
+        Index::clean('bar_index');
     }
 
     /**
@@ -1963,6 +2047,7 @@ class IndexTest extends \PHPUnit_Framework_TestCase {
          *
          */
         $client->shouldReceive('indices->updateAliases')
+            ->twice()
             ->with([
                 'body' => ['actions' => [ [ 'add' => ['index' => 'bar_Husband', 'alias' => 'bar_Father' ]]]]
             ]);
@@ -1972,6 +2057,7 @@ class IndexTest extends \PHPUnit_Framework_TestCase {
          * Assertion
          *
          */
+        Index::updateAliases(['actions' => [ [ 'add' => ['index' => 'Husband', 'alias' => 'Father' ]]]]);
         Index::updateAliases(['actions' => [ [ 'add' => ['index' => 'bar_Husband', 'alias' => 'bar_Father' ]]]]);
     }
 
@@ -2035,6 +2121,7 @@ class IndexTest extends \PHPUnit_Framework_TestCase {
          *
          */
         $client->shouldReceive('indices->getAlias')
+            ->twice()
             ->with([
                 'name' => 'bar_mock'
             ]);
@@ -2045,6 +2132,7 @@ class IndexTest extends \PHPUnit_Framework_TestCase {
          *
          */
         Index::getAlias('mock');
+        Index::getAlias('bar_mock');
     }
 
     /**
@@ -2107,6 +2195,7 @@ class IndexTest extends \PHPUnit_Framework_TestCase {
          *
          */
         $client->shouldReceive('indices->refresh')
+            ->twice()
             ->with([
                 'index' => 'bar_mock'
             ]);
@@ -2117,6 +2206,7 @@ class IndexTest extends \PHPUnit_Framework_TestCase {
          *
          */
         Index::refresh('mock');
+        Index::refresh('bar_mock');
     }
 
     /**

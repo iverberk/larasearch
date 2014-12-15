@@ -178,6 +178,31 @@ class Query {
 		}
 	}
 
+    /**
+     * Allow sorting of results
+     */
+    private function getSort()
+    {
+        if($sort = Utils::findKey($this->options, 'sort', false))
+        {
+            if(!empty($sort))
+            {
+                $this->payload['sort'] = $sort;
+            }
+        }
+    }
+
+	/**
+	 * Allow sorting of results
+	 */
+	private function getSort()
+	{
+		if($sort = Utils::findKey($this->options, 'sort', false))
+		{
+			$this->payload['sort'] = $sort;
+		}
+	}
+
 	/**
 	 * Construct the payload from the options
 	 */
@@ -309,6 +334,7 @@ class Query {
 		$this->getHighlight();
 		$this->getSuggest();
 		$this->getAggregations();
+		$this->getSort();
 		$this->getPayload();
 
 		$params = [

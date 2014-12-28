@@ -263,6 +263,16 @@ class ProxyTest extends \PHPUnit_Framework_TestCase {
         });
     }
 
+	/**
+	 * @test
+	 */
+	public function it_should_get_elasticsearch_id()
+	{
+		$this->model->shouldReceive('getAttribute')->with('id')->andReturn(1);
+
+		$this->assertEquals(1, $this->proxy->getEsId());
+	}
+
     /**
      * @test
      */
@@ -285,9 +295,12 @@ class ProxyTest extends \PHPUnit_Framework_TestCase {
             ->with(true)
             ->andReturn('body');
 
+	    $this->model->shouldReceive('getEsId')
+		    ->andReturn(1);
+
         $this->client->shouldReceive('index')
             ->with([
-                'id' => '',
+                'id' => '1',
                 'index' => 'Husband',
                 'type' => 'Husband',
                 'body' => 'body'

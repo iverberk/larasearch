@@ -89,7 +89,7 @@ class Index {
 			{
 				$data[] = [
 					'index' => [
-						'_id' => $record->id
+						'_id' => $record->getEsId()
 					]
 				];
 

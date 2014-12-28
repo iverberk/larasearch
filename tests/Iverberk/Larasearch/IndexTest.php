@@ -44,6 +44,10 @@ class IndexTest extends \PHPUnit_Framework_TestCase {
                 $model, $model, $model
             ], []);
 
+	    $model->shouldReceive('getEsId')
+		    ->times(3)
+		    ->andReturn(1);
+
         $model->shouldReceive('transform')
             ->times(3)
             ->andReturn(['mock', 'data']);

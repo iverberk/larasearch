@@ -156,13 +156,23 @@ class Proxy {
 	}
 
 	/**
+	 * Allow custom generation of Elasticsearch document id
+	 *
+	 * @return mixed
+	 */
+	public function getEsId()
+	{
+		return $this->config['model']->id;
+	}
+
+	/**
 	 * Reindex a specific database record to Elasticsearch
 	 */
 	public function refreshDoc($model)
 	{
 		$this->config['client']->index(
 			[
-				'id' => $model->id,
+				'id' => $model->getEsId(),
 				'index' => $this->getIndex()->getName(),
 				'type' => $this->getType(),
 				'body' => $model->transform(true)

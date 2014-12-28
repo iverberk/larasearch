@@ -82,7 +82,7 @@ class Proxy {
 	 * @param array $options
 	 * @return \Iverberk\Larasearch\Response
 	 */
-	public function query($query, $options = [])
+	public function searchQuery($query, $options = [])
 	{
 		$options = array_merge(['query' => $query], $options);
 

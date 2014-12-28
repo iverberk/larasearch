@@ -164,7 +164,7 @@ class ProxyTest extends \PHPUnit_Framework_TestCase {
 	/**
 	 * @test
 	 */
-	public function it_can_query()
+	public function it_can_search_with_a_query()
 	{
 		/**
 		 *
@@ -197,7 +197,7 @@ class ProxyTest extends \PHPUnit_Framework_TestCase {
 		 * Assertion
 		 *
 		 */
-		$result = $this->proxy->query($query, ['option']);
+		$result = $this->proxy->searchQuery($query, ['option']);
 
 		$this->assertEquals('result', $result);
 	}

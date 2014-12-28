@@ -1,6 +1,7 @@
 <?php namespace Iverberk\Larasearch;
 
 use Husband;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Facade;
 use Illuminate\Support\Facades\Queue;
@@ -15,6 +16,32 @@ class ObserverTest extends \PHPUnit_Framework_TestCase {
         am::clean();
     }
 
+	/**
+	 * @test
+	 */
+	public function it_should_not_reindex_on_model_save()
+	{
+		/**
+		 *
+		 * Expectation
+		 *
+		 */
+		$queue = am::double('Illuminate\Support\Facades\Queue', ['push' => null]);
+
+		$husband = m::mock('Husband');
+		$husband->shouldReceive('shouldIndex')->andReturn(false);
+
+		/**
+		 *
+		 *
+		 * Assertion
+		 *
+		 */
+		with(new Observer)->saved($husband);
+
+		$queue->verifyNeverInvoked('push');
+	}
+
     /**
      * @test
      */
@@ -26,6 +53,14 @@ class ObserverTest extends \PHPUnit_Framework_TestCase {
          *
          */
         Facade::clearResolvedInstances();
+
+	    $proxy = m::mock('Iverberk\Larasearch\Proxy');
+	    $proxy->shouldReceive('shouldIndex')->andReturn(true);
+
+	    App::shouldReceive('make')
+		    ->with('iverberk.larasearch.proxy', m::type('Illuminate\Database\Eloquent\Model'))
+		    ->andReturn($proxy);
+
         Config::shouldReceive('get')
             ->with('/^larasearch::reversedPaths\.Husband$/', array())
             ->once()
@@ -45,7 +80,7 @@ class ObserverTest extends \PHPUnit_Framework_TestCase {
          * Assertion
          *
          */
-        $husband = \Husband::find(2);
+	    $husband = \Husband::find(2);
 
         with(new Observer)->saved($husband);
 
@@ -55,6 +90,14 @@ class ObserverTest extends \PHPUnit_Framework_TestCase {
 	     *
 	     */
 	    Facade::clearResolvedInstances();
+
+	    $proxy = m::mock('Iverberk\Larasearch\Proxy');
+	    $proxy->shouldReceive('shouldIndex')->andReturn(true);
+
+	    App::shouldReceive('make')
+		    ->with('iverberk.larasearch.proxy', m::type('Illuminate\Database\Eloquent\Model'))
+		    ->andReturn($proxy);
+
 	    Config::shouldReceive('get')
 		    ->with('/^larasearch::reversedPaths\.Toy$/', array())
 		    ->once()
@@ -83,7 +126,7 @@ class ObserverTest extends \PHPUnit_Framework_TestCase {
     }
 
     /**
-     * @test
+     *
      */
     public function it_shoud_reindex_on_model_delete()
     {

@@ -2,6 +2,7 @@
 
 use Husband;
 use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Facade;
 use Iverberk\Larasearch\Proxy;
 use Mockery as m;
 use AspectMock\Test as am;
@@ -31,7 +32,9 @@ class SearchableTraitTest extends \PHPUnit_Framework_TestCase {
          * Expectation
          *
          */
-        App::clearResolvedInstance('app');
+	    Facade::clearResolvedInstances();
+	    \Husband::clearProxy();
+
         App::shouldReceive('make')
             ->with('iverberk.larasearch.proxy', m::type('Illuminate\Database\Eloquent\Model'))
             ->andReturn($proxy);

@@ -28,7 +28,10 @@ class Observer {
 	 */
 	public function saved(Model $model)
 	{
-		Queue::push('Iverberk\Larasearch\Jobs\ReindexJob',$this->findAffectedModels($model));
+		if ($model->shouldIndex())
+		{
+			Queue::push('Iverberk\Larasearch\Jobs\ReindexJob',$this->findAffectedModels($model));
+		}
 	}
 
 	/**

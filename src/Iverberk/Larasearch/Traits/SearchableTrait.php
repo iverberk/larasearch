@@ -30,7 +30,7 @@ trait SearchableTrait {
 	 */
 	public static function getProxy()
 	{
-		if (!static::$__es_proxy)
+		if ( ! static::$__es_proxy)
 		{
 			$instance = new static;
 
@@ -47,6 +47,14 @@ trait SearchableTrait {
 		}
 
 		return static::$__es_proxy;
+	}
+
+	/**
+	 * Clear the Elasticsearch proxy
+	 */
+	public static function clearProxy()
+	{
+		static::$__es_proxy = null;
 	}
 
 	/**

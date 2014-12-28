@@ -148,6 +148,9 @@ class Proxy {
 	}
 
 	/**
+	 * Determine if the model requires a (re)index. Defaults to 'true' but can
+	 * be overridden by user-defined logic.
+	 *
 	 * @return bool
 	 */
 	public function shouldIndex()

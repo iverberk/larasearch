@@ -161,6 +161,47 @@ class ProxyTest extends \PHPUnit_Framework_TestCase {
         $this->assertEquals('result', $result);
     }
 
+	/**
+	 * @test
+	 */
+	public function it_can_query()
+	{
+		/**
+		 *
+		 * Set
+		 *
+		 */
+		$queryMock = m::mock('Iverberk\Larasearch\Query');
+
+		$query['index'] = 'my_index';
+		$query['type']  = 'my_type';
+		$query['body']['query']['match']['testField'] = 'abc';
+
+		/**
+		 *
+		 * Expectation
+		 *
+		 */
+		$queryMock->shouldReceive('execute')->andReturn('result');
+
+		App::shouldReceive('make')
+			->with('iverberk.larasearch.query', [
+				'proxy' => $this->proxy,
+				'term' => null,
+				'options' => array_merge(['query' => $query], ['option'])])
+			->once()
+			->andReturn($queryMock);
+
+		/**
+		 *
+		 * Assertion
+		 *
+		 */
+		$result = $this->proxy->query($query, ['option']);
+
+		$this->assertEquals('result', $result);
+	}
+
     /**
      * @test
      */

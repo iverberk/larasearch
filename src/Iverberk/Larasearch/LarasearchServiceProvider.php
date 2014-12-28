@@ -4,6 +4,7 @@ use Elasticsearch\Client;
 use Illuminate\Support\ServiceProvider;
 use Iverberk\Larasearch\Commands\PathsCommand;
 use Iverberk\Larasearch\Commands\ReindexCommand;
+use Iverberk\Larasearch\Response\Result;
 
 class LarasearchServiceProvider extends ServiceProvider {
 
@@ -32,6 +33,7 @@ class LarasearchServiceProvider extends ServiceProvider {
 		$this->bindIndex();
 		$this->bindQuery();
 		$this->bindProxy();
+		$this->bindResult();
 	}
 
 	/**
@@ -77,6 +79,17 @@ class LarasearchServiceProvider extends ServiceProvider {
 		$this->app->bind('iverberk.larasearch.proxy', function ($app, $model)
 		{
 			return new Proxy($model);
+		});
+	}
+
+	/**
+	 * Bind the Larasearch result to the container
+	 */
+	protected function bindResult()
+	{
+		$this->app->bind('iverberk.larasearch.response.result', function ($app, array $hit)
+		{
+			return new Result($hit);
 		});
 	}
 

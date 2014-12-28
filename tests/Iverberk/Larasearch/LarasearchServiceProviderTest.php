@@ -52,7 +52,7 @@ class LarasearchServiceProviderTest extends PHPUnit_Framework_TestCase {
          * Set
          */
         $sp = m::mock('Iverberk\Larasearch\LarasearchServiceProvider[' .
-            'bindProxy, bindIndex, bindElasticsearch, bindQuery]', ['something']);
+            'bindProxy, bindIndex, bindElasticsearch, bindQuery, bindResult]', ['something']);
         $sp->shouldAllowMockingProtectedMethods();
 
         /**
@@ -62,6 +62,7 @@ class LarasearchServiceProviderTest extends PHPUnit_Framework_TestCase {
         $sp->shouldReceive('bindProxy')->once()->andReturn(true);
         $sp->shouldReceive('bindIndex')->once()->andReturn(true);
         $sp->shouldReceive('bindQuery')->once()->andReturn(true);
+	    $sp->shouldReceive('bindResult')->once()->andReturn(true);
 
         /**
          * Assertions
@@ -226,6 +227,37 @@ class LarasearchServiceProviderTest extends PHPUnit_Framework_TestCase {
          */
         $sp->bindProxy();
     }
+
+	/**
+	 * @test
+	 */
+	public function it_should_bind_result()
+	{
+		/**
+		 * Set
+		 */
+		$app = m::mock('LaravelApp');
+		$sp = m::mock('Iverberk\Larasearch\LarasearchServiceProvider[bindResult]', [$app]);
+
+		/**
+		 * Expectation
+		 */
+		$app->shouldReceive('bind')
+			->once()
+			->andReturnUsing(
+				function ($name, $closure) use ($app)
+				{
+					assertEquals('iverberk.larasearch.response.result', $name);
+					assertInstanceOf('Iverberk\Larasearch\Response\Result',
+						$closure($app, []));
+				}
+			);
+
+		/**
+		 * Assertion
+		 */
+		$sp->bindResult();
+	}
 
     /**
      * @test

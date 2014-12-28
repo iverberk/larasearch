@@ -78,6 +78,8 @@ class Proxy {
 	}
 
 	/**
+	 * Performs a search based on a custom Elasticsearch query
+	 *
 	 * @param array $query
 	 * @param array $options
 	 * @return \Iverberk\Larasearch\Response
@@ -87,6 +89,24 @@ class Proxy {
 		$options = array_merge(['query' => $query], $options);
 
 		return App::make('iverberk.larasearch.query', ['proxy' => $this, 'term' => null, 'options' => $options])->execute();
+	}
+
+	/**
+	 * Retrieves a single document by identifier
+	 *
+	 * @param $id
+	 * @return Result
+	 */
+	public function searchOne($id)
+	{
+		return App::make('iverberk.larasearch.response.result', $this->config['client']->get(
+				[
+					'index' => $this->getIndex()->getName(),
+					'type' => $this->getType(),
+					'id' => $id
+				]
+			)
+		);
 	}
 
 	/**

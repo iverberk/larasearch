@@ -202,6 +202,43 @@ class ProxyTest extends \PHPUnit_Framework_TestCase {
 		$this->assertEquals('result', $result);
 	}
 
+	/**
+	 * @test
+	 */
+	public function it_can_search_for_a_single_document()
+	{
+		/**
+		 *
+		 * Set
+		 *
+		 */
+		$query['index'] = 'my_index';
+		$query['type']  = 'my_type';
+		$query['id'] = 'abc';
+
+		/**
+		 *
+		 * Expectation
+		 *
+		 */
+		$this->index->shouldReceive('getName')->andReturn('index');
+		$this->client->shouldReceive('get')->andReturn(['hit']);
+
+		App::shouldReceive('make')
+			->with('iverberk.larasearch.response.result', ['hit'])
+			->once()
+			->andReturn('result');
+
+		/**
+		 *
+		 * Assertion
+		 *
+		 */
+		$result = $this->proxy->searchOne('abc');
+
+		$this->assertEquals('result', $result);
+	}
+
     /**
      * @test
      */

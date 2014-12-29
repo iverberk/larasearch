@@ -13,7 +13,7 @@ trait SearchableTrait {
 	 *
 	 * @var \Iverberk\Larasearch\Proxy
 	 */
-	private static $__es_proxy = null;
+	protected static $__es_proxy = null;
 
 	/**
 	 * Related Eloquent models as dot seperated paths

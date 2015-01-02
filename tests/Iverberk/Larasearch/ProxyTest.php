@@ -197,7 +197,7 @@ class ProxyTest extends \PHPUnit_Framework_TestCase {
 		 * Assertion
 		 *
 		 */
-		$result = $this->proxy->searchQuery($query, ['option']);
+		$result = $this->proxy->searchByQuery($query, ['option']);
 
 		$this->assertEquals('result', $result);
 	}
@@ -234,7 +234,7 @@ class ProxyTest extends \PHPUnit_Framework_TestCase {
 		 * Assertion
 		 *
 		 */
-		$result = $this->proxy->searchOne('abc');
+		$result = $this->proxy->searchById('abc');
 
 		$this->assertEquals('result', $result);
 	}
@@ -340,16 +340,6 @@ class ProxyTest extends \PHPUnit_Framework_TestCase {
             $test->assertEquals($actions, $calls[0]);
         });
     }
-
-	/**
-	 * @test
-	 */
-	public function it_should_get_elasticsearch_id()
-	{
-		$this->model->shouldReceive('getAttribute')->with('id')->andReturn(1);
-
-		$this->assertEquals(1, $this->proxy->getEsId());
-	}
 
     /**
      * @test

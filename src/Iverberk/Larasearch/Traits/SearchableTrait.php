@@ -95,4 +95,14 @@ trait SearchableTrait {
 		return parent::__callStatic($method, $parameters);
 	}
 
+	/**
+	 * Allow custom generation of Elasticsearch document id
+	 *
+	 * @return mixed
+	 */
+	public function getEsId()
+	{
+		return $this->getKey();
+	}
+
 }

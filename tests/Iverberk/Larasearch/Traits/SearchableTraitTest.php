@@ -139,4 +139,17 @@ class SearchableTraitTest extends \PHPUnit_Framework_TestCase {
         \Husband::bogus('*');
     }
 
+	/**
+	 * @test
+	 */
+	public function it_should_get_elasticsearch_id()
+	{
+		/**
+		 * Assertions
+		 */
+		$husband = new Husband();
+
+		$this->assertEquals('dummy_id', $husband->getEsId());
+	}
+
 } 

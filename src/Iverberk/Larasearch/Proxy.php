@@ -84,7 +84,7 @@ class Proxy {
 	 * @param array $options
 	 * @return \Iverberk\Larasearch\Response
 	 */
-	public function searchQuery($query, $options = [])
+	public function searchByQuery($query, $options = [])
 	{
 		$options = array_merge(['query' => $query], $options);
 
@@ -97,7 +97,7 @@ class Proxy {
 	 * @param $id
 	 * @return Result
 	 */
-	public function searchOne($id)
+	public function searchById($id)
 	{
 		return App::make('iverberk.larasearch.response.result', $this->config['client']->get(
 				[
@@ -188,16 +188,6 @@ class Proxy {
 	public function shouldIndex()
 	{
 		return true;
-	}
-
-	/**
-	 * Allow custom generation of Elasticsearch document id
-	 *
-	 * @return mixed
-	 */
-	public function getEsId()
-	{
-		return $this->config['model']->id;
 	}
 
 	/**

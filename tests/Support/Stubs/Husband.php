@@ -6,7 +6,7 @@ class Husband extends Illuminate\Database\Eloquent\Model {
 
     use SearchableTrait;
 
-    public $__es_config = [
+    public static $__es_config = [
         'autocomplete' => ['name', 'wife.name'],
 
         'suggest' => ['name'],

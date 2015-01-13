@@ -18,7 +18,9 @@ class Proxy {
 	 */
 	public function __construct(Model $model)
 	{
-		$this->config = property_exists($model, '__es_config') ? $model->__es_config : [];
+		$class = get_class($model);
+
+		$this->config = property_exists($class, '__es_config') ? $class::$__es_config : [];
 
 		$this->config['model'] = $model;
 		$this->config['type'] = str_singular($model->getTable());

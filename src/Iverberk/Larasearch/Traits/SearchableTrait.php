@@ -16,11 +16,18 @@ trait SearchableTrait {
 	private static $__es_proxy = null;
 
 	/**
-	 * Related Eloquent models as dot seperated paths
+	 * Related Eloquent models as dot separated paths
 	 *
 	 * @var array
 	 */
 	private static $__es_paths = [];
+
+	/**
+	 * Boolean variable to globally enable/disable (re)indexing
+	 *
+	 * @var bool
+	 */
+	public static $__es_enable = true;
 
 	/**
 	 * Return an instance of the Elasticsearch proxy

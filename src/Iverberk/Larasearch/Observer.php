@@ -14,10 +14,10 @@ class Observer {
 	 */
 	public function deleted(Model $model)
 	{
-        // Delete corresponding $model document from Elasticsearch
+		// Delete corresponding $model document from Elasticsearch
 		Queue::push('Iverberk\Larasearch\Jobs\DeleteJob', [get_class($model) . ':' . $model->getKey()]);
 
-        // Update all related model documents to reflect that $model has been removed
+		// Update all related model documents to reflect that $model has been removed
 		Queue::push('Iverberk\Larasearch\Jobs\ReindexJob', $this->findAffectedModels($model, true));
 	}
 
@@ -28,9 +28,9 @@ class Observer {
 	 */
 	public function saved(Model $model)
 	{
-		if ($model->shouldIndex())
+		if ($model::$__es_enable && $model->shouldIndex())
 		{
-			Queue::push('Iverberk\Larasearch\Jobs\ReindexJob',$this->findAffectedModels($model));
+			Queue::push('Iverberk\Larasearch\Jobs\ReindexJob', $this->findAffectedModels($model));
 		}
 	}
 

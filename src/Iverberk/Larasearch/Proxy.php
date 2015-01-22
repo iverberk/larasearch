@@ -207,20 +207,40 @@ class Proxy {
 		);
 	}
 
-    /**
-     * Delete a specific database record within Elasticsearch
-     *
-     * @param $id Eloquent id of model object
-     */
-    public function deleteDoc($id)
-    {
-        $this->config['client']->delete(
-            [
-                'id' => $id,
-                'index' => $this->getIndex()->getName(),
-                'type' => $this->getType()
-            ]
-        );
-    }
+	/**
+	 * Delete a specific database record within Elasticsearch
+	 *
+	 * @param $id Eloquent id of model object
+	 */
+	public function deleteDoc($id)
+	{
+		$this->config['client']->delete(
+			[
+				'id' => $id,
+				'index' => $this->getIndex()->getName(),
+				'type' => $this->getType()
+			]
+		);
+	}
+
+	/**
+	 * Globally enable (re)indexing for this model
+	 */
+	public function enableIndexing()
+	{
+		$class = get_class($this->config['model']);
+
+		$class::$__es_enable = true;
+	}
+
+	/**
+	 * Globally disable (re)indexing for this model
+	 */
+	public function disableIndexing()
+	{
+		$class = get_class($this->config['model']);
+
+		$class::$__es_enable = false;
+	}
 
 }

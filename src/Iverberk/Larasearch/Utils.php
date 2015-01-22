@@ -72,7 +72,7 @@ class Utils {
 			{
 				$namespace = '';
 
-				if (!$fileinfo->isDot() && $fileinfo->isReadable())
+				if (!$fileinfo->isDot() && !$fileinfo->isDir() && $fileinfo->isReadable())
 				{
 					$fileObj = $fileinfo->openFile('r');
 

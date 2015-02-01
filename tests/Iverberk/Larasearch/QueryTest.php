@@ -903,6 +903,74 @@ class QueryTest extends \PHPUnit_Framework_TestCase {
 
     /**
      * @test
+     */
+    public function it_should_search_with_sort()
+    {
+        /**
+         * Set
+         * @var \Mockery\Mock $client
+         */
+        list($proxy, $client, $model) = $this->getMocks();
+        $test = $this;
+
+        $query = m::mock('Iverberk\Larasearch\Query', [$proxy, 'term', ['sort' => 'name'] ])->makePartial();
+        
+        /**
+         * Expectation
+         */
+
+        $client->shouldReceive('search')
+            ->andReturnUsing(function($params) use ($test) {
+                $test->assertEquals(json_decode(
+                    '{
+                        "index": "Husband",
+                        "type": "Husband",
+                        "body": {
+                            "size": 50,
+                            "from": 0,
+                            "sort": "name",
+                            "query": {
+                                "dis_max": {
+                                    "queries": [
+                                        {
+                                            "match": {
+                                                "_all": {
+                                                    "query": "term",
+                                                    "operator": "and",
+                                                    "boost": 10,
+                                                    "analyzer": "larasearch_search"
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "match": {
+                                                "_all": {
+                                                    "query": "term",
+                                                    "operator": "and",
+                                                    "boost": 10,
+                                                    "analyzer": "larasearch_search2"
+                                                }
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    }', true), $params);
+                return [];
+            });
+
+        /**
+         * Assertion
+         */
+        $response = $query->execute();
+
+        $this->assertInstanceOf('Iverberk\Larasearch\Response', $response);
+    }
+
+
+    /**
+     * @test
      * @expectedException \InvalidArgumentException
      */
     public function it_should_throw_an_exception_when_multiple_queries_are_provided()

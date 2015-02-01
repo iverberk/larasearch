@@ -29,6 +29,10 @@ Wiki
 ----
 Please see the Github [wiki](https://github.com/iverberk/larasearch/wiki/Introduction) for the most up-to-date documentation.
 
+Changelog
+---------
+All releases are tracked and documented in the [changelog](https://github.com/iverberk/larasearch/wiki/Changelog).
+
 Credits
 -------
 This package is very much inspired by these excellent packages that already exist for the Ruby/Rails ecosystem.

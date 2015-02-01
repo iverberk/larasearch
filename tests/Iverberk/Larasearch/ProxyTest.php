@@ -415,4 +415,30 @@ class ProxyTest extends \PHPUnit_Framework_TestCase {
 		$this->proxy->deleteDoc(1);
 	}
 
+	/**
+	 * @test
+	 */
+	public function it_should_enable_indexing_globally()
+	{
+		/**
+		 * Assertions
+		 */
+		$this->proxy->enableIndexing();
+
+		$this->assertEquals(\Husband::$__es_enable, true);
+	}
+
+	/**
+	 * @test
+	 */
+	public function it_should_disable_indexing_globally()
+	{
+		/**
+		 * Assertions
+		 */
+		$this->proxy->disableIndexing();
+
+		$this->assertEquals(\Husband::$__es_enable, false);
+	}
+
 }

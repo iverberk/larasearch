@@ -104,7 +104,7 @@ class IndexTest extends \PHPUnit_Framework_TestCase {
 		 * Assertions
 		 */
         $this->assertEquals($index, $index->setName('baz_MockMe'));
-		$this->assertEquals('baz_MockMe', $index->getName());
+		$this->assertEquals('baz_mockme', $index->getName());
 	}
 
     /**
@@ -780,7 +780,7 @@ class IndexTest extends \PHPUnit_Framework_TestCase {
             ->andReturnUsing(function($params) use ($test) {
                 $test->assertEquals(json_decode(
                         '{
-                          "index": "bar_Husband",
+                          "index": "bar_husband",
                           "body": {
                             "settings": {
                               "number_of_shards": 1,
@@ -1088,7 +1088,7 @@ class IndexTest extends \PHPUnit_Framework_TestCase {
                                 }
                               }
                             },
-                            "index": "bar_Husband",
+                            "index": "bar_husband",
                             "type": "Husband"
                           }
                         }', true)
@@ -1137,7 +1137,7 @@ class IndexTest extends \PHPUnit_Framework_TestCase {
          *
          */
         $client->shouldReceive('indices->delete')
-            ->with(['index' => 'Husband'])
+            ->with(['index' => 'husband'])
             ->andReturn();
 
         /**
@@ -1169,7 +1169,7 @@ class IndexTest extends \PHPUnit_Framework_TestCase {
          *
          */
         $client->shouldReceive('indices->delete')
-            ->with(['index' => 'bar_Husband'])
+            ->with(['index' => 'bar_husband'])
             ->andReturn();
 
         /**
@@ -1201,7 +1201,7 @@ class IndexTest extends \PHPUnit_Framework_TestCase {
          *
          */
         $client->shouldReceive('indices->exists')
-            ->with(['index' => 'Husband'])
+            ->with(['index' => 'husband'])
             ->andReturn();
 
         /**
@@ -1233,7 +1233,7 @@ class IndexTest extends \PHPUnit_Framework_TestCase {
          *
          */
         $client->shouldReceive('indices->exists')
-            ->with(['index' => 'bar_Husband'])
+            ->with(['index' => 'bar_husband'])
             ->andReturn();
 
         /**
@@ -1298,7 +1298,7 @@ class IndexTest extends \PHPUnit_Framework_TestCase {
          */
         $client->shouldReceive('indices->existsAlias')
             ->twice()
-            ->with(['name' => 'bar_Alias'])
+            ->with(['name' => 'bar_alias'])
             ->andReturn();
 
         /**
@@ -1306,8 +1306,8 @@ class IndexTest extends \PHPUnit_Framework_TestCase {
          * Assertion
          *
          */
-        $index->aliasExists('Alias');
-        $index->aliasExists('bar_Alias');
+        $index->aliasExists('alias');
+        $index->aliasExists('bar_alias');
     }
 
     /**
@@ -1332,7 +1332,7 @@ class IndexTest extends \PHPUnit_Framework_TestCase {
          */
         $client->shouldReceive('index')
             ->with([
-                'index' => 'Husband',
+                'index' => 'husband',
                 'type' => 'Husband',
                 'id' => 1,
                 'body' => 'data'
@@ -1374,7 +1374,7 @@ class IndexTest extends \PHPUnit_Framework_TestCase {
         $client->shouldReceive('index')
             ->twice()
             ->with([
-                'index' => 'bar_Husband',
+                'index' => 'bar_husband',
                 'type' => 'Husband',
                 'id' => 1,
                 'body' => 'data'
@@ -1420,7 +1420,7 @@ class IndexTest extends \PHPUnit_Framework_TestCase {
          */
         $client->shouldReceive('get')
             ->with([
-                'index' => 'Husband',
+                'index' => 'husband',
                 'type' => 'Husband',
                 'id' => 1,
             ])
@@ -1461,7 +1461,7 @@ class IndexTest extends \PHPUnit_Framework_TestCase {
         $client->shouldReceive('get')
             ->twice()
             ->with([
-                'index' => 'bar_Husband',
+                'index' => 'bar_husband',
                 'type' => 'Husband',
                 'id' => 1,
             ])
@@ -1507,7 +1507,7 @@ class IndexTest extends \PHPUnit_Framework_TestCase {
          */
         $client->shouldReceive('delete')
             ->with([
-                'index' => 'Husband',
+                'index' => 'husband',
                 'type' => 'Husband',
                 'id' => 1
             ])
@@ -1547,7 +1547,7 @@ class IndexTest extends \PHPUnit_Framework_TestCase {
         $client->shouldReceive('delete')
             ->twice()
             ->with([
-                'index' => 'bar_Husband',
+                'index' => 'bar_husband',
                 'type' => 'Husband',
                 'id' => 1
             ])
@@ -1591,7 +1591,7 @@ class IndexTest extends \PHPUnit_Framework_TestCase {
          */
         $client->shouldReceive('indices->analyze')
             ->with([
-                'index' => 'Husband',
+                'index' => 'husband',
                 'text' => 'text',
                 'option1' => 1,
                 'option2' => 2
@@ -1632,7 +1632,7 @@ class IndexTest extends \PHPUnit_Framework_TestCase {
         $client->shouldReceive('indices->analyze')
             ->twice()
             ->with([
-                'index' => 'bar_Husband',
+                'index' => 'bar_husband',
                 'text' => 'text',
                 'option1' => 1,
                 'option2' => 2
@@ -1699,7 +1699,7 @@ class IndexTest extends \PHPUnit_Framework_TestCase {
 
         $client->shouldReceive('bulk')
             ->with([
-                'index' => 'bar_Husband',
+                'index' => 'bar_husband',
                 'type' => 'Husband',
                 'body' => 'records'
             ])
@@ -1747,7 +1747,7 @@ class IndexTest extends \PHPUnit_Framework_TestCase {
 
         $client->shouldReceive('bulk')
             ->with([
-                'index' => 'bar_Husband',
+                'index' => 'bar_husband',
                 'type' => 'Husband',
                 'body' => 'records'
             ])
@@ -1797,7 +1797,7 @@ class IndexTest extends \PHPUnit_Framework_TestCase {
 
         $client->shouldReceive('bulk')
             ->with([
-                'index' => 'bar_Husband',
+                'index' => 'bar_husband',
                 'type' => 'Husband',
                 'body' => 'records'
             ])
@@ -1845,7 +1845,7 @@ class IndexTest extends \PHPUnit_Framework_TestCase {
 
         $client->shouldReceive('bulk')
             ->with([
-                'index' => 'Husband',
+                'index' => 'husband',
                 'type' => 'Husband',
                 'body' => 'records'
             ])
@@ -1886,7 +1886,7 @@ class IndexTest extends \PHPUnit_Framework_TestCase {
         $client->shouldReceive('bulk')
             ->twice()
             ->with([
-                'index' => 'bar_Husband',
+                'index' => 'bar_husband',
                 'type' => 'Husband',
                 'body' => 'records'
             ])

@@ -136,7 +136,7 @@ class PathsCommandTest extends \PHPUnit_Framework_TestCase {
 
         $command->shouldReceive('option')
             ->with('relations')
-            ->times(16)
+            ->times(17)
             ->andReturn(true);
 
         $command->shouldReceive('error', 'confirm', 'call', 'info')
@@ -154,7 +154,8 @@ class PathsCommandTest extends \PHPUnit_Framework_TestCase {
                 'Husband' => ['wife.children.toys'],
                 'Child' => ['mother', 'father', 'toys'],
                 'Toy' => ['children.mother', 'children.father'],
-                'Wife' => ['husband', 'children.toys']
+                'Wife' => ['husband', 'children.toys'],
+                'House\\Item' => []
             ],
             $command->getPaths()
         );
@@ -164,7 +165,8 @@ class PathsCommandTest extends \PHPUnit_Framework_TestCase {
                 'Husband' => ['', 'children', 'children.toys', 'wife'],
                 'Child' => ['mother.husband', '', 'toys', 'mother'],
                 'Toy' => ['children.mother.husband', 'children', '', 'children.mother'],
-                'Wife' => ['husband', 'children', 'children.toys', '']
+                'Wife' => ['husband', 'children', 'children.toys', ''],
+                'House\\Item' => [ '' ]
             ],
             $command->getReversedPaths()
         );

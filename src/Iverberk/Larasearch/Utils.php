@@ -1,6 +1,12 @@
 <?php namespace Iverberk\Larasearch;
 
-use DirectoryIterator;
+use PHPParser_Parser;
+use PHPParser_Lexer;
+use PHPParser_Node_Stmt_Namespace;
+Use PHPParser_Node_Stmt_Class;
+use RecursiveDirectoryIterator;
+use RecursiveIteratorIterator;
+use RegexIterator;
 
 class Utils {
 
@@ -63,42 +69,43 @@ class Utils {
 	public static function findSearchableModels($directories)
 	{
 		$models = [];
+		$parser = new PHPParser_Parser(new PHPParser_Lexer);
 
 		// Iterate over each directory and inspect files for models
 		foreach ($directories as $directory)
 		{
-			$dir = new DirectoryIterator($directory);
-			foreach ($dir as $fileinfo)
+            // iterate over all .php files in the directory
+			$files = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($directory));
+			$files = new RegexIterator($files, '/\.php$/');
+
+			foreach ($files as $file)
 			{
-				$namespace = '';
+				// read the file that should be converted
+				$code = file_get_contents($file);
 
-				if (!$fileinfo->isDot() && $fileinfo->isReadable())
+				// parse
+				$stmts = $parser->parse($code);
+
+				$walk = function($stmt, $key, $ns) use (&$models, &$walk)
 				{
-					$fileObj = $fileinfo->openFile('r');
-
-					while (!$fileObj->eof())
+					if ($stmt instanceof PHPParser_Node_Stmt_Namespace)
 					{
-						$line = $fileObj->fgets();
-
-						// Extract namespace
-						if (preg_match('/namespace\s+([a-zA-z0-9]+)/', $line, $matches))
+						$new_ns = implode('\\', $stmt->name->parts);
+						if ($ns && strpos($new_ns, $ns) !== 0) $new_ns = $ns . $new_ns;
+						array_walk($stmt->stmts, $walk, $new_ns);
+					}
+					else if ($stmt instanceof PHPParser_Node_Stmt_Class)
+					{
+						$class = $stmt->name;
+						if ($ns) $class = $ns . '\\' . $class;
+						if (in_array('Iverberk\\Larasearch\\Traits\\SearchableTrait', class_uses($class)))
 						{
-							$namespace = $matches[1];
-						}
-
-						// Extract classname
-						if (preg_match('/class\s+([a-zA-z0-9]+)/', $line, $matches))
-						{
-							$model = $namespace ? $namespace . '\\' . $matches[1] : $matches[1];
-
-							// Check if the model has the searchable trait
-							if (in_array('Iverberk\\Larasearch\\Traits\\SearchableTrait', class_uses($model)))
-							{
-								$models[] = $model;
-							}
+							$models[] = $class;
 						}
 					}
-				}
+				};
+
+				array_walk($stmts, $walk, '');
 			}
 		}
 

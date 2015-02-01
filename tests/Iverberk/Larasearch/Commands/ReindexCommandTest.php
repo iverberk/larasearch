@@ -126,7 +126,7 @@ class ReindexCommandTest extends \PHPUnit_Framework_TestCase {
          */
         $model->shouldReceive('reindex')
             ->with(true, 750, null, \Mockery::type('closure'))
-            ->times(4)
+            ->times(5)
             ->andReturnUsing(function($relations, $batch, $mapping, $callback) {
                 $callback(1);
             });
@@ -143,22 +143,22 @@ class ReindexCommandTest extends \PHPUnit_Framework_TestCase {
 
         $command->shouldReceive('option')
             ->with('mapping')
-            ->times(4)
+            ->times(5)
             ->andReturn(false);
 
         $command->shouldReceive('option')
             ->with('relations')
-            ->times(4)
+            ->times(5)
             ->andReturn(true);
 
         $command->shouldReceive('option')
             ->with('batch')
-            ->times(4)
+            ->times(5)
             ->andReturn(750);
 
         $command->shouldReceive('info')->andReturn(true);
 
-        $command->shouldReceive('getModelInstance')->times(4)->andReturn($model);
+        $command->shouldReceive('getModelInstance')->times(5)->andReturn($model);
 
         /**
          *

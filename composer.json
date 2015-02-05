@@ -10,9 +10,9 @@
     ],
     "require": {
         "php": ">=5.4.0",
-        "illuminate/support": "~4.2|~5.0",
-        "illuminate/database": "~4.2|~5.0",
-        "illuminate/console": "~4.2|~5.0",
+        "illuminate/support": "~4.2",
+        "illuminate/database": "~4.2",
+        "illuminate/console": "~4.2",
         "doctrine/dbal": "~2.3",
         "elasticsearch/elasticsearch": "~1.0",
         "nikic/php-parser": "*"

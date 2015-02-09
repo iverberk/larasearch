@@ -386,7 +386,18 @@ class Index {
 			$analyzers,
 			array_map(function ($type)
 				{
-					return Utils::findKey($this->getProxy()->getConfig(), $type, false) ?: [];
+					$config = $this->getProxy()->getConfig();
+
+					// Maintain backwards compatibility by allowing a plain array of analyzer => fields
+					$field_mappings = Utils::findKey($config, $type, false) ?: [];
+
+					// Also read from a dedicated array key called 'analyzers'
+					if (isset($config['analyzers']))
+					{
+						$field_mappings = array_merge($field_mappings, Utils::findKey($config['analyzers'], $type, false) ?: []);
+					}
+
+					return $field_mappings;
 				},
 				$analyzers
 			)
@@ -428,7 +439,7 @@ class Index {
 				}
 			}
 
-			if (!empty($pathSegments))
+			if ( ! empty($pathSegments))
 			{
 				$mapping = Utils::array_merge_recursive_distinct(
 					$mapping,
@@ -441,7 +452,7 @@ class Index {
 			}
 		}
 
-		if (!empty($mapping)) $params['mappings']['_default_']['properties'] = $mapping;
+		if ( ! empty($mapping)) $params['mappings']['_default_']['properties'] = $mapping;
 
 		$params['index'] = $this->getName();
 		$params['type'] = $this->getProxy()->getType();

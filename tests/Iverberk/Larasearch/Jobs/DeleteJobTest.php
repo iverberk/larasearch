@@ -21,6 +21,9 @@ class DeleteJobTest extends \PHPUnit_Framework_TestCase {
          * Set
          *
          */
+	    $app = m::mock('Illuminate\Foundation\Application');
+	    $config = m::mock('Illuminate\Config\Repository');
+	    $logger = m::mock('Monolog\Logger');
 	    $husband = am::double('Husband', ['deleteDoc' => true]);
 
         $job = m::mock('Illuminate\Queue\Jobs\Job');
@@ -33,6 +36,9 @@ class DeleteJobTest extends \PHPUnit_Framework_TestCase {
          * Expectation
          *
          */
+	    $logger->shouldReceive('info')->with('Deleting Husband with ID: 999 from Elasticsearch');
+	    $config->shouldReceive('get')->with('larasearch::logger', 'iverberk.larasearch.logger')->andReturn('iverberk.larasearch.logger');
+	    $app->shouldReceive('make')->with('iverberk.larasearch.logger')->andReturn($logger);
         $job->shouldReceive('delete')->once();
 
         /**
@@ -40,7 +46,7 @@ class DeleteJobTest extends \PHPUnit_Framework_TestCase {
          * Assertion
          *
          */
-        with(new DeleteJob)->fire($job, $models);
+        with(new DeleteJob($app, $config))->fire($job, $models);
     }
 
 } 

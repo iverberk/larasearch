@@ -21,6 +21,9 @@ class ReindexJobTest extends \PHPUnit_Framework_TestCase {
          * Set
          *
          */
+	    $app = m::mock('Illuminate\Foundation\Application');
+	    $config = m::mock('Illuminate\Config\Repository');
+	    $logger = m::mock('Monolog\Logger');
         $job = m::mock('Illuminate\Queue\Jobs\Job');
         $models = [
             'Husband:99999'
@@ -31,6 +34,11 @@ class ReindexJobTest extends \PHPUnit_Framework_TestCase {
          * Expectation
          *
          */
+	    $logger->shouldReceive('info')->with('Indexing Husband with ID: 99999');
+	    $logger->shouldReceive('error')->with('Indexing Husband with ID: 99999 failed: No query results for model [Husband].');
+	    $config->shouldReceive('get')->with('larasearch::logger', 'iverberk.larasearch.logger')->andReturn('iverberk.larasearch.logger');
+	    $app->shouldReceive('make')->with('iverberk.larasearch.logger')->andReturn($logger);
+	    $job->shouldReceive('delete')->once();
         $job->shouldReceive('release')->with(60)->once();
 
         /**
@@ -38,7 +46,7 @@ class ReindexJobTest extends \PHPUnit_Framework_TestCase {
          * Assertion
          *
          */
-        with(new ReindexJob)->fire($job, $models);
+        with(new ReindexJob($app, $config))->fire($job, $models);
     }
 
     /**
@@ -51,6 +59,9 @@ class ReindexJobTest extends \PHPUnit_Framework_TestCase {
          * Set
          *
          */
+	    $app = m::mock('Illuminate\Foundation\Application');
+	    $config = m::mock('Illuminate\Config\Repository');
+	    $logger = m::mock('Monolog\Logger');
         $model = m::mock('Husband');
         $model->shouldReceive('refreshDoc')->with($model)->once();
         $husband = am::double('Husband', ['findOrFail' => $model]);
@@ -63,6 +74,9 @@ class ReindexJobTest extends \PHPUnit_Framework_TestCase {
          * Expectation
          *
          */
+	    $logger->shouldReceive('info')->with('Indexing Husband with ID: 999');
+	    $config->shouldReceive('get')->with('larasearch::logger', 'iverberk.larasearch.logger')->andReturn('iverberk.larasearch.logger');
+	    $app->shouldReceive('make')->with('iverberk.larasearch.logger')->andReturn($logger);
         $job = m::mock('Illuminate\Queue\Jobs\Job');
         $job->shouldReceive('delete')->once();
 
@@ -71,7 +85,7 @@ class ReindexJobTest extends \PHPUnit_Framework_TestCase {
          * Assertion
          *
          */
-        with(new ReindexJob)->fire($job, $models);
+        with(new ReindexJob($app, $config))->fire($job, $models);
 
         $husband->verifyInvoked('findOrFail');
     }

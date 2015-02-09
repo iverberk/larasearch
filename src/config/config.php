@@ -201,6 +201,8 @@ return array_merge($pathConfig, array(
         ],
 	    
         'index_prefix' => ''
-    ]
+    ],
+
+	'logger' => 'iverberk.larasearch.logger'
 
 ));

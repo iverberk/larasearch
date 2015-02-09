@@ -1,29 +1,62 @@
 <?php namespace Iverberk\Larasearch\Jobs;
 
-use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Config\Repository;
+use Illuminate\Foundation\Application;
 use Illuminate\Queue\Jobs\Job;
+use Exception;
 
+/**
+ * Class ReindexJob
+ *
+ * @package Iverberk\Larasearch\Jobs
+ */
 class ReindexJob {
+
+	/**
+	 * @var Application
+	 */
+	private $app;
+
+	/**
+	 * @var Repository
+	 */
+	private $config;
+
+	/**
+	 * @param Application $app
+	 * @param Repository  $config
+	 */
+	public function __construct(Application $app, Repository $config)
+	{
+		$this->app = $app;
+		$this->config = $config;
+	}
 
 	public function fire(Job $job, $models)
 	{
-		try
+		$loggerContainerBinding = $this->config->get('larasearch::logger', 'iverberk.larasearch.logger');
+		$logger = $this->app->make($loggerContainerBinding);
+
+		foreach ($models as $model)
 		{
-			foreach ($models as $model)
+			list($class, $id) = explode(':', $model);
+
+			$logger->info('Indexing ' . $class . ' with ID: ' . $id);
+
+			try
 			{
-				list($class, $id) = explode(':', $model);
-
 				$model = $class::findOrFail($id);
-
 				$model->refreshDoc($model);
 			}
+			catch (Exception $e)
+			{
+				$logger->error('Indexing ' . $class . ' with ID: ' . $id . ' failed: ' . $e->getMessage());
 
-			$job->delete();
+				$job->release(60);
+			}
 		}
-		catch (ModelNotFoundException $e)
-		{
-			$job->release(60);
-		}
+
+		$job->delete();
 	}
 
 } 

@@ -5,6 +5,8 @@ use Illuminate\Support\ServiceProvider;
 use Iverberk\Larasearch\Commands\PathsCommand;
 use Iverberk\Larasearch\Commands\ReindexCommand;
 use Iverberk\Larasearch\Response\Result;
+use Monolog\Handler\NullHandler;
+use Monolog\Logger;
 
 class LarasearchServiceProvider extends ServiceProvider {
 
@@ -30,10 +32,22 @@ class LarasearchServiceProvider extends ServiceProvider {
 	public function bootContainerBindings()
 	{
 		$this->bindElasticsearch();
+		$this->bindLogger();
 		$this->bindIndex();
 		$this->bindQuery();
 		$this->bindProxy();
 		$this->bindResult();
+	}
+
+	/**
+	 * Bind a Larasearch log handler to the container
+	 */
+	protected function bindLogger()
+	{
+		$this->app->singleton('iverberk.larasearch.logger', function ($app)
+		{
+			return new Logger('larasearch', [ new NullHandler() ]);
+		});
 	}
 
 	/**

@@ -52,13 +52,14 @@ class LarasearchServiceProviderTest extends PHPUnit_Framework_TestCase {
          * Set
          */
         $sp = m::mock('Iverberk\Larasearch\LarasearchServiceProvider[' .
-            'bindProxy, bindIndex, bindElasticsearch, bindQuery, bindResult]', ['something']);
+            'bindProxy, bindIndex, bindLogger, bindElasticsearch, bindQuery, bindResult]', ['something']);
         $sp->shouldAllowMockingProtectedMethods();
 
         /**
          * Expectation
          */
-        $sp->shouldReceive('bindElasticsearch')->once()->andReturn(true);
+	    $sp->shouldReceive('bindElasticsearch')->once()->andReturn(true);
+	    $sp->shouldReceive('bindLogger')->once()->andReturn(true);
         $sp->shouldReceive('bindProxy')->once()->andReturn(true);
         $sp->shouldReceive('bindIndex')->once()->andReturn(true);
         $sp->shouldReceive('bindQuery')->once()->andReturn(true);
@@ -69,7 +70,6 @@ class LarasearchServiceProviderTest extends PHPUnit_Framework_TestCase {
          */
         $sp->bootContainerBindings();
     }
-
 
     /**
      * @test
@@ -108,6 +108,33 @@ class LarasearchServiceProviderTest extends PHPUnit_Framework_TestCase {
 
         $sp->bindElasticsearch();
     }
+
+	/**
+	 * @test
+	 */
+	public function it_should_bind_logger()
+	{
+		/**
+		 * Set
+		 */
+		$app = m::mock('LaravelApp');
+		$sp = m::mock('Iverberk\Larasearch\LarasearchServiceProvider[bindLogger]', [$app]);
+
+		/**
+		 * Expectation
+		 */
+		$app->shouldReceive('singleton')
+			->once()
+			->andReturnUsing(
+				function ($name, $closure) use ($app)
+				{
+					assertEquals('iverberk.larasearch.logger', $name);
+					assertInstanceOf('Monolog\Logger', $closure($app));
+				}
+			);
+
+		$sp->bindLogger();
+	}
 
     /**
      * @test

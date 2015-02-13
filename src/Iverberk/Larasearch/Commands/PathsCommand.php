@@ -119,6 +119,7 @@ class PathsCommand extends Command {
 			array('dir', null, InputOption::VALUE_IS_ARRAY | InputOption::VALUE_REQUIRED, 'Directory to scan for searchable models', null, ''),
 			array('relations', null, InputOption::VALUE_NONE, 'Include related Eloquent models', null),
 			array('write-config', null, InputOption::VALUE_NONE, 'Include the compiled paths in the package configuration', null),
+			array('depth', null, InputOption::VALUE_OPTIONAL, 'How many related paths should be followed', null),
 		);
 	}
 
@@ -192,7 +193,13 @@ class PathsCommand extends Command {
 					$this->reversedPaths[$modelClass][] = implode('.', array_reverse($reversedPath));
 					$this->reversedPaths[$modelClass] = array_values(array_unique($this->reversedPaths[$modelClass]));
 
-					$this->compilePaths($related['model'], $model, $newPath, $newReversedPath, $start);
+					// If depth restriction not met continue recursion
+					if ($this->option('depth') === null || $this->option('depth') >= count($newPath)) {
+						$this->compilePaths($related['model'], $model, $newPath, $newReversedPath, $start);
+					} else {
+						// Depth restriction met, forget other relations
+						$relations = [];
+					}
 				}
 			}
 		}
@@ -233,7 +240,7 @@ class PathsCommand extends Command {
 		{
 			return false;
 		}
-		
+
 		if (preg_match('/@follow\s+FROM\b/', $docComment) && ! preg_match('/@follow\s+FROM\s+' . str_replace('\\', '\\\\', get_class($model)) . '\b/', $docComment))
 		{
 			return false;

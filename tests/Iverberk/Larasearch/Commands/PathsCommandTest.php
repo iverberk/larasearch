@@ -59,6 +59,7 @@ class PathsCommandTest extends \PHPUnit_Framework_TestCase {
             array('dir', null, InputOption::VALUE_IS_ARRAY | InputOption::VALUE_REQUIRED, 'Directory to scan for searchable models', null, ''),
             array('relations', null, InputOption::VALUE_NONE, 'Include related Eloquent models', null),
             array('write-config', null, InputOption::VALUE_NONE, 'Include the compiled paths in the package configuration', null),
+            array('depth', null, InputOption::VALUE_OPTIONAL, 'How many related paths should be followed', null),
         );
 
         /**
@@ -138,6 +139,10 @@ class PathsCommandTest extends \PHPUnit_Framework_TestCase {
             ->with('relations')
             ->times(17)
             ->andReturn(true);
+
+        $command->shouldReceive('option')
+            ->with('depth')
+            ->andReturn(null);
 
         $command->shouldReceive('error', 'confirm', 'call', 'info')
             ->andReturn(true);
@@ -379,6 +384,83 @@ class PathsCommandTest extends \PHPUnit_Framework_TestCase {
         |------------------------------------------------------------
         */
         $command->fire();
+    }
+
+    /**
+     * @test
+     */
+    public function it_should_limit_path_length_when_depth_set()
+    {
+
+        /**
+         *
+         * Set
+         *
+         * @var \Mockery\Mock $command
+         */
+        $command = m::mock('Iverberk\Larasearch\Commands\PathsCommand')->makePartial();
+        $command->shouldAllowMockingProtectedMethods();
+
+        /**
+         *
+         * Expectation
+         *
+         */
+        $command->shouldReceive('argument')
+            ->with('model')
+            ->once()
+            ->andReturn(['Husband']);
+
+        $command->shouldReceive('option')
+            ->with('dir')
+            ->once()
+            ->andReturn([__DIR__ . '/../../../Support/Stubs']);
+
+        $command->shouldReceive('option')
+            ->with('write-config')
+            ->once()
+            ->andReturn(false);
+
+        $command->shouldReceive('option')
+            ->with('relations')
+            ->times(16)
+            ->andReturn(true);
+
+        $command->shouldReceive('option')
+            ->with('depth')
+            ->andReturn(2);
+
+        $command->shouldReceive('info')
+            ->andReturn(true);
+
+        /**
+         *
+         * Assertion
+         *
+         */
+        $command->fire();
+
+        assertEquals(
+            [
+                'Husband' => ['wife.children'],
+                'Child' => ['mother', 'father', 'toys'],
+                'Toy' => ['children.mother', 'children.father'],
+                'Wife' => ['husband', 'children.toys'],
+                'House\\Item' => []
+            ],
+            $command->getPaths()
+        );
+
+        assertEquals(
+            [
+                'Husband' => ['', 'wife', 'children.toys', 'children'],
+                'Child' => ['mother.husband', 'mother', 'toys', ''],
+                'Toy' => ['children.mother', '', 'children'],
+                'Wife' => ['husband', '', 'children.toys', 'children'],
+                'House\\Item' => [ '' ]
+            ],
+            $command->getReversedPaths()
+        );
     }
 
 }

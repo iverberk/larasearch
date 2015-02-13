@@ -162,10 +162,10 @@ class PathsCommandTest extends \PHPUnit_Framework_TestCase {
 
         assertEquals(
             [
-                'Husband' => ['', 'children', 'children.toys', 'wife'],
-                'Child' => ['mother.husband', '', 'toys', 'mother'],
-                'Toy' => ['children.mother.husband', 'children', '', 'children.mother'],
-                'Wife' => ['husband', 'children', 'children.toys', ''],
+                'Husband' => ['', 'wife', 'children.toys', 'children'],
+                'Child' => ['mother.husband', 'mother', 'toys', ''],
+                'Toy' => ['children.mother.husband', 'children.mother', '', 'children'],
+                'Wife' => ['husband', '', 'children.toys', 'children'],
                 'House\\Item' => [ '' ]
             ],
             $command->getReversedPaths()

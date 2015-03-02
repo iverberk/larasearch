@@ -15,9 +15,9 @@ Features
 Installation
 ------------
 
-Add Larasearch to your composer.json file:
+Include Larasearch in your composer.json file:
 
-```"iverberk/larasearch": "0.6.*"```
+```composer require iverberk/larasearch```
 
 Add the service provider to your Laravel application config:
 

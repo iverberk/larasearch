@@ -23,7 +23,7 @@ class LarasearchServiceProvider extends ServiceProvider {
         $this->publishes([
             $this->guessPackagePath() . '/config/config.php' => config_path('larasearch.php'),
         ]);
-        
+
 		$this->bootContainerBindings();
 	}
 

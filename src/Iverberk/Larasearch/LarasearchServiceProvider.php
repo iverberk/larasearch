@@ -19,8 +19,6 @@ class LarasearchServiceProvider extends ServiceProvider {
 
 	public function boot()
 	{
-		$this->package('iverberk/larasearch');
-
 		$this->bootContainerBindings();
 	}
 
@@ -57,7 +55,7 @@ class LarasearchServiceProvider extends ServiceProvider {
 	{
 		$this->app->singleton('Elasticsearch', function ($app)
 		{
-			return new Client($app->make('config')->get('larasearch::elasticsearch.params'));
+			return new Client($app->make('config')->get('larasearch.elasticsearch.params'));
 		});
 	}
 

@@ -12,7 +12,7 @@ trait TransformableTrait {
 	 */
 	public function transform($relations = false)
 	{
-		$relations = $relations ? Config::get('larasearch::paths.' . get_class($this)) : [];
+		$relations = $relations ? Config::get('larasearch.paths.' . get_class($this)) : [];
 
 		$doc = $this->load($relations)->toArray();
 

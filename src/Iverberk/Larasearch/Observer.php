@@ -45,7 +45,7 @@ class Observer {
 		// Temporary array to store affected models
 		$affectedModels = [];
 
-		$paths = Config::get('larasearch::reversedPaths.' . get_class($model), []);
+		$paths = Config::get('larasearch.reversedPaths.' . get_class($model), []);
 
 		foreach ((array)$paths as $path)
 		{

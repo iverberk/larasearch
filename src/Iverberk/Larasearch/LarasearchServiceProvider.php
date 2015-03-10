@@ -7,6 +7,7 @@ use Iverberk\Larasearch\Commands\ReindexCommand;
 use Iverberk\Larasearch\Response\Result;
 use Monolog\Handler\NullHandler;
 use Monolog\Logger;
+use ReflectionClass;
 
 class LarasearchServiceProvider extends ServiceProvider {
 
@@ -19,7 +20,9 @@ class LarasearchServiceProvider extends ServiceProvider {
 
 	public function boot()
 	{
-		$this->package('iverberk/larasearch');
+        $this->publishes([
+            $this->guessPackagePath() . '/config/config.php' => config_path('larasearch.php'),
+        ]);
 
 		$this->bootContainerBindings();
 	}
@@ -57,7 +60,7 @@ class LarasearchServiceProvider extends ServiceProvider {
 	{
 		$this->app->singleton('Elasticsearch', function ($app)
 		{
-			return new Client($app->make('config')->get('larasearch::elasticsearch.params'));
+			return new Client($app->make('config')->get('larasearch.elasticsearch.params'));
 		});
 	}
 
@@ -148,4 +151,15 @@ class LarasearchServiceProvider extends ServiceProvider {
 		return array();
 	}
 
+    /**
+     * Guess real path of the package.
+     *
+     * @return string
+     */
+    public function guessPackagePath()
+    {
+        $path = (new ReflectionClass($this))->getFileName();
+
+        return realpath(dirname($path).'/../..');
+    }
 }

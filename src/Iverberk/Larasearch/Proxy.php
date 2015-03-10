@@ -125,7 +125,7 @@ class Proxy {
 		$name = $this->config['index']->getName();
 
 		$newName = $name . '_' . date("YmdHis");
-		$relations = $relations ? Config::get('larasearch::paths.' . get_class($model)) : [];
+		$relations = $relations ? Config::get('larasearch.paths.' . get_class($model)) : [];
 
 		Index::clean($name);
 

@@ -310,13 +310,14 @@ class PathsCommand extends Command {
 	{
 		if ($this->option('write-config'))
 		{
-			$configDir = app_path() . '/config/packages/iverberk/larasearch';
+			$configFile = base_path() . '/config/larasearch.php';
+                        $configDir = base_path() . '/config';
 
-			if (!File::exists($configDir))
+			if (!File::exists($configFile))
 			{
 				if ($this->confirm('It appears that you have not yet published the larasearch config. Would you like to do this now?', false))
 				{
-					$this->call('config:publish', ['package' => 'iverberk/larasearch']);
+					$this->call('vendor:publish', ['package' => 'iverberk/larasearch']);
 				}
 				else
 				{

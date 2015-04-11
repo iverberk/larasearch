@@ -1,8 +1,8 @@
 <?php namespace Iverberk\Larasearch\Response;
 
-use Illuminate\Support\Contracts\ArrayableInterface;
+use Illuminate\Contracts\Support\Arrayable;
 
-class Result implements \ArrayAccess, ArrayableInterface {
+class Result implements \ArrayAccess, Arrayable {
 
 	/**
 	 * Contains an Elasticsearch hit response

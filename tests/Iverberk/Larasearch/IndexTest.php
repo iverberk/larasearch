@@ -1,7 +1,6 @@
 <?php namespace Iverberk\Larasearch;
 
 use Illuminate\Support\Facades\App;
-use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Facade;
 use Mockery as m;
 use AspectMock\Test as am;
@@ -141,7 +140,7 @@ class IndexTest extends \PHPUnit_Framework_TestCase {
          * @var \Mockery\Mock $proxy
          * @var \Mockery\Mock $client
          */
-        list($index, $proxy, $client) = $this->getMocks();
+        list($index, $proxy, $client, $config) = $this->getMocks();
         $test = $this;
 
         /**
@@ -149,8 +148,8 @@ class IndexTest extends \PHPUnit_Framework_TestCase {
          * Expectation
          *
          */
-        Config::shouldReceive('get')
-            ->with('larasearch::elasticsearch.analyzers')
+        $config->shouldReceive('get')
+            ->with('elasticsearch.analyzers')
             ->andReturn([
                 'autocomplete',
                 'suggest',
@@ -162,8 +161,8 @@ class IndexTest extends \PHPUnit_Framework_TestCase {
                 'word_end'
             ]);
 
-        Config::shouldReceive('get')
-            ->with('larasearch::elasticsearch.defaults.index')
+        $config->shouldReceive('get')
+            ->with('elasticsearch.defaults.index')
             ->andReturn([
                 'settings' => [
                     'number_of_shards' => 1,
@@ -635,7 +634,7 @@ class IndexTest extends \PHPUnit_Framework_TestCase {
          * @var \Mockery\Mock $proxy
          * @var \Mockery\Mock $client
          */
-        list($index, $proxy, $client) = $this->getMocks('bar_');
+        list($index, $proxy, $client, $config) = $this->getMocks('bar_');
         $test = $this;
 
         /**
@@ -643,8 +642,8 @@ class IndexTest extends \PHPUnit_Framework_TestCase {
          * Expectation
          *
          */
-        Config::shouldReceive('get')
-            ->with('larasearch::elasticsearch.analyzers')
+        $config->shouldReceive('get')
+            ->with('elasticsearch.analyzers')
             ->andReturn([
                 'autocomplete',
                 'suggest',
@@ -656,8 +655,8 @@ class IndexTest extends \PHPUnit_Framework_TestCase {
                 'word_end'
             ]);
 
-        Config::shouldReceive('get')
-            ->with('larasearch::elasticsearch.defaults.index')
+        $config->shouldReceive('get')
+            ->with('elasticsearch.defaults.index')
             ->andReturn([
                 'settings' => [
                     'number_of_shards' => 1,
@@ -2116,10 +2115,10 @@ class IndexTest extends \PHPUnit_Framework_TestCase {
          * @var \Mockery\Mock $proxy
          * @var \Mockery\Mock $client
          */
-        list($index, $proxy, $client) = $this->getMocks('bar_');
+        list($index, $proxy, $client, $config) = $this->getMocks('bar_');
 
         // Mock the self::$client variable
-        am::double('Iverberk\Larasearch\Index', ['self::$client' => $client]);
+        am::double('Iverberk\Larasearch\Index', ['self::$client' => $client, 'self::$config' => $config]);
 
         /**
          *
@@ -2154,10 +2153,10 @@ class IndexTest extends \PHPUnit_Framework_TestCase {
          * @var \Mockery\Mock $proxy
          * @var \Mockery\Mock $client
          */
-        list($index, $proxy, $client) = $this->getMocks();
+        list($index, $proxy, $client, $config) = $this->getMocks();
 
         // Mock the self::$client variable
-        am::double('Iverberk\Larasearch\Index', ['self::$client' => $client]);
+        am::double('Iverberk\Larasearch\Index', ['self::$client' => $client, 'self::$config' => $config]);
 
         /**
          *
@@ -2190,10 +2189,10 @@ class IndexTest extends \PHPUnit_Framework_TestCase {
          * @var \Mockery\Mock $proxy
          * @var \Mockery\Mock $client
          */
-        list($index, $proxy, $client) = $this->getMocks('bar_');
+        list($index, $proxy, $client, $config) = $this->getMocks('bar_');
 
         // Mock the self::$client variable
-        am::double('Iverberk\Larasearch\Index', ['self::$client' => $client]);
+        am::double('Iverberk\Larasearch\Index', ['self::$client' => $client, 'self::$config' => $config]);
 
         /**
          *
@@ -2228,9 +2227,6 @@ class IndexTest extends \PHPUnit_Framework_TestCase {
          *
          */
         Facade::clearResolvedInstances();
-        Config::shouldReceive('get')
-            ->with('larasearch::elasticsearch.index_prefix', '')
-            ->andReturn($index_prefix);
 
         $client = m::mock('Elasticsearch\Client');
 
@@ -2238,13 +2234,22 @@ class IndexTest extends \PHPUnit_Framework_TestCase {
             ->with('Elasticsearch')
             ->andReturn($client);
 
+        $config = m::mock('Iverberk\\Larasearch\\Config');
+        $config->shouldReceive('get')
+            ->with('elasticsearch.index_prefix', '')
+            ->andReturn($index_prefix);
+
+        App::shouldReceive('make')
+            ->with('iverberk.larasearch.config')
+            ->andReturn($config);
+
         $proxy = m::mock('Iverberk\Larasearch\Proxy');
         $proxy->shouldReceive('getModel->getTable')
             ->andReturn('Husband');
 
         $index = m::mock('Iverberk\Larasearch\Index', [$proxy], [ m::BLOCKS => ['setName', 'setProxy']])->makePartial();
 
-        return [$index, $proxy, $client];
+        return [$index, $proxy, $client, $config];
     }
 
 }

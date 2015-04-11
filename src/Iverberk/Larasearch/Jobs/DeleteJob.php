@@ -1,6 +1,6 @@
 <?php namespace Iverberk\Larasearch\Jobs;
 
-use Illuminate\Config\Repository;
+use Iverberk\Larasearch\Config;
 use Illuminate\Foundation\Application;
 use Illuminate\Queue\Jobs\Job;
 
@@ -17,15 +17,15 @@ class DeleteJob {
 	private $app;
 
 	/**
-	 * @var Repository
+	 * @var Config
 	 */
 	private $config;
 
 	/**
 	 * @param Application $app
-	 * @param Repository  $config
+	 * @param Config
 	 */
-	public function __construct(Application $app, Repository $config)
+	public function __construct(Application $app, Config $config)
 	{
 		$this->app = $app;
 		$this->config = $config;
@@ -37,7 +37,7 @@ class DeleteJob {
 	 */
 	public function fire(Job $job, $models)
 	{
-		$loggerContainerBinding = $this->config->get('larasearch::logger', 'iverberk.larasearch.logger');
+		$loggerContainerBinding = $this->config->get('logger', 'iverberk.larasearch.logger');
 		$logger = $this->app->make($loggerContainerBinding);
 
 		foreach ($models as $model)

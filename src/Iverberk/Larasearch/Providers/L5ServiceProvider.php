@@ -7,7 +7,7 @@ class L5ServiceProvider extends ServiceProvider {
         parent::boot();
 
         $this->publishes([
-            __DIR__ . '/../../../onfig/config.php' => config_path('larasearch.php'),
+            __DIR__ . '/../../../config/config.php' => config_path('larasearch.php'),
         ], 'config');
     }
 

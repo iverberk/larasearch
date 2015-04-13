@@ -1,7 +1,5 @@
 <?php
 
-require __DIR__ . '/../../../vendor/phpunit/phpunit/src/Framework/Assert/Functions.php';
-
 use Illuminate\Support\Facades\App as App;
 use Mockery as m;
 
@@ -101,8 +99,8 @@ class LarasearchServiceProviderTest extends PHPUnit_Framework_TestCase {
             ->andReturnUsing(
                 function ($name, $closure) use ($app)
                 {
-                    assertEquals('Elasticsearch', $name);
-                    assertInstanceOf('Elasticsearch\Client', $closure($app));
+                    $this->assertEquals('Elasticsearch', $name);
+                    $this->assertInstanceOf('Elasticsearch\Client', $closure($app));
                 }
             );
 
@@ -128,8 +126,8 @@ class LarasearchServiceProviderTest extends PHPUnit_Framework_TestCase {
 			->andReturnUsing(
 				function ($name, $closure) use ($app)
 				{
-					assertEquals('iverberk.larasearch.logger', $name);
-					assertInstanceOf('Monolog\Logger', $closure($app));
+					$this->assertEquals('iverberk.larasearch.logger', $name);
+					$this->assertInstanceOf('Monolog\Logger', $closure($app));
 				}
 			);
 
@@ -170,8 +168,8 @@ class LarasearchServiceProviderTest extends PHPUnit_Framework_TestCase {
             ->andReturnUsing(
                 function ($name, $closure) use ($app, $proxy)
                 {
-                    assertEquals('iverberk.larasearch.index', $name);
-                    assertInstanceOf('Iverberk\Larasearch\Index',
+                    $this->assertEquals('iverberk.larasearch.index', $name);
+                    $this->assertInstanceOf('Iverberk\Larasearch\Index',
                         $closure($app, ['proxy' => $proxy, 'name' => 'name']));
                 }
             );
@@ -207,8 +205,8 @@ class LarasearchServiceProviderTest extends PHPUnit_Framework_TestCase {
             ->andReturnUsing(
                 function ($name, $closure) use ($app, $proxy)
                 {
-                    assertEquals('iverberk.larasearch.query', $name);
-                    assertInstanceOf('Iverberk\Larasearch\Query',
+                    $this->assertEquals('iverberk.larasearch.query', $name);
+                    $this->assertInstanceOf('Iverberk\Larasearch\Query',
                         $closure($app, ['proxy' => $proxy, 'term' => 'term', 'options' => []]));
                 }
             );
@@ -242,8 +240,8 @@ class LarasearchServiceProviderTest extends PHPUnit_Framework_TestCase {
             ->andReturnUsing(
                 function ($name, $closure) use ($app, $model)
                 {
-                    assertEquals('iverberk.larasearch.proxy', $name);
-                    assertInstanceOf('Iverberk\Larasearch\Proxy',
+                    $this->assertEquals('iverberk.larasearch.proxy', $name);
+                    $this->assertInstanceOf('Iverberk\Larasearch\Proxy',
                         $closure($app, $model));
                 }
             );
@@ -274,8 +272,8 @@ class LarasearchServiceProviderTest extends PHPUnit_Framework_TestCase {
 			->andReturnUsing(
 				function ($name, $closure) use ($app)
 				{
-					assertEquals('iverberk.larasearch.response.result', $name);
-					assertInstanceOf('Iverberk\Larasearch\Response\Result',
+					$this->assertEquals('iverberk.larasearch.response.result', $name);
+					$this->assertInstanceOf('Iverberk\Larasearch\Response\Result',
 						$closure($app, []));
 				}
 			);
@@ -307,14 +305,14 @@ class LarasearchServiceProviderTest extends PHPUnit_Framework_TestCase {
             ->once()
             ->andReturnUsing(function ($closure) use ($app)
             {
-                assertInstanceOf('Iverberk\Larasearch\Commands\ReindexCommand', $closure($app));
+                $this->assertInstanceOf('Iverberk\Larasearch\Commands\ReindexCommand', $closure($app));
             });
 
         $app->shouldReceive('share')
             ->once()
             ->andReturnUsing(function ($closure) use ($app)
             {
-                assertInstanceOf('Iverberk\Larasearch\Commands\PathsCommand', $closure($app));
+                $this->assertInstanceOf('Iverberk\Larasearch\Commands\PathsCommand', $closure($app));
             });
 
         $sp->shouldReceive('commands')
@@ -347,7 +345,7 @@ class LarasearchServiceProviderTest extends PHPUnit_Framework_TestCase {
          * Assertion
          */
         $sp = new Iverberk\Larasearch\LarasearchServiceProvider($app);
-        assertEquals([], $sp->provides());
+        $this->assertEquals([], $sp->provides());
     }
 
 }

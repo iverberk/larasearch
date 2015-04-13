@@ -149,7 +149,7 @@ class PathsCommandTest extends \PHPUnit_Framework_TestCase {
          */
         $command->fire();
 
-        assertEquals(
+        $this->assertEquals(
             [
                 'Husband' => ['wife.children.toys'],
                 'Child' => ['mother', 'father', 'toys'],
@@ -160,12 +160,12 @@ class PathsCommandTest extends \PHPUnit_Framework_TestCase {
             $command->getPaths()
         );
 
-        assertEquals(
+        $this->assertEquals(
             [
-                'Husband' => ['', 'children', 'children.toys', 'wife'],
-                'Child' => ['mother.husband', '', 'toys', 'mother'],
-                'Toy' => ['children.mother.husband', 'children', '', 'children.mother'],
-                'Wife' => ['husband', 'children', 'children.toys', ''],
+                'Husband' => ['', 'wife', 'children', 'children.toys'],
+                'Child' => ['mother.husband', 'mother', '', 'toys'],
+                'Toy' => ['children.mother.husband', 'children.mother', 'children', ''],
+                'Wife' => ['husband', '', 'children', 'children.toys'],
                 'House\\Item' => [ '' ]
             ],
             $command->getReversedPaths()
@@ -214,12 +214,12 @@ class PathsCommandTest extends \PHPUnit_Framework_TestCase {
          */
         $command->fire();
 
-        assertEquals(
+        $this->assertEquals(
             [],
             $command->getPaths()
         );
 
-        assertEquals(
+        $this->assertEquals(
             [],
             $command->getReversedPaths()
         );

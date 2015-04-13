@@ -13,7 +13,7 @@
         "illuminate/support": "~4.2",
         "illuminate/database": "~4.2",
         "illuminate/console": "~4.2",
-        "doctrine/dbal": "~2.3",
+        "doctrine/dbal": "2.5.1",
         "elasticsearch/elasticsearch": "~1.0",
         "nikic/php-parser": "*"
     },

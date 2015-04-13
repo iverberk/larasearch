@@ -188,7 +188,7 @@ class ReindexCommandTest extends \PHPUnit_Framework_TestCase {
          */
         $model = $command->getModelInstance('Husband');
 
-        assertInstanceOf('Husband', $model);
+        $this->assertInstanceOf('Husband', $model);
     }
 
-} 
+}

@@ -27,7 +27,7 @@ class ConfigTest extends \PHPUnit_Framework_TestCase {
     public function it_should_constructL4()
     {
         $this->forL4();
-        $laravel_config = m::mock('Illuminate\Contracts\Config\Repository');
+        $laravel_config = m::mock('Illuminate\Config\Repository');
         $config = new Config($laravel_config);
     }
 
@@ -37,7 +37,7 @@ class ConfigTest extends \PHPUnit_Framework_TestCase {
     public function it_should_constructL5()
     {
         $this->forL5();
-        $laravel_config = m::mock('Illuminate\Contracts\Config\Repository');
+        $laravel_config = m::mock('Illuminate\Config\Repository');
         $config = new Config($laravel_config);
     }
 
@@ -47,7 +47,7 @@ class ConfigTest extends \PHPUnit_Framework_TestCase {
     public function it_should_construct_with_package_name()
     {
         $this->forL4();
-        $laravel_config = m::mock('Illuminate\Contracts\Config\Repository');
+        $laravel_config = m::mock('Illuminate\Config\Repository');
         $config = new Config($laravel_config, 'foobarbaz');
     }
 
@@ -57,7 +57,7 @@ class ConfigTest extends \PHPUnit_Framework_TestCase {
     public function it_should_get_l4_style()
     {
         $this->forL4();
-        $laravel_config = m::mock('Illuminate\Contracts\Config\Repository');
+        $laravel_config = m::mock('Illuminate\Config\Repository');
         $laravel_config->shouldReceive('get')
             ->with('larasearch::myconfigsetting', null)
             ->andReturn('myconfigvalue');
@@ -72,7 +72,7 @@ class ConfigTest extends \PHPUnit_Framework_TestCase {
     public function it_should_get_l5_style()
     {
         $this->forL5();
-        $laravel_config = m::mock('Illuminate\Contracts\Config\Repository');
+        $laravel_config = m::mock('Illuminate\Config\Repository');
         $laravel_config->shouldReceive('get')
             ->with('larasearch.myconfigsetting', null)
             ->andReturn('myconfigvalue');
@@ -87,7 +87,7 @@ class ConfigTest extends \PHPUnit_Framework_TestCase {
     public function it_should_set_l4_style()
     {
         $this->forL4();
-        $laravel_config = m::mock('Illuminate\Contracts\Config\Repository');
+        $laravel_config = m::mock('Illuminate\Config\Repository');
         $laravel_config->shouldReceive('set')
             ->with('larasearch::myconfigsetting', 'myconfigvalue')
             ->andReturn(null);
@@ -102,7 +102,7 @@ class ConfigTest extends \PHPUnit_Framework_TestCase {
     public function it_should_set_l5_style()
     {
         $this->forL5();
-        $laravel_config = m::mock('Illuminate\Contracts\Config\Repository');
+        $laravel_config = m::mock('Illuminate\Config\Repository');
         $laravel_config->shouldReceive('set')
             ->with('larasearch.myconfigsetting', 'myconfigvalue')
             ->andReturn();
@@ -117,7 +117,7 @@ class ConfigTest extends \PHPUnit_Framework_TestCase {
     public function it_should_get_and_set_package_name()
     {
         $this->forL5();
-        $laravel_config = m::mock('Illuminate\Contracts\Config\Repository');
+        $laravel_config = m::mock('Illuminate\Config\Repository');
         $config = new Config($laravel_config);
 
         $config->setPackageName($name = 'foo' . microtime(true));

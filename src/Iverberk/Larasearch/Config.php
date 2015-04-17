@@ -1,6 +1,6 @@
 <?php namespace Iverberk\Larasearch;
 
-use Illuminate\Contracts\Config\Repository;
+use Illuminate\Config\Repository;
 
 class Config {
 

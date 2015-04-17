@@ -23,7 +23,7 @@ class LarasearchServiceProvider extends ServiceProvider
         $this->bootContainerBindings();
 
         $this->publishes([
-            __DIR__ . '/../../config/config.php' => config_path('larasearch.php'),
+            __DIR__ . '/../../config/config.php' => $this->app->basePath('config/larasearch.php'),
         ], 'config');
     }
 

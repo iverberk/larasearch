@@ -114,7 +114,7 @@ class ResponseTest extends \PHPUnit_Framework_TestCase {
          */
         $model->shouldReceive('get')->andReturn('succes');
         $model->shouldReceive('whereIn')
-            ->with('id',[1])
+            ->with('id', [1])
             ->andReturn($model);
 
         /**
@@ -351,4 +351,4 @@ class ResponseTest extends \PHPUnit_Framework_TestCase {
     }
 
 
-} 
+}

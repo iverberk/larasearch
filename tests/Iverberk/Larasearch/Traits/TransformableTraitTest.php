@@ -1,6 +1,6 @@
 <?php namespace Iverberk\Larasearch\Traits;
 
-use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\App;
 use Mockery as m;
 
 class TransformableTraitTest extends \PHPUnit_Framework_TestCase {
@@ -29,8 +29,12 @@ class TransformableTraitTest extends \PHPUnit_Framework_TestCase {
          */
         $husband->shouldReceive('load->toArray')->once()->andReturn('mock');
 
-        Config::clearResolvedInstance('config');
-        Config::shouldReceive('get')->with('/larasearch::paths\..*/')->once();
+        $config = m::mock('Iverberk\\Larasearch\\Config');
+        $config->shouldReceive('get')->with('/paths\..*/')->once();
+        App::shouldReceive('make')
+            ->with('iverberk.larasearch.config')
+            ->once()
+            ->andReturn($config);
 
         /**
          *
@@ -42,4 +46,4 @@ class TransformableTraitTest extends \PHPUnit_Framework_TestCase {
         $this->assertEquals('mock', $transformed);
     }
 
-} 
+}

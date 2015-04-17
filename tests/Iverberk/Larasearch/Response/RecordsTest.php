@@ -29,9 +29,10 @@ class RecordsTest extends \PHPUnit_Framework_TestCase {
          *
          */
         $husbandMock->shouldReceive('whereIn')
-            ->andReturnUsing(function($attribute, $items) use ($test, $husbandMock) {
+            ->andReturnUsing(function ($attribute, $items) use ($test, $husbandMock)
+            {
                 $test->assertEquals('id', $attribute);
-                $test->assertEquals([1,2], $items);
+                $test->assertEquals([1, 2], $items);
                 return $husbandMock;
             });
         $husbandMock->shouldReceive('get->toArray')
@@ -52,4 +53,4 @@ class RecordsTest extends \PHPUnit_Framework_TestCase {
         $this->assertEquals('item2', $records[1]);
     }
 
-} 
+}

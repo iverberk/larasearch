@@ -32,8 +32,8 @@ class SearchableTraitTest extends \PHPUnit_Framework_TestCase {
          * Expectation
          *
          */
-	    Facade::clearResolvedInstances();
-	    \Husband::clearProxy();
+        Facade::clearResolvedInstances();
+        \Husband::clearProxy();
 
         App::shouldReceive('make')
             ->with('iverberk.larasearch.proxy', m::type('Illuminate\Database\Eloquent\Model'))
@@ -139,17 +139,17 @@ class SearchableTraitTest extends \PHPUnit_Framework_TestCase {
         \Husband::bogus('*');
     }
 
-	/**
-	 * @test
-	 */
-	public function it_should_get_elasticsearch_id()
-	{
-		/**
-		 * Assertions
-		 */
-		$husband = new Husband();
+    /**
+     * @test
+     */
+    public function it_should_get_elasticsearch_id()
+    {
+        /**
+         * Assertions
+         */
+        $husband = new Husband();
 
-		$this->assertEquals('dummy_id', $husband->getEsId());
-	}
+        $this->assertEquals('dummy_id', $husband->getEsId());
+    }
 
-} 
+}

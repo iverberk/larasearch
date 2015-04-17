@@ -60,4 +60,4 @@ class ResultsTest extends \PHPUnit_Framework_TestCase {
         $this->assertInstanceOf('Illuminate\Support\Collection', $results);
         $this->assertInstanceOf('Iverberk\Larasearch\Response\Result', $results->first());
     }
-} 
+}

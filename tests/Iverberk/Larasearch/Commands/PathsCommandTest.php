@@ -14,6 +14,16 @@ function app_path()
     return PathsCommandTest::$functions->app_path();
 }
 
+function constant($const)
+{
+    return PathsCommandTest::$functions->constant($const);
+}
+
+function config_path()
+{
+    return PathsCommandTest::$functions->config_path();
+}
+
 /**
  * Class PathsCommandTest
  * @package Iverberk\Larasearch\Commands
@@ -112,7 +122,8 @@ class PathsCommandTest extends \PHPUnit_Framework_TestCase {
 
         App::shouldReceive('make')->andReturn(true);
 
-        self::$functions->shouldReceive('app_path')->once()->andReturn('');
+        self::$functions->shouldReceive('config_path')->once()->andReturn('');
+        self::$functions->shouldReceive('constant')->with('Illuminate\\Foundation\\Application::VERSION')->once()->andReturn('5.0.0');
 
         /**
          *
@@ -166,7 +177,7 @@ class PathsCommandTest extends \PHPUnit_Framework_TestCase {
                 'Child' => ['mother.husband', 'mother', '', 'toys'],
                 'Toy' => ['children.mother.husband', 'children.mother', 'children', ''],
                 'Wife' => ['husband', '', 'children', 'children.toys'],
-                'House\\Item' => [ '' ]
+                'House\\Item' => ['']
             ],
             $command->getReversedPaths()
         );
@@ -291,7 +302,8 @@ class PathsCommandTest extends \PHPUnit_Framework_TestCase {
 
         App::shouldReceive('make')->andReturn(true);
 
-        self::$functions->shouldReceive('app_path')->once()->andReturn('');
+        self::$functions->shouldReceive('config_path')->once()->andReturn('');
+        self::$functions->shouldReceive('constant')->with('Illuminate\\Foundation\\Application::VERSION')->once()->andReturn('5.0.0');
 
         /**
          *
@@ -346,7 +358,8 @@ class PathsCommandTest extends \PHPUnit_Framework_TestCase {
 
         App::shouldReceive('make')->andReturn(true);
 
-        self::$functions->shouldReceive('app_path')->once()->andReturn('');
+        self::$functions->shouldReceive('config_path')->once()->andReturn('');
+        self::$functions->shouldReceive('constant')->with('Illuminate\\Foundation\\Application::VERSION')->once()->andReturn('5.0.0');
 
         /**
          * Expectation

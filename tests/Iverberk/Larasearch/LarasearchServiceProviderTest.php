@@ -1,12 +1,27 @@
-<?php
+<?php namespace Iverberk\Larasearch;
 
-use Illuminate\Support\Facades\App as App;
+use Illuminate\Support\Facades\App;
 use Mockery as m;
+
+function config_path($path = null)
+{
+    return LarasearchServiceProviderTest::$functions->config_path($path);
+}
 
 /**
  * Class LarasearchServiceProviderTest
  */
-class LarasearchServiceProviderTest extends PHPUnit_Framework_TestCase {
+class LarasearchServiceProviderTest extends \PHPUnit_Framework_TestCase {
+
+    public static $functions;
+    protected static $providers_real_path;
+
+    protected function setup()
+    {
+        self::$functions = m::mock();
+        self::$functions->shouldReceive('config_path')->andReturn('');
+        self::$providers_real_path = realpath(__DIR__ . '/../../../src/Iverberk/Larasearch');
+    }
 
     protected function tearDown()
     {
@@ -21,15 +36,16 @@ class LarasearchServiceProviderTest extends PHPUnit_Framework_TestCase {
         /**
          * Set
          */
-        $sp = m::mock('Iverberk\Larasearch\LarasearchServiceProvider[package, bootContainerBindings]', ['something']);
-
+        $sp = m::mock('Iverberk\Larasearch\LarasearchServiceProvider[package, bootContainerBindings, publishes]', ['something']);
         $sp->shouldAllowMockingProtectedMethods();
 
         /**
          * Expectation
          */
-        $sp->shouldReceive('package')
-            ->with('iverberk/larasearch')
+        $sp->shouldReceive('publishes')
+            ->with([
+                self::$providers_real_path . '/../../../config/config.php' => config_path('larasearch.php'),
+            ], 'config')
             ->once();
 
         $sp->shouldReceive('bootContainerBindings')
@@ -50,18 +66,19 @@ class LarasearchServiceProviderTest extends PHPUnit_Framework_TestCase {
          * Set
          */
         $sp = m::mock('Iverberk\Larasearch\LarasearchServiceProvider[' .
-            'bindProxy, bindIndex, bindLogger, bindElasticsearch, bindQuery, bindResult]', ['something']);
+            'bindProxy, bindConfig, bindIndex, bindLogger, bindElasticsearch, bindQuery, bindResult]', ['something']);
         $sp->shouldAllowMockingProtectedMethods();
 
         /**
          * Expectation
          */
-	    $sp->shouldReceive('bindElasticsearch')->once()->andReturn(true);
-	    $sp->shouldReceive('bindLogger')->once()->andReturn(true);
+        $sp->shouldReceive('bindConfig')->once()->andReturn(true);
+        $sp->shouldReceive('bindElasticsearch')->once()->andReturn(true);
+        $sp->shouldReceive('bindLogger')->once()->andReturn(true);
         $sp->shouldReceive('bindProxy')->once()->andReturn(true);
         $sp->shouldReceive('bindIndex')->once()->andReturn(true);
         $sp->shouldReceive('bindQuery')->once()->andReturn(true);
-	    $sp->shouldReceive('bindResult')->once()->andReturn(true);
+        $sp->shouldReceive('bindResult')->once()->andReturn(true);
 
         /**
          * Assertions
@@ -85,12 +102,12 @@ class LarasearchServiceProviderTest extends PHPUnit_Framework_TestCase {
          * Expectation
          */
         $config->shouldReceive('get')
-            ->with('larasearch::elasticsearch.params')
+            ->with('elasticsearch.params')
             ->once()
             ->andReturn([]);
 
         $app->shouldReceive('make')
-            ->with('config')
+            ->with('iverberk.larasearch.config')
             ->once()
             ->andReturn($config);
 
@@ -107,32 +124,32 @@ class LarasearchServiceProviderTest extends PHPUnit_Framework_TestCase {
         $sp->bindElasticsearch();
     }
 
-	/**
-	 * @test
-	 */
-	public function it_should_bind_logger()
-	{
-		/**
-		 * Set
-		 */
-		$app = m::mock('LaravelApp');
-		$sp = m::mock('Iverberk\Larasearch\LarasearchServiceProvider[bindLogger]', [$app]);
+    /**
+     * @test
+     */
+    public function it_should_bind_logger()
+    {
+        /**
+         * Set
+         */
+        $app = m::mock('LaravelApp');
+        $sp = m::mock('Iverberk\Larasearch\LarasearchServiceProvider[bindLogger]', [$app]);
 
-		/**
-		 * Expectation
-		 */
-		$app->shouldReceive('singleton')
-			->once()
-			->andReturnUsing(
-				function ($name, $closure) use ($app)
-				{
-					$this->assertEquals('iverberk.larasearch.logger', $name);
-					$this->assertInstanceOf('Monolog\Logger', $closure($app));
-				}
-			);
+        /**
+         * Expectation
+         */
+        $app->shouldReceive('singleton')
+            ->once()
+            ->andReturnUsing(
+                function ($name, $closure) use ($app)
+                {
+                    $this->assertEquals('iverberk.larasearch.logger', $name);
+                    $this->assertInstanceOf('Monolog\Logger', $closure($app));
+                }
+            );
 
-		$sp->bindLogger();
-	}
+        $sp->bindLogger();
+    }
 
     /**
      * @test
@@ -142,8 +159,16 @@ class LarasearchServiceProviderTest extends PHPUnit_Framework_TestCase {
         /**
          * Set
          */
+        App::clearResolvedInstances();
+        $config = m::mock('Iverberk\Larasearch\Config');
+        $config->shouldReceive('get')
+            ->with('elasticsearch.index_prefix', '')
+            ->andReturn('');
         App::shouldReceive('make')
-            ->with('iverberk.larasearch.index', Mockery::any())
+            ->with('iverberk.larasearch.config')
+            ->andReturn($config);
+        App::shouldReceive('make')
+            ->with('iverberk.larasearch.index', m::any())
             ->once()
             ->andReturn('mock');
 
@@ -253,36 +278,36 @@ class LarasearchServiceProviderTest extends PHPUnit_Framework_TestCase {
         $sp->bindProxy();
     }
 
-	/**
-	 * @test
-	 */
-	public function it_should_bind_result()
-	{
-		/**
-		 * Set
-		 */
-		$app = m::mock('LaravelApp');
-		$sp = m::mock('Iverberk\Larasearch\LarasearchServiceProvider[bindResult]', [$app]);
+    /**
+     * @test
+     */
+    public function it_should_bind_result()
+    {
+        /**
+         * Set
+         */
+        $app = m::mock('LaravelApp');
+        $sp = m::mock('Iverberk\Larasearch\LarasearchServiceProvider[bindResult]', [$app]);
 
-		/**
-		 * Expectation
-		 */
-		$app->shouldReceive('bind')
-			->once()
-			->andReturnUsing(
-				function ($name, $closure) use ($app)
-				{
-					$this->assertEquals('iverberk.larasearch.response.result', $name);
-					$this->assertInstanceOf('Iverberk\Larasearch\Response\Result',
-						$closure($app, []));
-				}
-			);
+        /**
+         * Expectation
+         */
+        $app->shouldReceive('bind')
+            ->once()
+            ->andReturnUsing(
+                function ($name, $closure) use ($app)
+                {
+                    $this->assertEquals('iverberk.larasearch.response.result', $name);
+                    $this->assertInstanceOf('Iverberk\Larasearch\Response\Result',
+                        $closure($app, []));
+                }
+            );
 
-		/**
-		 * Assertion
-		 */
-		$sp->bindResult();
-	}
+        /**
+         * Assertion
+         */
+        $sp->bindResult();
+    }
 
     /**
      * @test
@@ -293,7 +318,8 @@ class LarasearchServiceProviderTest extends PHPUnit_Framework_TestCase {
          * Set
          */
         $app = m::mock('Illuminate\Container\Container');
-        $sp = m::mock('Iverberk\Larasearch\LarasearchServiceProvider[registerCommands, commands]', [$app]);
+        $sp = m::mock('Iverberk\Larasearch\LarasearchServiceProvider[commands, mergeConfigFrom]', [$app]);
+        $sp->shouldAllowMockingProtectedMethods();
 
         /**
          * Expectation
@@ -325,10 +351,14 @@ class LarasearchServiceProviderTest extends PHPUnit_Framework_TestCase {
             ->once()
             ->andReturn(true);
 
+        $sp->shouldReceive('mergeConfigFrom')
+            ->with(self::$providers_real_path . '/../../../config/config.php', 'larasearch')
+            ->once();
+
         /**
          * Assertion
          */
-        $sp->registerCommands();
+        $sp->register();
     }
 
     /**
@@ -344,7 +374,7 @@ class LarasearchServiceProviderTest extends PHPUnit_Framework_TestCase {
         /**
          * Assertion
          */
-        $sp = new Iverberk\Larasearch\LarasearchServiceProvider($app);
+        $sp = new LarasearchServiceProvider($app);
         $this->assertEquals([], $sp->provides());
     }
 

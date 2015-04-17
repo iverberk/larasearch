@@ -10,13 +10,13 @@ class UtilsTest extends \PHPUnit_Framework_TestCase {
         ];
 
         $this->assertEquals('test_value', Utils::findKey($params, 'test_key'));
-        $this->assertEquals('test_value', Utils::findKey((object) $params, 'test_key'));
+        $this->assertEquals('test_value', Utils::findKey((object)$params, 'test_key'));
 
         $this->assertEquals('default_value', Utils::findKey($params, 'bad_key', 'default_value'));
-        $this->assertEquals('default_value', Utils::findKey((object) $params, 'bad_key', 'default_value'));
+        $this->assertEquals('default_value', Utils::findKey((object)$params, 'bad_key', 'default_value'));
 
         $this->assertEquals(null, Utils::findKey($params, 'bad_key'));
-        $this->assertEquals(null, Utils::findKey((object) $params, 'bad_key'));
+        $this->assertEquals(null, Utils::findKey((object)$params, 'bad_key'));
     }
 
     public function testThatArraysAreMergedRecursivelyByOverwritingCommonKeys()

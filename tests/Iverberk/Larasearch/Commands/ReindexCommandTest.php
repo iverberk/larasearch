@@ -26,8 +26,8 @@ class ReindexCommandTest extends \PHPUnit_Framework_TestCase {
         $command = m::mock('Iverberk\Larasearch\Commands\ReindexCommand');
         $options = array(
             array('relations', null, InputOption::VALUE_NONE, 'Reindex related Eloquent models', null),
-			array('mapping', null, InputOption::VALUE_REQUIRED, 'A file containing custom mappings', null),
-			array('dir', null, InputOption::VALUE_IS_ARRAY | InputOption::VALUE_REQUIRED, 'Directory to scan for searchable models', null),
+            array('mapping', null, InputOption::VALUE_REQUIRED, 'A file containing custom mappings', null),
+            array('dir', null, InputOption::VALUE_IS_ARRAY | InputOption::VALUE_REQUIRED, 'Directory to scan for searchable models', null),
             array('batch', null, InputOption::VALUE_OPTIONAL, 'The number of records to index in a single batch', 750),
             array('force', null, InputOption::VALUE_NONE, 'Overwrite existing indices and documents', null)
         );
@@ -127,7 +127,8 @@ class ReindexCommandTest extends \PHPUnit_Framework_TestCase {
         $model->shouldReceive('reindex')
             ->with(true, 750, null, \Mockery::type('closure'))
             ->times(5)
-            ->andReturnUsing(function($relations, $batch, $mapping, $callback) {
+            ->andReturnUsing(function ($relations, $batch, $mapping, $callback)
+            {
                 $callback(1);
             });
 

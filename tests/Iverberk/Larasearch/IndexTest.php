@@ -1,7 +1,6 @@
 <?php namespace Iverberk\Larasearch;
 
 use Illuminate\Support\Facades\App;
-use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Facade;
 use Mockery as m;
 use AspectMock\Test as am;
@@ -44,9 +43,9 @@ class IndexTest extends \PHPUnit_Framework_TestCase {
                 $model, $model, $model
             ], []);
 
-	    $model->shouldReceive('getEsId')
-		    ->times(3)
-		    ->andReturn(1);
+        $model->shouldReceive('getEsId')
+            ->times(3)
+            ->andReturn(1);
 
         $model->shouldReceive('transform')
             ->times(3)
@@ -60,7 +59,8 @@ class IndexTest extends \PHPUnit_Framework_TestCase {
          * Assertion
          *
          */
-        $index->import($model, [], 750, function($batch) use ($test) {
+        $index->import($model, [], 750, function ($batch) use ($test)
+        {
             $test->assertEquals(1, $batch);
         });
     }
@@ -85,13 +85,13 @@ class IndexTest extends \PHPUnit_Framework_TestCase {
          */
         $this->assertEquals($index, $index->setName('Mock'));
         $this->assertEquals('bar_mock', $index->getName());
-	}
+    }
 
     /**
      * @test
      */
     public function it_should_only_prepend_prefix_once()
-	{
+    {
         /**
          *
          * Set
@@ -100,12 +100,12 @@ class IndexTest extends \PHPUnit_Framework_TestCase {
          */
         list($index) = $this->getMocks('baz_');
 
-		/**
-		 * Assertions
-		 */
+        /**
+         * Assertions
+         */
         $this->assertEquals($index, $index->setName('baz_MockMe'));
-		$this->assertEquals('baz_mockme', $index->getName());
-	}
+        $this->assertEquals('baz_mockme', $index->getName());
+    }
 
     /**
      * @test
@@ -141,7 +141,7 @@ class IndexTest extends \PHPUnit_Framework_TestCase {
          * @var \Mockery\Mock $proxy
          * @var \Mockery\Mock $client
          */
-        list($index, $proxy, $client) = $this->getMocks();
+        list($index, $proxy, $client, $config) = $this->getMocks();
         $test = $this;
 
         /**
@@ -149,8 +149,8 @@ class IndexTest extends \PHPUnit_Framework_TestCase {
          * Expectation
          *
          */
-        Config::shouldReceive('get')
-            ->with('larasearch::elasticsearch.analyzers')
+        $config->shouldReceive('get')
+            ->with('elasticsearch.analyzers')
             ->andReturn([
                 'autocomplete',
                 'suggest',
@@ -162,8 +162,8 @@ class IndexTest extends \PHPUnit_Framework_TestCase {
                 'word_end'
             ]);
 
-        Config::shouldReceive('get')
-            ->with('larasearch::elasticsearch.defaults.index')
+        $config->shouldReceive('get')
+            ->with('elasticsearch.defaults.index')
             ->andReturn([
                 'settings' => [
                     'number_of_shards' => 1,
@@ -282,7 +282,8 @@ class IndexTest extends \PHPUnit_Framework_TestCase {
                 ]]);
 
         $client->shouldReceive('indices->create')
-            ->andReturnUsing(function($params) use ($test) {
+            ->andReturnUsing(function ($params) use ($test)
+            {
                 $test->assertEquals(json_decode(
                         '{
                           "index": "husband",
@@ -603,14 +604,14 @@ class IndexTest extends \PHPUnit_Framework_TestCase {
 
         $proxy->shouldReceive('getType')->andReturn('Husband');
         $proxy->shouldReceive('getConfig')->andReturn([
-                'autocomplete' => ['name', 'wife.name'],
-                'suggest' => ['name'],
-                'text_start' => ['name', 'wife.children.name'],
-                'text_middle' => ['name', 'wife.children.name'],
-                'text_end' => ['name', 'wife.children.name'],
-                'word_start' => ['name', 'wife.children.name'],
-                'word_middle' => ['name', 'wife.children.name'],
-                'word_end' => ['name', 'wife.children.name']
+            'autocomplete' => ['name', 'wife.name'],
+            'suggest' => ['name'],
+            'text_start' => ['name', 'wife.children.name'],
+            'text_middle' => ['name', 'wife.children.name'],
+            'text_end' => ['name', 'wife.children.name'],
+            'word_start' => ['name', 'wife.children.name'],
+            'word_middle' => ['name', 'wife.children.name'],
+            'word_end' => ['name', 'wife.children.name']
         ]);
 
         /**
@@ -635,7 +636,7 @@ class IndexTest extends \PHPUnit_Framework_TestCase {
          * @var \Mockery\Mock $proxy
          * @var \Mockery\Mock $client
          */
-        list($index, $proxy, $client) = $this->getMocks('bar_');
+        list($index, $proxy, $client, $config) = $this->getMocks('bar_');
         $test = $this;
 
         /**
@@ -643,8 +644,8 @@ class IndexTest extends \PHPUnit_Framework_TestCase {
          * Expectation
          *
          */
-        Config::shouldReceive('get')
-            ->with('larasearch::elasticsearch.analyzers')
+        $config->shouldReceive('get')
+            ->with('elasticsearch.analyzers')
             ->andReturn([
                 'autocomplete',
                 'suggest',
@@ -656,8 +657,8 @@ class IndexTest extends \PHPUnit_Framework_TestCase {
                 'word_end'
             ]);
 
-        Config::shouldReceive('get')
-            ->with('larasearch::elasticsearch.defaults.index')
+        $config->shouldReceive('get')
+            ->with('elasticsearch.defaults.index')
             ->andReturn([
                 'settings' => [
                     'number_of_shards' => 1,
@@ -777,7 +778,8 @@ class IndexTest extends \PHPUnit_Framework_TestCase {
 
 
         $client->shouldReceive('indices->create')
-            ->andReturnUsing(function($params) use ($test) {
+            ->andReturnUsing(function ($params) use ($test)
+            {
                 $test->assertEquals(json_decode(
                         '{
                           "index": "bar_husband",
@@ -1098,14 +1100,14 @@ class IndexTest extends \PHPUnit_Framework_TestCase {
 
         $proxy->shouldReceive('getType')->andReturn('Husband');
         $proxy->shouldReceive('getConfig')->andReturn([
-                'autocomplete' => ['name', 'wife.name'],
-                'suggest' => ['name'],
-                'text_start' => ['name', 'wife.children.name'],
-                'text_middle' => ['name', 'wife.children.name'],
-                'text_end' => ['name', 'wife.children.name'],
-                'word_start' => ['name', 'wife.children.name'],
-                'word_middle' => ['name', 'wife.children.name'],
-                'word_end' => ['name', 'wife.children.name']
+            'autocomplete' => ['name', 'wife.name'],
+            'suggest' => ['name'],
+            'text_start' => ['name', 'wife.children.name'],
+            'text_middle' => ['name', 'wife.children.name'],
+            'text_end' => ['name', 'wife.children.name'],
+            'word_start' => ['name', 'wife.children.name'],
+            'word_middle' => ['name', 'wife.children.name'],
+            'word_end' => ['name', 'wife.children.name']
         ]);
 
         /**
@@ -2055,7 +2057,7 @@ class IndexTest extends \PHPUnit_Framework_TestCase {
         $client->shouldReceive('indices->updateAliases')
             ->twice()
             ->with([
-                'body' => ['actions' => [ [ 'add' => ['index' => 'bar_Husband', 'alias' => 'bar_Father' ]]]]
+                'body' => ['actions' => [['add' => ['index' => 'bar_Husband', 'alias' => 'bar_Father']]]]
             ]);
 
         /**
@@ -2063,8 +2065,8 @@ class IndexTest extends \PHPUnit_Framework_TestCase {
          * Assertion
          *
          */
-        Index::updateAliases(['actions' => [ [ 'add' => ['index' => 'Husband', 'alias' => 'Father' ]]]]);
-        Index::updateAliases(['actions' => [ [ 'add' => ['index' => 'bar_Husband', 'alias' => 'bar_Father' ]]]]);
+        Index::updateAliases(['actions' => [['add' => ['index' => 'Husband', 'alias' => 'Father']]]]);
+        Index::updateAliases(['actions' => [['add' => ['index' => 'bar_Husband', 'alias' => 'bar_Father']]]]);
     }
 
     /**
@@ -2116,10 +2118,10 @@ class IndexTest extends \PHPUnit_Framework_TestCase {
          * @var \Mockery\Mock $proxy
          * @var \Mockery\Mock $client
          */
-        list($index, $proxy, $client) = $this->getMocks('bar_');
+        list($index, $proxy, $client, $config) = $this->getMocks('bar_');
 
         // Mock the self::$client variable
-        am::double('Iverberk\Larasearch\Index', ['self::$client' => $client]);
+        am::double('Iverberk\Larasearch\Index', ['self::$client' => $client, 'self::$config' => $config]);
 
         /**
          *
@@ -2154,10 +2156,10 @@ class IndexTest extends \PHPUnit_Framework_TestCase {
          * @var \Mockery\Mock $proxy
          * @var \Mockery\Mock $client
          */
-        list($index, $proxy, $client) = $this->getMocks();
+        list($index, $proxy, $client, $config) = $this->getMocks();
 
         // Mock the self::$client variable
-        am::double('Iverberk\Larasearch\Index', ['self::$client' => $client]);
+        am::double('Iverberk\Larasearch\Index', ['self::$client' => $client, 'self::$config' => $config]);
 
         /**
          *
@@ -2190,10 +2192,10 @@ class IndexTest extends \PHPUnit_Framework_TestCase {
          * @var \Mockery\Mock $proxy
          * @var \Mockery\Mock $client
          */
-        list($index, $proxy, $client) = $this->getMocks('bar_');
+        list($index, $proxy, $client, $config) = $this->getMocks('bar_');
 
         // Mock the self::$client variable
-        am::double('Iverberk\Larasearch\Index', ['self::$client' => $client]);
+        am::double('Iverberk\Larasearch\Index', ['self::$client' => $client, 'self::$config' => $config]);
 
         /**
          *
@@ -2228,9 +2230,6 @@ class IndexTest extends \PHPUnit_Framework_TestCase {
          *
          */
         Facade::clearResolvedInstances();
-        Config::shouldReceive('get')
-            ->with('larasearch::elasticsearch.index_prefix', '')
-            ->andReturn($index_prefix);
 
         $client = m::mock('Elasticsearch\Client');
 
@@ -2238,13 +2237,22 @@ class IndexTest extends \PHPUnit_Framework_TestCase {
             ->with('Elasticsearch')
             ->andReturn($client);
 
+        $config = m::mock('Iverberk\\Larasearch\\Config');
+        $config->shouldReceive('get')
+            ->with('elasticsearch.index_prefix', '')
+            ->andReturn($index_prefix);
+
+        App::shouldReceive('make')
+            ->with('iverberk.larasearch.config')
+            ->andReturn($config);
+
         $proxy = m::mock('Iverberk\Larasearch\Proxy');
         $proxy->shouldReceive('getModel->getTable')
             ->andReturn('Husband');
 
-        $index = m::mock('Iverberk\Larasearch\Index', [$proxy], [ m::BLOCKS => ['setName', 'setProxy']])->makePartial();
+        $index = m::mock('Iverberk\Larasearch\Index', [$proxy], [m::BLOCKS => ['setName', 'setProxy']])->makePartial();
 
-        return [$index, $proxy, $client];
+        return [$index, $proxy, $client, $config];
     }
 
 }

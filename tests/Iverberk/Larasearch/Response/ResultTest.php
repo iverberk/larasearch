@@ -3,7 +3,6 @@
 use Mockery as m;
 
 class ResultTest extends \PHPUnit_Framework_TestCase {
-
     /**
      * @var \Mockery\Mock
      */
@@ -133,13 +132,13 @@ class ResultTest extends \PHPUnit_Framework_TestCase {
     public function it_should_convert_to_array()
     {
         $this->assertEquals([
-	        'field1' => 'value1',
-	        'field2' => 'value2',
-	        'nested' => [
-		        'nested_field' => 'nested_value'
-	        ]
-        ],
-        $this->result->toArray());
+                'field1' => 'value1',
+                'field2' => 'value2',
+                'nested' => [
+                    'nested_field' => 'nested_value'
+                ]
+            ],
+            $this->result->toArray());
     }
 
     /**
@@ -154,4 +153,4 @@ class ResultTest extends \PHPUnit_Framework_TestCase {
         unset($this->result['foo']);
     }
 
-} 
+}

@@ -79,20 +79,20 @@ class ProxyTest extends \PHPUnit_Framework_TestCase {
     public function it_can_get_config()
     {
         $this->assertEquals([
-            'model' => $this->model,
-            'type' => 'Husband',
-            'client' => $this->client,
-            'index' => $this->index,
-            'autocomplete' => ['name', 'wife.name'],
-            'suggest' => ['name'],
-            'text_start' => ['name', 'wife.children.name'],
-            'text_middle' => ['name', 'wife.children.name'],
-            'text_end' => ['name', 'wife.children.name'],
-            'word_start' => ['name', 'wife.children.name'],
-            'word_middle' => ['name', 'wife.children.name'],
-            'word_end' => ['name', 'wife.children.name']
-        ],
-        $this->proxy->getConfig());
+                'model' => $this->model,
+                'type' => 'Husband',
+                'client' => $this->client,
+                'index' => $this->index,
+                'autocomplete' => ['name', 'wife.name'],
+                'suggest' => ['name'],
+                'text_start' => ['name', 'wife.children.name'],
+                'text_middle' => ['name', 'wife.children.name'],
+                'text_end' => ['name', 'wife.children.name'],
+                'word_start' => ['name', 'wife.children.name'],
+                'word_middle' => ['name', 'wife.children.name'],
+                'word_end' => ['name', 'wife.children.name']
+            ],
+            $this->proxy->getConfig());
     }
 
     /**
@@ -147,7 +147,7 @@ class ProxyTest extends \PHPUnit_Framework_TestCase {
         $query->shouldReceive('execute')->andReturn('result');
 
         App::shouldReceive('make')
-            ->with('iverberk.larasearch.query', [ 'proxy' => $this->proxy, 'term' => '*', 'options' => ['option']])
+            ->with('iverberk.larasearch.query', ['proxy' => $this->proxy, 'term' => '*', 'options' => ['option']])
             ->once()
             ->andReturn($query);
 
@@ -161,83 +161,83 @@ class ProxyTest extends \PHPUnit_Framework_TestCase {
         $this->assertEquals('result', $result);
     }
 
-	/**
-	 * @test
-	 */
-	public function it_can_search_with_a_query()
-	{
-		/**
-		 *
-		 * Set
-		 *
-		 */
-		$queryMock = m::mock('Iverberk\Larasearch\Query');
+    /**
+     * @test
+     */
+    public function it_can_search_with_a_query()
+    {
+        /**
+         *
+         * Set
+         *
+         */
+        $queryMock = m::mock('Iverberk\Larasearch\Query');
 
-		$query['index'] = 'my_index';
-		$query['type']  = 'my_type';
-		$query['body']['query']['match']['testField'] = 'abc';
+        $query['index'] = 'my_index';
+        $query['type'] = 'my_type';
+        $query['body']['query']['match']['testField'] = 'abc';
 
-		/**
-		 *
-		 * Expectation
-		 *
-		 */
-		$queryMock->shouldReceive('execute')->andReturn('result');
+        /**
+         *
+         * Expectation
+         *
+         */
+        $queryMock->shouldReceive('execute')->andReturn('result');
 
-		App::shouldReceive('make')
-			->with('iverberk.larasearch.query', [
-				'proxy' => $this->proxy,
-				'term' => null,
-				'options' => array_merge(['query' => $query], ['option'])])
-			->once()
-			->andReturn($queryMock);
+        App::shouldReceive('make')
+            ->with('iverberk.larasearch.query', [
+                'proxy' => $this->proxy,
+                'term' => null,
+                'options' => array_merge(['query' => $query], ['option'])])
+            ->once()
+            ->andReturn($queryMock);
 
-		/**
-		 *
-		 * Assertion
-		 *
-		 */
-		$result = $this->proxy->searchByQuery($query, ['option']);
+        /**
+         *
+         * Assertion
+         *
+         */
+        $result = $this->proxy->searchByQuery($query, ['option']);
 
-		$this->assertEquals('result', $result);
-	}
+        $this->assertEquals('result', $result);
+    }
 
-	/**
-	 * @test
-	 */
-	public function it_can_search_for_a_single_document()
-	{
-		/**
-		 *
-		 * Set
-		 *
-		 */
-		$query['index'] = 'my_index';
-		$query['type']  = 'my_type';
-		$query['id'] = 'abc';
+    /**
+     * @test
+     */
+    public function it_can_search_for_a_single_document()
+    {
+        /**
+         *
+         * Set
+         *
+         */
+        $query['index'] = 'my_index';
+        $query['type'] = 'my_type';
+        $query['id'] = 'abc';
 
-		/**
-		 *
-		 * Expectation
-		 *
-		 */
-		$this->index->shouldReceive('getName')->andReturn('index');
-		$this->client->shouldReceive('get')->andReturn(['hit']);
+        /**
+         *
+         * Expectation
+         *
+         */
+        $this->index->shouldReceive('getName')->andReturn('index');
+        $this->client->shouldReceive('get')->andReturn(['hit']);
 
-		App::shouldReceive('make')
-			->with('iverberk.larasearch.response.result', ['hit'])
-			->once()
-			->andReturn('result');
+        App::shouldReceive('make')
+            ->with('iverberk.larasearch.response.result', ['hit'])
+            ->once()
+            ->andReturn('result');
 
-		/**
-		 *
-		 * Assertion
-		 *
-		 */
-		$result = $this->proxy->searchById('abc');
+        /**
+         *
+         * Assertion
+         *
+         */
+        $result = $this->proxy->searchById('abc');
 
-		$this->assertEquals('result', $result);
-	}
+        $this->assertEquals('result', $result);
+    }
 
     /**
      * @test
@@ -336,7 +336,8 @@ class ProxyTest extends \PHPUnit_Framework_TestCase {
 
         $indexDouble->verifyInvoked('refresh', 'Husband');
         $indexDouble->verifyInvoked('clean', 'Husband');
-        $indexDouble->verifyInvoked('updateAliases', function($calls) use ($test, $actions) {
+        $indexDouble->verifyInvoked('updateAliases', function ($calls) use ($test, $actions)
+        {
             $test->assertEquals($actions, $calls[0]);
         });
     }
@@ -363,8 +364,8 @@ class ProxyTest extends \PHPUnit_Framework_TestCase {
             ->with(true)
             ->andReturn('body');
 
-	    $this->model->shouldReceive('getEsId')
-		    ->andReturn(1);
+        $this->model->shouldReceive('getEsId')
+            ->andReturn(1);
 
         $this->client->shouldReceive('index')
             ->with([
@@ -386,59 +387,59 @@ class ProxyTest extends \PHPUnit_Framework_TestCase {
         $this->proxy->refreshDoc($this->model);
     }
 
-	/**
-	 * @test
-	 */
-	public function it_should_delete_docs()
-	{
-		/**
-		 *
-		 * Expectation
-		 *
-		 */
-		$this->client->shouldReceive('delete')
-			->with([
-				'id' => 1,
-				'index' => 'Husband',
-				'type' => 'Husband'
-			])
-			->andReturn();
+    /**
+     * @test
+     */
+    public function it_should_delete_docs()
+    {
+        /**
+         *
+         * Expectation
+         *
+         */
+        $this->client->shouldReceive('delete')
+            ->with([
+                'id' => 1,
+                'index' => 'Husband',
+                'type' => 'Husband'
+            ])
+            ->andReturn();
 
-		$this->index->shouldReceive('getName')
-			->andReturn('Husband');
+        $this->index->shouldReceive('getName')
+            ->andReturn('Husband');
 
-		/**
-		 *
-		 * Assertion
-		 *
-		 */
-		$this->proxy->deleteDoc(1);
-	}
+        /**
+         *
+         * Assertion
+         *
+         */
+        $this->proxy->deleteDoc(1);
+    }
 
-	/**
-	 * @test
-	 */
-	public function it_should_enable_indexing_globally()
-	{
-		/**
-		 * Assertions
-		 */
-		$this->proxy->enableIndexing();
+    /**
+     * @test
+     */
+    public function it_should_enable_indexing_globally()
+    {
+        /**
+         * Assertions
+         */
+        $this->proxy->enableIndexing();
 
-		$this->assertEquals(\Husband::$__es_enable, true);
-	}
+        $this->assertEquals(\Husband::$__es_enable, true);
+    }
 
-	/**
-	 * @test
-	 */
-	public function it_should_disable_indexing_globally()
-	{
-		/**
-		 * Assertions
-		 */
-		$this->proxy->disableIndexing();
+    /**
+     * @test
+     */
+    public function it_should_disable_indexing_globally()
+    {
+        /**
+         * Assertions
+         */
+        $this->proxy->disableIndexing();
 
-		$this->assertEquals(\Husband::$__es_enable, false);
-	}
+        $this->assertEquals(\Husband::$__es_enable, false);
+    }
 
 }

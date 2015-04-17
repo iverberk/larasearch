@@ -28,14 +28,15 @@ class QueryTest extends \PHPUnit_Framework_TestCase {
         $query = m::mock('Iverberk\Larasearch\Query', [$proxy, 'term'])->makePartial();
 
         /**
-         * 
+         *
          * Expectation
-         * 
+         *
          */
         $client->shouldReceive('search')
-            ->andReturnUsing(function($params) use ($test) {
+            ->andReturnUsing(function ($params) use ($test)
+            {
                 $test->assertEquals(json_decode(
-                    '{
+                        '{
                       "index": "Husband",
                       "type": "Husband",
                       "body": {
@@ -113,9 +114,10 @@ class QueryTest extends \PHPUnit_Framework_TestCase {
          *
          */
         $client->shouldReceive('search')
-            ->andReturnUsing(function($params) use ($test) {
+            ->andReturnUsing(function ($params) use ($test)
+            {
                 $test->assertEquals(json_decode(
-                    '{
+                        '{
                       "index": "Husband",
                       "type": "Husband",
                       "body": {
@@ -183,9 +185,10 @@ class QueryTest extends \PHPUnit_Framework_TestCase {
          *
          */
         $client->shouldReceive('search')
-            ->andReturnUsing(function($params) use ($test) {
+            ->andReturnUsing(function ($params) use ($test)
+            {
                 $test->assertEquals(json_decode(
-                    '{
+                        '{
                       "index": "Husband",
                       "type": "Husband",
                       "body": {
@@ -286,9 +289,10 @@ class QueryTest extends \PHPUnit_Framework_TestCase {
          *
          */
         $client->shouldReceive('search')
-            ->andReturnUsing(function($params) use ($test) {
+            ->andReturnUsing(function ($params) use ($test)
+            {
                 $test->assertEquals(json_decode(
-                    '{
+                        '{
                       "index": "Husband",
                       "type": "Husband",
                       "body": {
@@ -376,9 +380,10 @@ class QueryTest extends \PHPUnit_Framework_TestCase {
          *
          */
         $client->shouldReceive('search')
-            ->andReturnUsing(function($params) use ($test) {
+            ->andReturnUsing(function ($params) use ($test)
+            {
                 $test->assertEquals(json_decode(
-                    '{
+                        '{
                       "index": "Husband",
                       "type": "Husband",
                       "body": {
@@ -441,7 +446,8 @@ class QueryTest extends \PHPUnit_Framework_TestCase {
          *
          */
         $client->shouldReceive('search')
-            ->andReturnUsing(function($params) use ($test) {
+            ->andReturnUsing(function ($params) use ($test)
+            {
                 $test->assertEquals(json_decode(
                         '{
                           "index": "Husband",
@@ -505,9 +511,10 @@ class QueryTest extends \PHPUnit_Framework_TestCase {
          *
          */
         $client->shouldReceive('search')
-            ->andReturnUsing(function($params) use ($test) {
+            ->andReturnUsing(function ($params) use ($test)
+            {
                 $test->assertEquals(json_decode(
-                    '{
+                        '{
                       "index": "Husband",
                       "type": "Husband",
                       "body": {
@@ -589,7 +596,8 @@ class QueryTest extends \PHPUnit_Framework_TestCase {
          *
          */
         $client->shouldReceive('search')
-            ->andReturnUsing(function($params) use ($test) {
+            ->andReturnUsing(function ($params) use ($test)
+            {
                 $test->assertEquals(json_decode(
                         '{
                           "index": "Husband",
@@ -675,7 +683,8 @@ class QueryTest extends \PHPUnit_Framework_TestCase {
          *
          */
         $client->shouldReceive('search')
-            ->andReturnUsing(function($params) use ($test) {
+            ->andReturnUsing(function ($params) use ($test)
+            {
                 $query = json_decode(
                     '{
                       "index": "Husband",
@@ -771,9 +780,10 @@ class QueryTest extends \PHPUnit_Framework_TestCase {
          *
          */
         $client->shouldReceive('search')
-            ->andReturnUsing(function($params) use ($test) {
+            ->andReturnUsing(function ($params) use ($test)
+            {
                 $test->assertEquals(json_decode(
-                    '{
+                        '{
                       "index": "Husband",
                       "type": "Husband",
                       "body": {
@@ -863,9 +873,10 @@ class QueryTest extends \PHPUnit_Framework_TestCase {
          *
          */
         $client->shouldReceive('search')
-            ->andReturnUsing(function($params) use ($test) {
+            ->andReturnUsing(function ($params) use ($test)
+            {
                 $test->assertEquals(json_decode(
-                    '{
+                        '{
                       "index": "Husband",
                       "type": "Husband",
                       "body": {
@@ -913,14 +924,15 @@ class QueryTest extends \PHPUnit_Framework_TestCase {
         list($proxy, $client, $model) = $this->getMocks();
         $test = $this;
 
-        $query = m::mock('Iverberk\Larasearch\Query', [$proxy, 'term', ['sort' => 'name'] ])->makePartial();
-        
+        $query = m::mock('Iverberk\Larasearch\Query', [$proxy, 'term', ['sort' => 'name']])->makePartial();
+
         /**
          * Expectation
          */
 
         $client->shouldReceive('search')
-            ->andReturnUsing(function($params) use ($test) {
+            ->andReturnUsing(function ($params) use ($test)
+            {
                 $test->assertEquals(json_decode(
                     '{
                         "index": "Husband",

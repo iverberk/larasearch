@@ -44,7 +44,7 @@ class LarasearchServiceProviderTest extends \PHPUnit_Framework_TestCase {
          */
         $sp->shouldReceive('publishes')
             ->with([
-                self::$providers_real_path . '/../../../config/config.php' => config_path('larasearch.php'),
+                self::$providers_real_path . '/../../config/config.php' => config_path('larasearch.php'),
             ], 'config')
             ->once();
 
@@ -352,7 +352,7 @@ class LarasearchServiceProviderTest extends \PHPUnit_Framework_TestCase {
             ->andReturn(true);
 
         $sp->shouldReceive('mergeConfigFrom')
-            ->with(self::$providers_real_path . '/../../../config/config.php', 'larasearch')
+            ->with(self::$providers_real_path . '/../../config/config.php', 'larasearch')
             ->once();
 
         /**

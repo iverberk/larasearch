@@ -10,6 +10,7 @@ use Monolog\Logger;
 
 class LarasearchServiceProvider extends ServiceProvider
 {
+
     /**
      * Indicates if loading of the provider is deferred.
      *
@@ -22,7 +23,7 @@ class LarasearchServiceProvider extends ServiceProvider
         $this->bootContainerBindings();
 
         $this->publishes([
-            __DIR__ . '/../../../config/config.php' => config_path('larasearch.php'),
+            __DIR__ . '/../../config/config.php' => config_path('larasearch.php'),
         ], 'config');
     }
 
@@ -35,9 +36,7 @@ class LarasearchServiceProvider extends ServiceProvider
     {
         $this->registerCommands();
 
-        $this->mergeConfigFrom(
-            __DIR__ . '/../../../config/config.php', 'larasearch'
-        );
+        $this->mergeConfigFrom(__DIR__ . '/../../config/config.php', 'larasearch');
     }
 
     /**

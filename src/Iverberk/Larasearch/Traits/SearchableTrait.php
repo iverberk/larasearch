@@ -74,7 +74,7 @@ trait SearchableTrait {
     {
         $proxy = static::getProxy();
 
-        if (method_exists($proxy, $method))
+        if (is_callable([$proxy, $method]))
         {
             return call_user_func_array(array($proxy, $method), $parameters);
         }
@@ -93,7 +93,7 @@ trait SearchableTrait {
     {
         $proxy = static::getProxy();
 
-        if (method_exists($proxy, $method))
+        if (is_callable([$proxy, $method]))
         {
             return call_user_func_array(array($proxy, $method), $parameters);
         }

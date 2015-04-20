@@ -2,7 +2,6 @@
 
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\File;
-use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
 use Mockery as m;
 
@@ -19,9 +18,9 @@ function constant($const)
     return PathsCommandTest::$functions->constant($const);
 }
 
-function config_path()
+function base_path()
 {
-    return PathsCommandTest::$functions->config_path();
+    return PathsCommandTest::$functions->base_path();
 }
 
 /**
@@ -122,8 +121,7 @@ class PathsCommandTest extends \PHPUnit_Framework_TestCase {
 
         App::shouldReceive('make')->andReturn(true);
 
-        self::$functions->shouldReceive('config_path')->once()->andReturn('');
-        self::$functions->shouldReceive('constant')->with('Illuminate\\Foundation\\Application::VERSION')->once()->andReturn('5.0.0');
+        self::$functions->shouldReceive('base_path')->once()->andReturn('');
 
         /**
          *
@@ -285,7 +283,7 @@ class PathsCommandTest extends \PHPUnit_Framework_TestCase {
     /**
      * @test
      */
-    public function it_should_fire_with_config_confirmed()
+    public function it_should_fire_with_laravel_and_config_confirmed()
     {
         /**
          *
@@ -302,14 +300,17 @@ class PathsCommandTest extends \PHPUnit_Framework_TestCase {
 
         App::shouldReceive('make')->andReturn(true);
 
-        self::$functions->shouldReceive('config_path')->once()->andReturn('');
-        self::$functions->shouldReceive('constant')->with('Illuminate\\Foundation\\Application::VERSION')->once()->andReturn('5.0.0');
+        self::$functions->shouldReceive('base_path')->once()->andReturn('');
 
         /**
          *
          * Expectation
          *
          */
+        $command->shouldReceive('getLaravel')
+            ->once()
+            ->andReturn(true);
+
         $command->shouldReceive('argument')
             ->with('model')
             ->once()
@@ -358,12 +359,15 @@ class PathsCommandTest extends \PHPUnit_Framework_TestCase {
 
         App::shouldReceive('make')->andReturn(true);
 
-        self::$functions->shouldReceive('config_path')->once()->andReturn('');
-        self::$functions->shouldReceive('constant')->with('Illuminate\\Foundation\\Application::VERSION')->once()->andReturn('5.0.0');
+        self::$functions->shouldReceive('base_path')->once()->andReturn('');
 
         /**
          * Expectation
          */
+        $command->shouldReceive('getLaravel')
+            ->once()
+            ->andReturn(true);
+
         $command->shouldReceive('argument')
             ->with('model')
             ->once()

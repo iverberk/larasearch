@@ -23,7 +23,7 @@ class LarasearchServiceProvider extends ServiceProvider
         $this->bootContainerBindings();
 
         $this->publishes([
-            __DIR__ . '/../../config/config.php' => $this->app->basePath('config/larasearch.php'),
+            __DIR__ . '/../../config/larasearch.php' => base_path('config/larasearch.php'),
         ], 'config');
     }
 
@@ -46,22 +46,12 @@ class LarasearchServiceProvider extends ServiceProvider
      */
     public function bootContainerBindings()
     {
-        $this->bindConfig();
         $this->bindElasticsearch();
         $this->bindLogger();
         $this->bindIndex();
         $this->bindQuery();
         $this->bindProxy();
         $this->bindResult();
-    }
-
-    /**
-     * Bind a Larasearch config repository to the container
-     */
-    protected function bindConfig()
-    {
-        $this->app->singleton('Iverberk\\Larasearch\\Config');
-        $this->app->alias('Iverberk\\Larasearch\\Config', 'iverberk.larasearch.config');
     }
 
     /**

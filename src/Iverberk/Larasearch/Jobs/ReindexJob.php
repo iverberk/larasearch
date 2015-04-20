@@ -1,6 +1,6 @@
 <?php namespace Iverberk\Larasearch\Jobs;
 
-use Iverberk\Larasearch\Config;
+use Illuminate\Config\Repository;
 use Illuminate\Foundation\Application;
 use Illuminate\Queue\Jobs\Job;
 use Exception;
@@ -24,9 +24,9 @@ class ReindexJob {
 
     /**
      * @param Application $app
-     * @param Config
+     * @param Repository $config
      */
-    public function __construct(Application $app, Config $config)
+    public function __construct(Application $app, Repository $config)
     {
         $this->app = $app;
         $this->config = $config;
@@ -34,7 +34,7 @@ class ReindexJob {
 
     public function fire(Job $job, $models)
     {
-        $loggerContainerBinding = $this->config->get('logger', 'iverberk.larasearch.logger');
+        $loggerContainerBinding = $this->config->get('larasearch.logger');
         $logger = $this->app->make($loggerContainerBinding);
 
         foreach ($models as $model)

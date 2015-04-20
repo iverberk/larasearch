@@ -305,40 +305,35 @@ class PathsCommand extends Command {
     {
         if ($this->option('write-config'))
         {
-            if (version_compare(constant('Illuminate\\Foundation\\Application::VERSION'), '5.0.0', '>='))
-            {
-                $configFile = config_path() . '/larasearch.php';
+            $configFile = base_path() . '/config/larasearch.php';
 
-                if (!File::exists($configFile))
+            if ($this->getLaravel())
+            {
+                if ( ! File::exists($configFile))
                 {
                     if ($this->confirm('It appears that you have not yet published the larasearch config. Would you like to do this now?', false))
                     {
-                        $this->call('vendor:publish', ['--provider' => 'Iverberk\\Larasearch\\Providers\\L5ServiceProvider', '--tag' => 'config']);
-                    } else
+                        $this->call('vendor:publish', ['--provider' => 'Iverberk\\Larasearch\LarasearchServiceProvider', '--tag' => 'config']);
+                    }
+                    else
                     {
                         return;
                     }
                 }
-            } else
+            }
+            else
             {
-                $configFile = app_path() . '/config/packages/iverberk/larasearch/config.php';
-
-                if (!File::exists($configFile))
+                if ( ! File::exists($configFile))
                 {
-                    if ($this->confirm('It appears that you have not yet published the larasearch config. Would you like to do this now?', false))
-                    {
-                        $this->call('config:publish', ['package' => 'iverberk/larasearch']);
-                    } else
-                    {
-                        return;
-                    }
+                    $this->info('Lumen application detected. Please copy the config manually to config/larasearch.php.');
                 }
             }
 
             File::put(dirname($configFile) . "/paths.json", json_encode(['paths' => $this->paths, 'reversedPaths' => $this->reversedPaths], JSON_PRETTY_PRINT));
 
             $this->info('Paths file written to local package configuration');
-        } else
+        }
+        else
         {
             $this->info(json_encode(['paths' => $this->paths, 'reversedPaths' => $this->reversedPaths], JSON_PRETTY_PRINT));
         }

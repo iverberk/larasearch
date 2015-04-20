@@ -1,11 +1,12 @@
 <?php namespace Iverberk\Larasearch;
 
 use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Config;
 use Mockery as m;
 
-function config_path($path = null)
+function base_path($path = null)
 {
-    return LarasearchServiceProviderTest::$functions->config_path($path);
+    return LarasearchServiceProviderTest::$functions->base_path($path);
 }
 
 /**
@@ -19,7 +20,7 @@ class LarasearchServiceProviderTest extends \PHPUnit_Framework_TestCase {
     protected function setup()
     {
         self::$functions = m::mock();
-        self::$functions->shouldReceive('config_path')->andReturn('');
+        self::$functions->shouldReceive('base_path')->andReturn('');
         self::$providers_real_path = realpath(__DIR__ . '/../../../src/Iverberk/Larasearch');
     }
 
@@ -44,7 +45,7 @@ class LarasearchServiceProviderTest extends \PHPUnit_Framework_TestCase {
          */
         $sp->shouldReceive('publishes')
             ->with([
-                self::$providers_real_path . '/../../config/config.php' => config_path('larasearch.php'),
+                self::$providers_real_path . '/../../config/larasearch.php' => base_path('config/larasearch.php'),
             ], 'config')
             ->once();
 
@@ -66,13 +67,12 @@ class LarasearchServiceProviderTest extends \PHPUnit_Framework_TestCase {
          * Set
          */
         $sp = m::mock('Iverberk\Larasearch\LarasearchServiceProvider[' .
-            'bindProxy, bindConfig, bindIndex, bindLogger, bindElasticsearch, bindQuery, bindResult]', ['something']);
+            'bindProxy, bindIndex, bindLogger, bindElasticsearch, bindQuery, bindResult]', ['something']);
         $sp->shouldAllowMockingProtectedMethods();
 
         /**
          * Expectation
          */
-        $sp->shouldReceive('bindConfig')->once()->andReturn(true);
         $sp->shouldReceive('bindElasticsearch')->once()->andReturn(true);
         $sp->shouldReceive('bindLogger')->once()->andReturn(true);
         $sp->shouldReceive('bindProxy')->once()->andReturn(true);
@@ -160,13 +160,8 @@ class LarasearchServiceProviderTest extends \PHPUnit_Framework_TestCase {
          * Set
          */
         App::clearResolvedInstances();
-        $config = m::mock('Iverberk\Larasearch\Config');
-        $config->shouldReceive('get')
-            ->with('elasticsearch.index_prefix', '')
-            ->andReturn('');
-        App::shouldReceive('make')
-            ->with('iverberk.larasearch.config')
-            ->andReturn($config);
+        Config::clearResolvedInstances();
+
         App::shouldReceive('make')
             ->with('iverberk.larasearch.index', m::any())
             ->once()
@@ -176,6 +171,10 @@ class LarasearchServiceProviderTest extends \PHPUnit_Framework_TestCase {
             ->with('Elasticsearch')
             ->twice()
             ->andReturn('mock');
+
+        Config::shouldReceive('get')
+            ->with('elasticsearch.index_prefix', '')
+            ->andReturn('');
 
         $model = m::mock('Illuminate\Database\Eloquent\Model');
         $model->shouldReceive('getTable')

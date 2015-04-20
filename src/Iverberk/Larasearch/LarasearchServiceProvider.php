@@ -72,7 +72,7 @@ class LarasearchServiceProvider extends ServiceProvider
     {
         $this->app->singleton('Elasticsearch', function ($app)
         {
-            return new Client($app->make('iverberk.larasearch.config')->get('elasticsearch.params'));
+            return new Client(\Illuminate\Support\Facades\Config::get('larasearch.elasticsearch.params'));
         });
     }
 

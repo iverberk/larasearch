@@ -2,6 +2,7 @@
 
 use Husband;
 use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Facade;
 use Illuminate\Support\Facades\Queue;
 use Mockery as m;
@@ -60,14 +61,10 @@ class ObserverTest extends \PHPUnit_Framework_TestCase {
             ->with('iverberk.larasearch.proxy', m::type('Illuminate\Database\Eloquent\Model'))
             ->andReturn($proxy);
 
-        $config = m::mock('Iverberk\Larasearch\Config');
-        $config->shouldReceive('get')
-            ->with('reversedPaths.Husband', [])
+        Config::shouldReceive('get')
+            ->with('larasearch.reversedPaths.Husband', [])
             ->once()
             ->andReturn(['', 'wife', 'children', 'children.toys']);
-        App::shouldReceive('make')
-            ->with('iverberk.larasearch.config')
-            ->andReturn($config);
 
         Queue::shouldReceive('push')
             ->with('Iverberk\Larasearch\Jobs\ReindexJob', [
@@ -102,13 +99,10 @@ class ObserverTest extends \PHPUnit_Framework_TestCase {
             ->with('iverberk.larasearch.proxy', m::type('Illuminate\Database\Eloquent\Model'))
             ->andReturn($proxy);
 
-        $config->shouldReceive('get')
-            ->with('reversedPaths.Toy', [])
+        Config::shouldReceive('get')
+            ->with('larasearch.reversedPaths.Toy', [])
             ->once()
             ->andReturn(['', 'children', 'children.mother.husband', 'children.mother']);
-        App::shouldReceive('make')
-            ->with('iverberk.larasearch.config')
-            ->andReturn($config);
 
         Queue::shouldReceive('push')
             ->with('Iverberk\Larasearch\Jobs\ReindexJob', [
@@ -152,14 +146,11 @@ class ObserverTest extends \PHPUnit_Framework_TestCase {
             ->with('Iverberk\Larasearch\Jobs\ReindexJob', ['Wife:2', 'Child:2', 'Toy:2'])
             ->once();
 
-        $config = m::mock('Iverberk\\Larasearch\\Config');
-        $config->shouldReceive('get')
-            ->with('/^reversedPaths\..*$/', [])
+        Config::shouldReceive('get')
+            ->with('/^larasearch.reversedPaths\..*$/', [])
             ->once()
             ->andReturn(['', 'wife', 'children', 'children.toys']);
-        App::shouldReceive('make')
-            ->with('iverberk.larasearch.config')
-            ->andReturn($config);
+
         $husband = \Husband::find(2);
 
         with(new Observer)->deleted($husband);

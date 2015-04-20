@@ -37,7 +37,7 @@ class LarasearchServiceProviderTest extends \PHPUnit_Framework_TestCase {
         /**
          * Set
          */
-        $sp = m::mock('Iverberk\Larasearch\LarasearchServiceProvider[package, bootContainerBindings, publishes]', ['something']);
+        $sp = m::mock('Iverberk\Larasearch\LarasearchServiceProvider[bootContainerBindings, publishes]', ['something']);
         $sp->shouldAllowMockingProtectedMethods();
 
         /**
@@ -94,22 +94,16 @@ class LarasearchServiceProviderTest extends \PHPUnit_Framework_TestCase {
         /**
          * Set
          */
-        $config = m::mock();
         $app = m::mock('LaravelApp');
         $sp = m::mock('Iverberk\Larasearch\LarasearchServiceProvider[bindElasticsearch]', [$app]);
 
         /**
          * Expectation
          */
-        $config->shouldReceive('get')
-            ->with('elasticsearch.params')
+        Config::shouldReceive('get')
+            ->with('larasearch.elasticsearch.params')
             ->once()
             ->andReturn([]);
-
-        $app->shouldReceive('make')
-            ->with('iverberk.larasearch.config')
-            ->once()
-            ->andReturn($config);
 
         $app->shouldReceive('singleton')
             ->once()
@@ -351,7 +345,7 @@ class LarasearchServiceProviderTest extends \PHPUnit_Framework_TestCase {
             ->andReturn(true);
 
         $sp->shouldReceive('mergeConfigFrom')
-            ->with(self::$providers_real_path . '/../../config/config.php', 'larasearch')
+            ->with(self::$providers_real_path . '/../../config/larasearch.php', 'larasearch')
             ->once();
 
         /**

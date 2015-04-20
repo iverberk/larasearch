@@ -12,7 +12,7 @@ $eloquent = __DIR__ . '/../vendor/illuminate/database/Illuminate/Database/Eloque
 
 $kernel->init([
     'debug' => true,
-    'cacheDir'  => '/tmp/larasearch2',
+    'cacheDir'  => '/tmp/larasearch',
     'includePaths' => [$src, $eloquent]
 ]);
 

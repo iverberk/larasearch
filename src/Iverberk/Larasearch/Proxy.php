@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Config;
 
 class Proxy {
 
@@ -124,7 +125,7 @@ class Proxy {
         $name = $this->config['index']->getName();
 
         $newName = $name . '_' . date("YmdHis");
-        $relations = $relations ? App::make('iverberk.larasearch.config')->get('paths.' . get_class($model)) : [];
+        $relations = $relations ? Config::get('larasearch.paths.' . get_class($model)) : [];
 
         Index::clean($name);
 

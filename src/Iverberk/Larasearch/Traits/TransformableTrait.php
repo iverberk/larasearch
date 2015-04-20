@@ -1,6 +1,6 @@
 <?php namespace Iverberk\Larasearch\Traits;
 
-use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Config;
 
 trait TransformableTrait {
 
@@ -12,7 +12,7 @@ trait TransformableTrait {
      */
     public function transform($relations = false)
     {
-        $relations = $relations ? App::make('iverberk.larasearch.config')->get('paths.' . get_class($this)) : [];
+        $relations = $relations ? Config::get('larasearch.paths.' . get_class($this)) : [];
 
         $doc = $this->load($relations)->toArray();
 

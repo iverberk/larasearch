@@ -2,7 +2,7 @@
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Queue;
 
 class Observer {
@@ -45,7 +45,7 @@ class Observer {
         // Temporary array to store affected models
         $affectedModels = [];
 
-        $paths = App::make('iverberk.larasearch.config')->get('reversedPaths.' . get_class($model), []);
+        $paths = Config::get('larasearch.reversedPaths.' . get_class($model), []);
 
         foreach ((array)$paths as $path)
         {

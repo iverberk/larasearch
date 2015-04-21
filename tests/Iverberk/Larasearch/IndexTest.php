@@ -149,7 +149,7 @@ class IndexTest extends \PHPUnit_Framework_TestCase {
          *
          */
         Config::shouldReceive('get')
-            ->with('elasticsearch.analyzers')
+            ->with('larasearch.elasticsearch.analyzers')
             ->andReturn([
                 'autocomplete',
                 'suggest',
@@ -162,7 +162,7 @@ class IndexTest extends \PHPUnit_Framework_TestCase {
             ]);
 
         Config::shouldReceive('get')
-            ->with('elasticsearch.defaults.index')
+            ->with('larasearch.elasticsearch.defaults.index')
             ->andReturn([
                 'settings' => [
                     'number_of_shards' => 1,
@@ -643,7 +643,7 @@ class IndexTest extends \PHPUnit_Framework_TestCase {
          *
          */
         Config::shouldReceive('get')
-            ->with('elasticsearch.analyzers')
+            ->with('larasearch.elasticsearch.analyzers')
             ->andReturn([
                 'autocomplete',
                 'suggest',
@@ -656,7 +656,7 @@ class IndexTest extends \PHPUnit_Framework_TestCase {
             ]);
 
         Config::shouldReceive('get')
-            ->with('elasticsearch.defaults.index')
+            ->with('larasearch.elasticsearch.defaults.index')
             ->andReturn([
                 'settings' => [
                     'number_of_shards' => 1,
@@ -2236,7 +2236,7 @@ class IndexTest extends \PHPUnit_Framework_TestCase {
             ->andReturn($client);
 
         Config::shouldReceive('get')
-            ->with('elasticsearch.index_prefix', '')
+            ->with('larasearch.elasticsearch.index_prefix', '')
             ->andReturn($index_prefix);
 
         $proxy = m::mock('Iverberk\Larasearch\Proxy');

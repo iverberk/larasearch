@@ -167,7 +167,7 @@ class LarasearchServiceProviderTest extends \PHPUnit_Framework_TestCase {
             ->andReturn('mock');
 
         Config::shouldReceive('get')
-            ->with('elasticsearch.index_prefix', '')
+            ->with('larasearch.elasticsearch.index_prefix', '')
             ->andReturn('');
 
         $model = m::mock('Illuminate\Database\Eloquent\Model');

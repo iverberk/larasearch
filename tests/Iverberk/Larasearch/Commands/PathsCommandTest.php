@@ -158,27 +158,44 @@ class PathsCommandTest extends \PHPUnit_Framework_TestCase {
          */
         $command->fire();
 
-        $this->assertEquals(
-            [
-                'Husband' => ['wife.children.toys'],
-                'Child' => ['mother', 'father', 'toys'],
-                'Toy' => ['children.mother', 'children.father'],
-                'Wife' => ['husband', 'children.toys'],
-                'House\\Item' => []
-            ],
-            $command->getPaths()
-        );
 
-        $this->assertEquals(
-            [
-                'Husband' => ['', 'wife', 'children', 'children.toys'],
-                'Child' => ['mother.husband', 'mother', '', 'toys'],
-                'Toy' => ['children.mother.husband', 'children.mother', 'children', ''],
-                'Wife' => ['husband', '', 'children', 'children.toys'],
-                'House\\Item' => ['']
-            ],
-            $command->getReversedPaths()
-        );
+        $expected = [
+            'Husband' => ['wife.children.toys'],
+            'Child' => ['mother', 'father', 'toys'],
+            'Toy' => ['children.mother', 'children.father'],
+            'Wife' => ['husband', 'children.toys'],
+            'House\\Item' => []
+        ];
+        $actual = $command->getPaths();
+
+        foreach ($expected as $model => $paths)
+        {
+            $this->assertArrayHasKey($model, $actual);
+
+            foreach ($paths as $path)
+            {
+                $this->assertContains($path, $actual[$model]);
+            }
+        }
+
+        $expected = [
+            'Husband' => ['', 'wife', 'children', 'children.toys'],
+            'Child' => ['mother.husband', 'mother', '', 'toys'],
+            'Toy' => ['children.mother.husband', 'children.mother', 'children', ''],
+            'Wife' => ['husband', '', 'children', 'children.toys'],
+            'House\\Item' => ['']
+        ];
+        $actual = $command->getReversedPaths();
+
+        foreach ($expected as $model => $paths)
+        {
+            $this->assertArrayHasKey($model, $actual);
+
+            foreach ($paths as $path)
+            {
+                $this->assertContains($path, $actual[$model]);
+            }
+        }
     }
 
     /**

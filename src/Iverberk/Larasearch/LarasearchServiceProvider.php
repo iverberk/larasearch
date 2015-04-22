@@ -36,7 +36,14 @@ class LarasearchServiceProvider extends ServiceProvider
     {
         $this->registerCommands();
 
-        $this->mergeConfigFrom(__DIR__ . '/../../config/larasearch.php', 'larasearch');
+        if (file_exists(base_path('config/larasearch.php')))
+        {
+            $this->mergeConfigFrom(base_path('config/larasearch.php'), 'larasearch');
+        }
+        else
+        {
+            $this->mergeConfigFrom(__DIR__ . '/../../config/larasearch.php', 'larasearch');
+        }
     }
 
     /**

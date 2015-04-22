@@ -15,15 +15,33 @@ Features
 Installation
 ------------
 
+*Laravel 5*
+
+NB: This is preliminary support. When L5 compatibility is stable I will tag it with a version.
+
 Add Larasearch to your composer.json file:
 
-```"iverberk/larasearch": "0.6.*"```
+```"iverberk/larasearch": "dev-L5"```
 
 Add the service provider to your Laravel application config:
 
 ```PHP
 'Iverberk\Larasearch\LarasearchServiceProvider'
 ```
+
+*Laravel 4*
+
+Add Larasearch to your composer.json file:
+
+```"iverberk/larasearch": "0.8.0"```
+
+Add the service provider to your Laravel application config:
+
+```PHP
+'Iverberk\Larasearch\LarasearchServiceProvider'
+```
+
+
 
 Wiki
 ----

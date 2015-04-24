@@ -288,7 +288,7 @@ class Index {
 
         $results = self::getClient()->bulk($params);
 
-        if ($results['errors'])
+        if (array_key_exists('errors', $results))
         {
             $errorItems = [];
 

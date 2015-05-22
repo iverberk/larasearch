@@ -123,14 +123,37 @@ class Proxy {
 	{
 		$model = $this->config['model'];
 		$name = $this->config['index']->getName();
-
 		$newName = $name . '_' . date("YmdHis");
 		$relations = $relations ? Config::get('larasearch::paths.' . get_class($model)) : [];
+		$type_mapper = ["Array"=>['type' => 'string'],"BigInt"=>['type'=> 'long'],"Object"=>['type' => 'string'],"SmallInt"=>['type'=> 'integer'],"String"=>['type' => 'string'],"Text"=>['type' => 'string'],"Time"=>['type' => 'date'],"Blob"=>['type'=> 'binary'],"Boolean"=>['type'=> 'boolean'],"DateTime"=>['type' => 'date','format' => 'yyyy-MM-dd HH:mm:ss',],"DateTimeTz"=>['type' => 'date','format' => 'yyyy-MM-dd HH:mm:ss',],"Date"=>['type' => 'date','format' => 'yyyy-MM-dd',],"Decimal"=>['type' => 'double'],"Float"=>['type' => 'float'],"Integer"=>['type'=> 'integer'],"VarDateTime"=>['type' => 'string'],];
+		$additional_mapping=['mappings'=>[$this->config['type']=> ['properties' => []]]];
+		//model searchble fields
+		$fields=isset($model::$searchable_fields)
+			?array_merge(['id','created_at','updated_at'],$model::$searchable_fields)
+			:false;
 
+		foreach ($model->getColunmTypes() as $field => $type) {
+			if($fields)
+			{
+				if(in_array($field, $fields))
+				{
+					$additional_mapping['mappings']
+								   [$this->config['type']]
+								   ['properties'][$field]=$type_mapper[$type];
+				}
+			}
+			else
+			{
+				$additional_mapping['mappings']
+								   [$this->config['type']]
+								   ['properties'][$field]=$type_mapper[$type];
+			}
+		}
+		
 		Index::clean($name);
 
 		$index = App::make('iverberk.larasearch.index', array('name' => $newName, 'proxy' => $this));
-		$index->create($mapping);
+		$index->create($mapping,$additional_mapping);
 
 		if ($index->aliasExists($name))
 		{

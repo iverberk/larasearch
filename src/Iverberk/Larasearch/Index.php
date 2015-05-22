@@ -71,7 +71,12 @@ class Index {
 	public function import(Model $model, $relations = [], $batchSize = 750, Callable $callback = null)
 	{
 		$batch = 0;
-
+		
+		//model searchble fields
+		$fields=isset($model::$searchable_fields)
+			?array_merge(['id','created_at','updated_at'],$model::$searchable_fields)
+			:false;
+		
 		while (true)
 		{
 			// Increase the batch number
@@ -81,8 +86,17 @@ class Index {
 			$records = $model
 				->with($relations)
 				->skip($batchSize * ($batch - 1))
-				->take($batchSize)
-				->get();
+				->take($batchSize);
+			if($fields)
+			{
+				$records = $records
+					->select($fields)
+					->get();
+			}
+			else
+			{
+				$records = $records->get();
+			}
 
 			// Break out of the loop if we are out of records
 			if (count($records) == 0) break;
@@ -167,10 +181,10 @@ class Index {
 	 *
 	 * @param array $options
 	 */
-	public function create($options = [])
+	public function create($options = [],$additional = [])
 	{
 		$body = empty($options) ? $this->getDefaultIndexParams() : $options;
-
+		$body = array_merge_recursive($body, $additional);
 		self::getClient()->indices()->create(['index' => $this->getName(), 'body' => $body]);
 	}
 
@@ -299,7 +313,7 @@ class Index {
 					$errorItems[] = $item;
 				}
 			}
-
+			\Log::error($errorItems);
 			throw new ImportException('Bulk import with errors', 1, $errorItems);
 		}
 	}

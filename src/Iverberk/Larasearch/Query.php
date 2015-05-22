@@ -323,7 +323,7 @@ class Query {
 		$this->getAggregations();
 		$this->getSort();
 		$this->getPayload();
-
+		
 		$params = [
 			'index' => Utils::findKey($this->options, 'index', false) ?: $this->proxy->getIndex()->getName(),
 			'type' => Utils::findKey($this->options, 'type', false) ?: $this->proxy->getType(),

@@ -65,72 +65,82 @@ return array_merge($pathConfig, array(
                             'larasearch_keyword' => [
                                 'type' => "custom",
                                 'tokenizer' => "keyword",
-                                'filter' => ["lowercase", "larasearch_stemmer"]
+                                'filter' => ["lowercase", "larasearch_stemmer", "bulgarian_stop", "bulgarian_stemmer"]
                             ],
                             'default_index' => [
                                 'type' => "custom",
                                 'tokenizer' => "standard",
-                                'filter' => ["standard", "lowercase", "asciifolding", "larasearch_index_shingle", "larasearch_stemmer"]
+                                'filter' => ["standard", "lowercase", "asciifolding", "larasearch_index_shingle", "larasearch_stemmer", "bulgarian_stop", "bulgarian_stemmer"]
                             ],
                             'larasearch_search' => [
                                 'type' => "custom",
                                 'tokenizer' => "standard",
-                                'filter' => ["standard", "lowercase", "asciifolding", "larasearch_search_shingle", "larasearch_stemmer"]
+                                'filter' => ["standard", "lowercase", "asciifolding", "larasearch_search_shingle", "larasearch_stemmer", "bulgarian_stop", "bulgarian_stemmer"]
                             ],
                             'larasearch_search2' => [
                                 'type' => "custom",
                                 'tokenizer' => "standard",
-                                'filter' => ["standard", "lowercase", "asciifolding", "larasearch_stemmer"]
+                                'filter' => ["standard", "lowercase", "asciifolding", "larasearch_stemmer", "bulgarian_stop", "bulgarian_stemmer"]
                             ],
                             'larasearch_autocomplete_index' => [
                                 'type' => "custom",
                                 'tokenizer' => "larasearch_autocomplete_ngram",
-                                'filter' => ["lowercase", "asciifolding"]
+                                'filter' => ["lowercase", "asciifolding", "bulgarian_stop", "bulgarian_stemmer"]
                             ],
                             'larasearch_autocomplete_search' => [
                                 'type' => "custom",
                                 'tokenizer' => "keyword",
-                                'filter' => ["lowercase", "asciifolding"]
+                                'filter' => ["lowercase", "asciifolding", "bulgarian_stop", "bulgarian_stemmer"]
                             ],
                             'larasearch_word_search' => [
                                 'type' => "custom",
                                 'tokenizer' => "standard",
-                                'filter' => ["lowercase", "asciifolding"]
+                                'filter' => ["lowercase", "asciifolding", "bulgarian_stop", "bulgarian_stemmer"]
                             ],
                             'larasearch_suggest_index' => [
                                 'type' => "custom",
                                 'tokenizer' => "standard",
-                                'filter' => ["lowercase", "asciifolding", "larasearch_suggest_shingle"]
+                                'filter' => ["lowercase", "asciifolding", "larasearch_suggest_shingle", "bulgarian_stop", "bulgarian_stemmer"]
                             ],
                             'larasearch_text_start_index' => [
                                 'type' => "custom",
                                 'tokenizer' => "keyword",
-                                'filter' => ["lowercase", "asciifolding", "larasearch_edge_ngram"]
+                                'filter' => ["lowercase", "asciifolding", "larasearch_edge_ngram", "bulgarian_stop", "bulgarian_stemmer"]
                             ],
                             'larasearch_text_middle_index' => [
                                 'type' => "custom",
                                 'tokenizer' => "keyword",
-                                'filter' => ["lowercase", "asciifolding", "larasearch_ngram"]
+                                'filter' => ["lowercase", "asciifolding", "larasearch_ngram", "bulgarian_stop", "bulgarian_stemmer"]
                             ],
                             'larasearch_text_end_index' => [
                                 'type' => "custom",
                                 'tokenizer' => "keyword",
-                                'filter' => ["lowercase", "asciifolding", "reverse", "larasearch_edge_ngram", "reverse"]
+                                'filter' => ["lowercase", "asciifolding", "reverse", "larasearch_edge_ngram", "reverse", "bulgarian_stop", "bulgarian_stemmer"]
                             ],
                             'larasearch_word_start_index' => [
                                 'type' => "custom",
                                 'tokenizer' => "standard",
-                                'filter' => ["lowercase", "asciifolding", "larasearch_edge_ngram"]
+                                'filter' => ["lowercase", "asciifolding", "larasearch_edge_ngram", "bulgarian_stop", "bulgarian_stemmer"]
                             ],
                             'larasearch_word_middle_index' => [
                                 'type' => "custom",
                                 'tokenizer' => "standard",
-                                'filter' => ["lowercase", "asciifolding", "larasearch_ngram"]
+                                'filter' => ["lowercase", "asciifolding", "larasearch_ngram", "bulgarian_stop", "bulgarian_stemmer"]
                             ],
                             'larasearch_word_end_index' => [
                                 'type' => "custom",
                                 'tokenizer' => "standard",
-                                'filter' => ["lowercase", "asciifolding", "reverse", "larasearch_edge_ngram", "reverse"]
+                                'filter' => ["lowercase", "asciifolding", "reverse", "larasearch_edge_ngram", "reverse", "bulgarian_stop", "bulgarian_stemmer"]
+                            ],
+                            'bulgarian' => 
+                            [
+                                'tokenizer' => 'standard',
+                                'filter' => 
+                                [
+                                    'lowercase',
+                                    'bulgarian_stop',
+                                    'bulgarian_stemmer'
+                                ]
                             ]
                         ],
                         'filter' => [
@@ -161,6 +171,16 @@ return array_merge($pathConfig, array(
                             'larasearch_stemmer' => [
                                 'type' => "snowball",
                                 'language' => "English"
+                            ],
+                            'bulgarian_stop' => 
+                            [
+                                  'type' => 'stop',
+                                  'stopwords' => 'а,аз,ако,ала,бе,без,беше,би,бил,била,били,било,близо,бъдат,бъде,бяха,в,вас,ваш,ваша,вероятно,вече,взема,ви,вие,винаги,все,всеки,всички,всичко,всяка,във,въпреки,върху,г,ги,главно,го,д,да,дали,до,докато,докога,дори,досега,доста,е,едва,един,ето,за,зад,заедно,заради,засега,затова,защо,защото,и,из,или,им,има,имат,иска,й,каза,как,каква,какво,както,какъв,като,кога,когато,което,които,кой,който,колко,която,къде,където,към,ли,м,ме,между,мен,ми,мнозина,мога,могат,може,моля,момента,му,н,на,над,назад,най,направи,напред,например,нас,не,него,нея,ни,ние,никой,нито,но,някои,някой,няма,обаче,около,освен,особено,от,отгоре,отново,още,пак,по,повече,повечето,под,поне,поради,после,почти,прави,пред,преди,през,при,пък,първо,с,са,само,се,сега,си,скоро,след,сме,според,сред,срещу,сте,съм,със,също,т,тази,така,такива,такъв,там,твой,те,тези,ти,тн,то,това,тогава,този,той,толкова,точно,трябва,тук,тъй,тя,тях,у,харесва,ч,че,често,чрез,ще,щом,я,a,an,and,are,as,at,be,but,by,for,if,in,into,is,it,no,not,of,on,or,such,that,the,their,then,there,these,they,this,to,was,will,with',
+                            ],
+                            'bulgarian_stemmer' => 
+                            [
+                                'type' => 'stemmer',
+                                'language' => 'bulgarian'
                             ]
                         ],
                         'tokenizer' => [

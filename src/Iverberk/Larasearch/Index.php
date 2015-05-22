@@ -181,10 +181,10 @@ class Index {
 	 *
 	 * @param array $options
 	 */
-	public function create($options = [])
+	public function create($options = [],$additional = [])
 	{
 		$body = empty($options) ? $this->getDefaultIndexParams() : $options;
-
+		$body = array_merge_recursive($body, $additional);
 		self::getClient()->indices()->create(['index' => $this->getName(), 'body' => $body]);
 	}
 
@@ -313,7 +313,7 @@ class Index {
 					$errorItems[] = $item;
 				}
 			}
-
+			\Log::error($errorItems);
 			throw new ImportException('Bulk import with errors', 1, $errorItems);
 		}
 	}

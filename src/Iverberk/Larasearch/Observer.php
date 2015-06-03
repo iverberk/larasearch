@@ -28,10 +28,16 @@ class Observer {
 	 */
 	public function saved(Model $model)
 	{
-		if ($model::$__es_enable && $model->shouldIndex())
+		if (property_exists($model, '__es_enable') && ! $model::$__es_enable)
 		{
-			Queue::push('Iverberk\Larasearch\Jobs\ReindexJob', $this->findAffectedModels($model));
+			return;
 		}
+		if (method_exists($model, 'shouldIndex') && ! $model->shouldIndex())
+		{
+			return;
+		}
+
+		Queue::push('Iverberk\Larasearch\Jobs\ReindexJob', $this->findAffectedModels($model));
 	}
 
 	/**

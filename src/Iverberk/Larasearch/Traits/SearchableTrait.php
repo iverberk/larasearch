@@ -43,7 +43,9 @@ trait SearchableTrait {
 
             if ($instance instanceof Model)
             {
-                static::$__es_proxy = App::make('iverberk.larasearch.proxy', $instance);
+                // This App:make line gives error in laravel 5, not sure about 4.
+                //static::$__es_proxy = App::make('iverberk.larasearch.proxy', $instance);
+                static::$__es_proxy = new \Iverberk\Larasearch\Proxy($instance);
 
                 return static::$__es_proxy;
             } else

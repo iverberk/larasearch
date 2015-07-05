@@ -43,7 +43,7 @@ trait SearchableTrait {
 
             if ($instance instanceof Model)
             {
-                static::$__es_proxy = App::make('iverberk.larasearch.proxy', $instance);
+                static::$__es_proxy = App::make('iverberk.larasearch.proxy', ['model' => $instance]);
 
                 return static::$__es_proxy;
             } else

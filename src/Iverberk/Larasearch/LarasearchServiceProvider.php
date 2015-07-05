@@ -112,9 +112,9 @@ class LarasearchServiceProvider extends ServiceProvider
      */
     protected function bindProxy()
     {
-        $this->app->bind('iverberk.larasearch.proxy', function ($app, $model)
+        $this->app->bind('iverberk.larasearch.proxy', function ($app, $params)
         {
-            return new Proxy($model);
+            return new Proxy($params['model']);
         });
     }
 

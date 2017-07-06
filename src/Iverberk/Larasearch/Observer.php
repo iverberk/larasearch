@@ -1,9 +1,9 @@
 <?php namespace Iverberk\Larasearch;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Queue;
+use Illuminate\Support\Facades\Config;
+use Illuminate\Database\Eloquent\Model;
 
 class Observer {
 
@@ -12,13 +12,13 @@ class Observer {
      *
      * @param Model $model
      */
-    public function deleted(Model $model)
+    public function deleting(Model $model)
     {
         // Delete corresponding $model document from Elasticsearch
-        Queue::push('Iverberk\Larasearch\Jobs\DeleteJob', [get_class($model) . ':' . $model->getKey()]);
+        Queue::connection('elastic-search')->push('Workers\ElasticDeleteJob', get_class($model) . ':' . $model->getKey());
 
         // Update all related model documents to reflect that $model has been removed
-        Queue::push('Iverberk\Larasearch\Jobs\ReindexJob', $this->findAffectedModels($model, true));
+        Queue::connection('elastic-search')->push('Iverberk\Larasearch\Jobs\ReindexJob', $this->findAffectedModels($model, true));
     }
 
     /**
@@ -28,9 +28,27 @@ class Observer {
      */
     public function saved(Model $model)
     {
-        if ($model::$__es_enable && $model->shouldIndex())
+        if ($model::$__es_enable)
         {
-            Queue::push('Iverberk\Larasearch\Jobs\ReindexJob', $this->findAffectedModels($model));
+            if ($model->shouldIndex())
+            {
+                Queue::connection('elastic-search')->push('Workers\ElasticReindexJob', get_class($model) . ':' . $model->getKey());
+            } elseif ($model->shouldDelete()) {
+                $this->deleting($model);
+            }
+
+            if ( ! empty($model->affectedDeletedModels))
+            {
+                foreach ($model->affectedDeletedModels as $model)
+                {
+                    if ($model->shouldIndex())
+                    {
+                        Queue::connection('elastic-search')->push('Workers\ElasticReindexJob', get_class($model) . ':' . $model->getKey());
+                    } else {
+                        $this->deleting($model);
+                    }
+                }
+            }
         }
     }
 
@@ -40,19 +58,20 @@ class Observer {
      * @param Model $model
      * @return array
      */
-    private function findAffectedModels(Model $model, $excludeCurrent = false)
+    public function findAffectedModels(Model $model, $excludeCurrent = false)
     {
         // Temporary array to store affected models
         $affectedModels = [];
 
-        $paths = Config::get('larasearch.reversedPaths.' . get_class($model), []);
+        $paths = Config::get('larasearch::reversedPaths.' . get_class($model), []);
 
         foreach ((array)$paths as $path)
         {
-            if (!empty($path))
+            if ( ! empty($path))
             {
-                $model = $model->load($path);
-
+                if ( ! array_key_exists($path, $model->getRelations())) {
+                    $model = $model->load($path);
+                }
                 // Explode the path into an array
                 $path = explode('.', $path);
 
@@ -68,17 +87,19 @@ class Observer {
                     {
                         if ($record instanceof Model)
                         {
-                            if (!empty($segment))
+                            if ( ! empty($segment))
                             {
                                 if (array_key_exists($segment, $record->getRelations()))
                                 {
                                     $walk($record->getRelation($segment), $path);
-                                } else
+                                }
+                                else
                                 {
                                     // Apparently the relation doesn't exist on this model, so skip the rest of the path as well
                                     return;
                                 }
-                            } else
+                            }
+                            else
                             {
                                 if (in_array('Iverberk\Larasearch\Traits\SearchableTrait', class_uses($record)))
                                 {
@@ -90,7 +111,8 @@ class Observer {
                 };
 
                 $walk($model->getRelation(array_shift($path)), $path);
-            } else if (!$excludeCurrent)
+            }
+            else if ( ! $excludeCurrent)
             {
                 if (in_array('Iverberk\Larasearch\Traits\SearchableTrait', class_uses($model)))
                 {

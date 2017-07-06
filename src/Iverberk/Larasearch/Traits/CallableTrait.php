@@ -18,5 +18,4 @@ trait CallableTrait {
             throw new \Exception("This trait can ony be used in Eloquent models.");
         }
     }
-
 }

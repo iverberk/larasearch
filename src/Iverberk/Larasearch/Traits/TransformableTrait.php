@@ -14,9 +14,11 @@ trait TransformableTrait {
     {
         $relations = $relations ? Config::get('larasearch.paths.' . get_class($this)) : [];
 
+        // #TODO5 Not legit
+        $this->isElasticSearch = true;
+
         $doc = $this->load($relations)->toArray();
 
         return $doc;
     }
-
 }

@@ -74,7 +74,7 @@ class Proxy {
      * @param array $options
      * @return \Iverberk\Larasearch\Response
      */
-    public function search($term, $options = [])
+    public function elasticSearch($term, $options = [])
     {
         return App::make('iverberk.larasearch.query', ['proxy' => $this, 'term' => $term, 'options' => $options])->execute();
     }

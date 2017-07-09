@@ -1,12 +1,12 @@
 <?php namespace Iverberk\Larasearch;
 
-use PHPParser_Parser;
+use RegexIterator;
 use PHPParser_Lexer;
-use PHPParser_Node_Stmt_Namespace;
+use PHPParser_Parser;
+use RecursiveIteratorIterator;
 Use PHPParser_Node_Stmt_Class;
 use RecursiveDirectoryIterator;
-use RecursiveIteratorIterator;
-use RegexIterator;
+use PHPParser_Node_Stmt_Namespace;
 
 class Utils {
 
@@ -108,5 +108,4 @@ class Utils {
 
         return $models;
     }
-
 }

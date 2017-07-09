@@ -123,5 +123,4 @@ class Observer {
 
         return array_unique($affectedModels);
     }
-
 }

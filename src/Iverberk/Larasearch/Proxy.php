@@ -1,8 +1,8 @@
 <?php namespace Iverberk\Larasearch;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Database\Eloquent\Model;
 
 class Proxy {
 
@@ -26,7 +26,7 @@ class Proxy {
         $this->config['type'] = str_singular($model->getTable());
 
         $this->config['client'] = App::make('Elasticsearch');
-        $this->config['index'] = App::make('iverberk.larasearch.index', array('proxy' => $this));
+        $this->config['index'] = App::makeWith('iverberk.larasearch.index', ['proxy' => $this]);
     }
 
     /**
@@ -76,7 +76,7 @@ class Proxy {
      */
     public function elasticSearch($term, $options = [])
     {
-        return App::make('iverberk.larasearch.query', ['proxy' => $this, 'term' => $term, 'options' => $options])->execute();
+        return App::makeWith('iverberk.larasearch.query', ['proxy' => $this, 'term' => $term, 'options' => $options])->execute();
     }
 
     /**
@@ -90,7 +90,7 @@ class Proxy {
     {
         $options = array_merge(['query' => $query], $options);
 
-        return App::make('iverberk.larasearch.query', ['proxy' => $this, 'term' => null, 'options' => $options])->execute();
+        return App::makeWith('iverberk.larasearch.query', ['proxy' => $this, 'term' => null, 'options' => $options])->execute();
     }
 
     /**
@@ -101,7 +101,7 @@ class Proxy {
      */
     public function searchById($id)
     {
-        return App::make('iverberk.larasearch.response.result', $this->config['client']->get(
+        return App::makeWith('iverberk.larasearch.response.result', $this->config['client']->get(
                 [
                     'index' => $this->getIndex()->getName(),
                     'type' => $this->getType(),
@@ -241,5 +241,4 @@ class Proxy {
 
         $class::$__es_enable = false;
     }
-
 }

@@ -1,7 +1,7 @@
 <?php namespace Iverberk\Larasearch\Traits;
 
-use Illuminate\Database\Eloquent\Model;
 use Iverberk\Larasearch\Observer;
+use Illuminate\Database\Eloquent\Model;
 
 trait CallableTrait {
 

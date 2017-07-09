@@ -153,5 +153,4 @@ class Response {
     {
         return empty($name) ? $this->response['aggregations'] : $this->response['aggregations'][$name];
     }
-
 }

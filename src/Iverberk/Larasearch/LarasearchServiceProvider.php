@@ -1,16 +1,15 @@
 <?php namespace Iverberk\Larasearch;
 
+use Monolog\Logger;
 use Elasticsearch\Client;
+use Monolog\Handler\NullHandler;
 use Illuminate\Support\ServiceProvider;
+use Iverberk\Larasearch\Response\Result;
 use Iverberk\Larasearch\Commands\PathsCommand;
 use Iverberk\Larasearch\Commands\ReindexCommand;
-use Iverberk\Larasearch\Response\Result;
-use Monolog\Handler\NullHandler;
-use Monolog\Logger;
 
 class LarasearchServiceProvider extends ServiceProvider
 {
-
     /**
      * Indicates if loading of the provider is deferred.
      *
@@ -25,6 +24,13 @@ class LarasearchServiceProvider extends ServiceProvider
         $this->publishes([
             __DIR__ . '/../../config/larasearch.php' => base_path('config/larasearch.php'),
         ], 'config');
+
+        if ($this->app->runningInConsole()) {
+            $this->commands([
+                ReindexCommand::class,
+                PathsCommand::class,
+            ]);
+        }
     }
 
     /**
@@ -34,8 +40,6 @@ class LarasearchServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->registerCommands();
-
         if (file_exists(base_path('config/larasearch.php')))
         {
             $this->mergeConfigFrom(base_path('config/larasearch.php'), 'larasearch');
@@ -112,9 +116,9 @@ class LarasearchServiceProvider extends ServiceProvider
      */
     protected function bindProxy()
     {
-        $this->app->bind('iverberk.larasearch.proxy', function ($app, $model)
+        $this->app->bind('iverberk.larasearch.proxy', function ($app, $param)
         {
-            return new Proxy($model);
+            return new Proxy($param['model']);
         });
     }
 
@@ -130,27 +134,6 @@ class LarasearchServiceProvider extends ServiceProvider
     }
 
     /**
-     * Register the commands.
-     *
-     * @return void
-     */
-    protected function registerCommands()
-    {
-        $this->app['iverberk.larasearch.commands.reindex'] = $this->app->share(function ($app)
-        {
-            return new ReindexCommand();
-        });
-
-        $this->app['iverberk.larasearch.commands.paths'] = $this->app->share(function ($app)
-        {
-            return new PathsCommand();
-        });
-
-        $this->commands('iverberk.larasearch.commands.reindex');
-        $this->commands('iverberk.larasearch.commands.paths');
-    }
-
-    /**
      * Get the services provided by the provider.
      *
      * @return array
@@ -159,5 +142,4 @@ class LarasearchServiceProvider extends ServiceProvider
     {
         return array();
     }
-
 }

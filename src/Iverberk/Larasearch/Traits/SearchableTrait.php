@@ -1,12 +1,12 @@
 <?php namespace Iverberk\Larasearch\Traits;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\App;
+use Illuminate\Database\Eloquent\Model;
 
 trait SearchableTrait {
 
-    use TransformableTrait;
     use CallableTrait;
+    use TransformableTrait;
 
     /**
      * The Elasticsearch proxy class
@@ -43,7 +43,7 @@ trait SearchableTrait {
 
             if ($instance instanceof Model)
             {
-                static::$__es_proxy = App::make('iverberk.larasearch.proxy', $instance);
+                static::$__es_proxy = App::makeWith('iverberk.larasearch.proxy', ['model' => $instance]);
 
                 return static::$__es_proxy;
             } else
@@ -61,25 +61,6 @@ trait SearchableTrait {
     public static function clearProxy()
     {
         static::$__es_proxy = null;
-    }
-
-    /**
-     * Catch dynamic method calls intended for the Elasticsearch proxy
-     *
-     * @param  string $method
-     * @param  array $parameters
-     * @return mixed
-     */
-    public function __call($method, $parameters)
-    {
-        $proxy = static::getProxy();
-
-        if (is_callable([$proxy, $method]))
-        {
-            return call_user_func_array(array($proxy, $method), $parameters);
-        }
-
-        return parent::__call($method, $parameters);
     }
 
     /**
@@ -110,5 +91,4 @@ trait SearchableTrait {
     {
         return $this->getKey();
     }
-
 }

@@ -108,7 +108,7 @@ class Proxy {
                     'id' => $id
                 ]
             )
-        );
+        )->getSource();
     }
 
     /**

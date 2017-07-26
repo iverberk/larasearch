@@ -15,7 +15,7 @@ class Observer {
     public function deleting(Model $model)
     {
         // Delete corresponding $model document from Elasticsearch
-        Queue::connection('elastic-search')->push('Workers\ElasticDeleteJob', get_class($model) . ':' . $model->getKey());
+        Queue::connection('elastic-search')->push('App\Workers\ElasticDeleteJob', get_class($model) . ':' . $model->getKey());
 
         // Update all related model documents to reflect that $model has been removed
         Queue::connection('elastic-search')->push('Iverberk\Larasearch\Jobs\ReindexJob', $this->findAffectedModels($model, true));
@@ -32,7 +32,7 @@ class Observer {
         {
             if ($model->shouldIndex())
             {
-                Queue::connection('elastic-search')->push('Workers\ElasticReindexJob', get_class($model) . ':' . $model->getKey());
+                Queue::connection('elastic-search')->push('App\Workers\ElasticReindexJob', get_class($model) . ':' . $model->getKey());
             } elseif ($model->shouldDelete()) {
                 $this->deleting($model);
             }
@@ -43,7 +43,7 @@ class Observer {
                 {
                     if ($model->shouldIndex())
                     {
-                        Queue::connection('elastic-search')->push('Workers\ElasticReindexJob', get_class($model) . ':' . $model->getKey());
+                        Queue::connection('elastic-search')->push('App\Workers\ElasticReindexJob', get_class($model) . ':' . $model->getKey());
                     } else {
                         $this->deleting($model);
                     }

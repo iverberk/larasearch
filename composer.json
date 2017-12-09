@@ -1,5 +1,5 @@
 {
-    "name": "iverberk/larasearch",
+    "name": "Norgul/larasearch",
     "description": "Elasticsearch enabled Eloquent models",
     "keywords": ["search", "elasticsearch", "eloquent"],
     "license": "MIT",

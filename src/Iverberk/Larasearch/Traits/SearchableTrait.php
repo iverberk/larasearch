@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\App;
+use Iverberk\Larasearch\Proxy;
 
 trait SearchableTrait {
 
@@ -43,7 +44,7 @@ trait SearchableTrait {
 
             if ($instance instanceof Model)
             {
-                static::$__es_proxy = App::make('iverberk.larasearch.proxy', $instance);
+                static::$__es_proxy = new Proxy($instance);
 
                 return static::$__es_proxy;
             } else

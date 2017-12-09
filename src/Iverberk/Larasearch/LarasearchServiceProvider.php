@@ -136,12 +136,12 @@ class LarasearchServiceProvider extends ServiceProvider
      */
     protected function registerCommands()
     {
-        $this->app['iverberk.larasearch.commands.reindex'] = $this->app->share(function ($app)
+        $this->app->singleton('iverberk.larasearch.commands.reindex', function ($app)
         {
             return new ReindexCommand();
         });
 
-        $this->app['iverberk.larasearch.commands.paths'] = $this->app->share(function ($app)
+        $this->app->singleton('iverberk.larasearch.commands.paths', function ($app)
         {
             return new PathsCommand();
         });

@@ -1,3 +1,8 @@
+Disclaimer
+----------
+
+This is a forked repository made for the sole purpose of working on Laravel 5 without errors.
+
 Introduction
 ------------
 

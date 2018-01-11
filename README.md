@@ -2,6 +2,7 @@ Disclaimer
 ----------
 
 This is a forked repository made for the sole purpose of working on Laravel 5 without errors. All other work is a courtesy of its respectful owner.
+[Original repository](https://github.com/iverberk/larasearch)
 
 Introduction
 ------------
@@ -24,7 +25,7 @@ Installation
 
 Add Larasearch to your composer.json file:
 
-```"norgul/larasearch": "l5"```
+```"norgul/larasearch": "0.9.0"```
 
 Add the service provider to your Laravel application config:
 

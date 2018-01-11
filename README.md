@@ -29,6 +29,8 @@ Add Larasearch to your composer.json file:
 
 Add the service provider to your Laravel application config:
 
+```'Iverberk\Larasearch\LarasearchServiceProvider'```
+
 Wiki
 ----
 Please see the Github [wiki](https://github.com/iverberk/larasearch/wiki/Introduction) for the most up-to-date documentation.

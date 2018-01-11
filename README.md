@@ -1,7 +1,7 @@
 Disclaimer
 ----------
 
-This is a forked repository made for the sole purpose of working on Laravel 5 without errors.
+This is a forked repository made for the sole purpose of working on Laravel 5 without errors. All other work is a courtesy of its respectful owner.
 
 Introduction
 ------------
@@ -22,31 +22,11 @@ Installation
 
 *Laravel 5*
 
-NB: This is preliminary support. When L5 compatibility is stable I will tag it with a version.
-
 Add Larasearch to your composer.json file:
 
-```"iverberk/larasearch": "dev-L5"```
+```"norgul/larasearch": "l5"```
 
 Add the service provider to your Laravel application config:
-
-```PHP
-'Iverberk\Larasearch\LarasearchServiceProvider'
-```
-
-*Laravel 4*
-
-Add Larasearch to your composer.json file:
-
-```"iverberk/larasearch": "0.8.0"```
-
-Add the service provider to your Laravel application config:
-
-```PHP
-'Iverberk\Larasearch\LarasearchServiceProvider'
-```
-
-
 
 Wiki
 ----

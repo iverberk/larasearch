@@ -27,7 +27,7 @@ class ReindexCommand extends Command {
      *
      * @return mixed
      */
-    public function fire()
+    public function handle()
     {
         $directoryModels = [];
         $models = $this->argument('model');

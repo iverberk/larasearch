@@ -25,7 +25,7 @@ Installation
 
 Add Larasearch to your composer.json file:
 
-```"norgul/larasearch": "0.9.0"```
+```"norgul/larasearch": "0.9.1"```
 
 Add the service provider to your Laravel application config:
 

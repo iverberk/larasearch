@@ -16,10 +16,10 @@ class Observer
     {
         // Delete corresponding $model document from Elasticsearch
         App\Workers\ElasticDeleteJob::dispatch(get_class($model) . ':' . $model->getKey())
-            ->onConnection(Config::get('larasearch.queue'));
+            ->OnQueue(Config::get('larasearch.queue'));
         // Update all related model documents to reflect that $model has been removed
         Jobs\ReindexJob::dispatch($this->findAffectedModels($model, true))
-            ->onConnection(Config::get('larasearch.queue'));
+            ->OnQueue(Config::get('larasearch.queue'));
     }
 
     /**
@@ -32,7 +32,7 @@ class Observer
         if ($model::$__es_enable) {
             if ($model->shouldIndex()) {
                 App\Workers\ElasticReindexJob::dispatch(get_class($model) . ':' . $model->getKey())
-                    ->onConnection(Config::get('larasearch.queue'));
+                    ->OnQueue(Config::get('larasearch.queue'));
             } elseif ($model->shouldDelete()) {
                 $this->deleting($model);
             }
@@ -41,7 +41,7 @@ class Observer
                 foreach ($model->affectedDeletedModels as $model) {
                     if ($model->shouldIndex()) {
                         App\Workers\ElasticReindexJob::dispatch(get_class($model) . ':' . $model->getKey())
-                            ->onConnection(Config::get('larasearch.queue'));
+                            ->OnQueue(Config::get('larasearch.queue'));
                     } else {
                         $this->deleting($model);
                     }

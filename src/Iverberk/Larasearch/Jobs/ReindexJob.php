@@ -35,7 +35,7 @@ class ReindexJob implements ShouldQueue
      */
     public function handle(Repository $config)
     {
-        $logger = App::make($config->get('larasearch.logger'));
+        $logger = \App::make($config->get('larasearch.logger'));
 
         foreach ($this->models as $model) {
             list($class, $id) = explode(':', $model);

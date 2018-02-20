@@ -1,61 +1,57 @@
 <?php namespace Iverberk\Larasearch\Jobs;
 
-use Illuminate\Config\Repository;
-use Illuminate\Foundation\Application;
-use Illuminate\Queue\Jobs\Job;
 use Exception;
+use Illuminate\Bus\Queueable;
+use Illuminate\Config\Repository;
+use Illuminate\Queue\SerializesModels;
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Foundation\Bus\Dispatchable;
 
 /**
  * Class ReindexJob
  *
  * @package Iverberk\Larasearch\Jobs
  */
-class ReindexJob {
+class ReindexJob implements ShouldQueue
+{
+    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     /**
-     * @var Application
+     * @var $models
      */
-    private $app;
+    protected $models;
 
     /**
-     * @var Config
+     * @param $models
      */
-    private $config;
-
-    /**
-     * @param Application $app
-     * @param Repository $config
-     */
-    public function __construct(Application $app, Repository $config)
+    public function __construct($models)
     {
-        $this->app = $app;
-        $this->config = $config;
+        $this->models = $models;
     }
 
-    public function fire(Job $job, $models)
+    /**
+     * @param Repository $config
+     */
+    public function handle(Repository $config)
     {
-        $loggerContainerBinding = $this->config->get('larasearch.logger');
-        $logger = $this->app->make($loggerContainerBinding);
+        $logger = App::make($config->get('larasearch.logger'));
 
-        foreach ($models as $model)
-        {
+        foreach ($this->models as $model) {
             list($class, $id) = explode(':', $model);
 
             $logger->info('Indexing ' . $class . ' with ID: ' . $id);
 
-            try
-            {
+            try {
                 $model = $class::findOrFail($id);
                 $model->refreshDoc($model);
-            } catch (Exception $e)
-            {
+            } catch (Exception $e) {
                 $logger->error('Indexing ' . $class . ' with ID: ' . $id . ' failed: ' . $e->getMessage());
 
-                $job->release(60);
+                $this->release(60);
             }
         }
 
-        $job->delete();
+        $this->delete();
     }
-
 }

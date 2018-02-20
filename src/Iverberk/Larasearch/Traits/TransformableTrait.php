@@ -2,12 +2,14 @@
 
 use Illuminate\Support\Facades\Config;
 
-trait TransformableTrait {
+trait TransformableTrait
+{
 
     /**
      * Transform the Person model and its relations to an Elasticsearch document.
      *
      * @param bool $relations
+     *
      * @return array
      */
     public function transform($relations = false)

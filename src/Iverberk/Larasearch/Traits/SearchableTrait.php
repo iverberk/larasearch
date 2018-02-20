@@ -3,8 +3,8 @@
 use Illuminate\Support\Facades\App;
 use Illuminate\Database\Eloquent\Model;
 
-trait SearchableTrait {
-
+trait SearchableTrait
+{
     use CallableTrait;
     use TransformableTrait;
 
@@ -37,17 +37,14 @@ trait SearchableTrait {
      */
     public static function getProxy()
     {
-        if (!static::$__es_proxy)
-        {
+        if ( ! static::$__es_proxy) {
             $instance = new static;
 
-            if ($instance instanceof Model)
-            {
+            if ($instance instanceof Model) {
                 static::$__es_proxy = App::makeWith('iverberk.larasearch.proxy', ['model' => $instance]);
 
                 return static::$__es_proxy;
-            } else
-            {
+            } else {
                 throw new \Exception("This trait can ony be used in Eloquent models.");
             }
         }
@@ -62,21 +59,21 @@ trait SearchableTrait {
     {
         static::$__es_proxy = null;
     }
-    
+
     /**
      * Catch dynamic method calls intended for the Elasticsearch proxy
      *
      * @param  string $method
      * @param  array  $parameters
+     *
      * @return mixed
      */
     public function __call($method, $parameters)
     {
         $proxy = static::getProxy();
 
-        if (method_exists($proxy, $method))
-        {
-            return call_user_func_array(array($proxy, $method), $parameters);
+        if (method_exists($proxy, $method)) {
+            return call_user_func_array([$proxy, $method], $parameters);
         }
 
         return parent::__call($method, $parameters);
@@ -86,16 +83,16 @@ trait SearchableTrait {
      * Catch dynamic static method calls intended for the Elasticsearch proxy
      *
      * @param  string $method
-     * @param  array $parameters
+     * @param  array  $parameters
+     *
      * @return mixed
      */
     public static function __callStatic($method, $parameters)
     {
         $proxy = static::getProxy();
 
-        if (is_callable([$proxy, $method]))
-        {
-            return call_user_func_array(array($proxy, $method), $parameters);
+        if (is_callable([$proxy, $method])) {
+            return call_user_func_array([$proxy, $method], $parameters);
         }
 
         return parent::__callStatic($method, $parameters);

@@ -7,7 +7,9 @@ $compiled = __DIR__ . '/paths.json';
 // Check for a json file that contains the compiled paths for model relations
 $pathConfig = file_exists($compiled) ? json_decode(file_get_contents($compiled), true) : [];
 
-return array_merge($pathConfig, array(
+return array_merge($pathConfig, [
+
+    'queue' => 'elastic-search',
 
     'elasticsearch' => [
 
@@ -199,10 +201,9 @@ return array_merge($pathConfig, array(
                 ]
             ]
         ],
-	    
+
         'index_prefix' => ''
     ],
 
 	'logger' => 'iverberk.larasearch.logger'
-
-));
+]);

@@ -1,10 +1,12 @@
-<?php namespace Iverberk\Larasearch\Response;
+<?php
 
-use Illuminate\Support\Collection;
+namespace Iverberk\Larasearch\Response;
+
 use Iverberk\Larasearch\Response;
+use Illuminate\Support\Collection;
 
-class Records extends Collection {
-
+class Records extends Collection
+{
     /**
      * Contains an Elasticsearch response wrapper
      *
@@ -16,14 +18,14 @@ class Records extends Collection {
      * Construct a collection of Eloquent models based on the search result
      *
      * @access public
+     *
      * @param Response $response
      */
     public function __construct(Response $response)
     {
         $this->response = $response;
 
-        $ids = array_map(function ($hit)
-        {
+        $ids = array_map(function ($hit) {
             return $hit['_id'];
         }, $this->response->getHits());
 

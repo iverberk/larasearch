@@ -1,47 +1,47 @@
 <?php namespace Iverberk\Larasearch\Jobs;
 
-use Iverberk\Larasearch\Config;
-use Illuminate\Foundation\Application;
-use Illuminate\Queue\Jobs\Job;
+use Illuminate\Bus\Queueable;
+use Illuminate\Config\Repository;
+use Illuminate\Queue\SerializesModels;
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Foundation\Bus\Dispatchable;
 
 /**
  * Class DeleteJob
  *
  * @package Iverberk\Larasearch\Jobs
  */
-class DeleteJob {
-
-    /**
-     * @var Application
-     */
-    private $app;
+class DeleteJob implements ShouldQueue
+{
+    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     /**
      * @var Config
      */
-    private $config;
+    protected $config;
 
     /**
-     * @param Application $app
-     * @param Config
+     * @var $models
      */
-    public function __construct(Application $app, Config $config)
+    protected $models;
+
+    /**
+     * @param $models
+     */
+    public function __construct($models)
     {
-        $this->app = $app;
-        $this->config = $config;
+        $this->models = $models;
     }
 
     /**
-     * @param Job $job
-     * @param mixed $models
+     * @param Repository $config
      */
-    public function fire(Job $job, $models)
+    public function handle(Repository $config)
     {
-        $loggerContainerBinding = $this->config->get('logger', 'iverberk.larasearch.logger');
-        $logger = $this->app->make($loggerContainerBinding);
+        $logger = App::make($config->get('larasearch.logger'));
 
-        foreach ($models as $model)
-        {
+        foreach ($this->models as $model) {
             list($class, $id) = explode(':', $model);
 
             $logger->info('Deleting ' . $class . ' with ID: ' . $id . ' from Elasticsearch');
@@ -51,7 +51,6 @@ class DeleteJob {
             $model->deleteDoc($id);
         }
 
-        $job->delete();
+        $this->delete();
     }
-
 }

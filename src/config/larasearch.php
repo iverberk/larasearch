@@ -9,7 +9,7 @@ $pathConfig = file_exists($compiled) ? json_decode(file_get_contents($compiled),
 
 return array_merge($pathConfig, [
 
-    'queue' => 'elastic-search',
+    'queue' => 'default',
 
     'elasticsearch' => [
 

@@ -11,8 +11,9 @@ trait CallableTrait
      */
     public static function bootCallableTrait()
     {
+        $observerClass = \Config::get('larasearch.observer');
         if (new static instanceof Model) {
-            static::observe(new (Config::get('larasearch.observer')));
+            static::observe(new $observerClass);
         } else {
             throw new \Exception("This trait can ony be used in Eloquent models.");
         }

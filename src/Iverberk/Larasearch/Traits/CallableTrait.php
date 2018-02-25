@@ -2,7 +2,6 @@
 
 namespace Iverberk\Larasearch\Traits;
 
-use Iverberk\Larasearch\Observer;
 use Illuminate\Database\Eloquent\Model;
 
 trait CallableTrait
@@ -13,7 +12,7 @@ trait CallableTrait
     public static function bootCallableTrait()
     {
         if (new static instanceof Model) {
-            static::observe(new Observer);
+            static::observe(new (Config::get('larasearch.observer')));
         } else {
             throw new \Exception("This trait can ony be used in Eloquent models.");
         }

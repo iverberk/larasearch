@@ -1,9 +1,11 @@
-<?php namespace Iverberk\Larasearch\Response;
+<?php
+
+namespace Iverberk\Larasearch\Response;
 
 use Illuminate\Contracts\Support\Arrayable;
 
-class Result implements \ArrayAccess, Arrayable {
-
+class Result implements \ArrayAccess, Arrayable
+{
     /**
      * Contains an Elasticsearch hit response
      *
@@ -16,6 +18,7 @@ class Result implements \ArrayAccess, Arrayable {
      * Construct the result with the an Elasticsearch hit array
      *
      * @access public
+     *
      * @param array $hit
      */
     public function __construct(array $hit)
@@ -80,13 +83,13 @@ class Result implements \ArrayAccess, Arrayable {
 
     /**
      * @param array $fields
+     *
      * @return array
      */
     public function getFields($fields = [])
     {
         $results = [];
-        foreach ($fields as $field)
-        {
+        foreach ($fields as $field) {
             $results[$field] = $this->hit['fields'][$field];
         }
 
@@ -106,27 +109,23 @@ class Result implements \ArrayAccess, Arrayable {
 
     /**
      * @param array $fields
+     *
      * @return array
      */
     public function getHighlights($fields = [])
     {
-        if (!empty($fields))
-        {
+        if ( ! empty($fields)) {
             $results = [];
-            foreach ($fields as $field)
-            {
-                foreach ($this->hit['highlight'] as $key => $value)
-                {
-                    if (preg_match("/^${field}.*/", $key) === 1)
-                    {
+            foreach ($fields as $field) {
+                foreach ($this->hit['highlight'] as $key => $value) {
+                    if (preg_match("/^${field}.*/", $key) === 1) {
                         $results[$field] = $value;
                     }
                 }
             }
 
             return $results;
-        } else
-        {
+        } else {
             return $this->hit['highlight'];
         }
     }
@@ -135,6 +134,7 @@ class Result implements \ArrayAccess, Arrayable {
      * Get data by key
      *
      * @param string The key data to retrieve
+     *
      * @return mixed
      * @access public
      */
@@ -149,6 +149,7 @@ class Result implements \ArrayAccess, Arrayable {
      * Whether or not an offset exists
      *
      * @param mixed $offset
+     *
      * @access      public
      * @return boolean
      * @abstracting ArrayAccess
@@ -162,6 +163,7 @@ class Result implements \ArrayAccess, Arrayable {
      * Returns the value at specified offset
      *
      * @param mixed $offset
+     *
      * @access      public
      * @return mixed
      * @abstracting ArrayAccess
@@ -176,6 +178,7 @@ class Result implements \ArrayAccess, Arrayable {
      *
      * @param mixed $offset
      * @param mixed $value
+     *
      * @access      public
      * @abstracting ArrayAccess
      */
@@ -188,6 +191,7 @@ class Result implements \ArrayAccess, Arrayable {
      * Unsets an offset
      *
      * @param mixed $offset
+     *
      * @access      public
      * @abstracting ArrayAccess
      */
@@ -201,7 +205,9 @@ class Result implements \ArrayAccess, Arrayable {
      * in the array
      *
      * @access private
+     *
      * @param $offset
+     *
      * @return string
      */
     private function getPath($offset)

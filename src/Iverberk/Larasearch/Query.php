@@ -2,8 +2,8 @@
 
 use stdClass;
 
-class Query {
-
+class Query
+{
     /**
      * @var Proxy
      */
@@ -51,12 +51,9 @@ class Query {
      */
     private function getAggregations()
     {
-        if ($aggregations = Utils::findKey($this->options, 'aggs', false))
-        {
-            foreach ($aggregations as $name => $aggregation)
-            {
-                switch ($aggregation['type'])
-                {
+        if ($aggregations = Utils::findKey($this->options, 'aggs', false)) {
+            foreach ($aggregations as $name => $aggregation) {
+                switch ($aggregation['type']) {
                     case 'terms':
                         $this->payload['aggs'][$name]['terms'] = ['field' => $aggregation['field'], 'size' => 0];
                         break;
@@ -70,26 +67,19 @@ class Query {
      */
     private function getFields()
     {
-        if (array_key_exists('fields', $this->options))
-        {
-            if (array_key_exists('autocomplete', $this->options))
-            {
-                $this->fields = array_map(function ($field)
-                    {
-                        return "${field}.autocomplete";
-                    },
+        if (array_key_exists('fields', $this->options)) {
+            if (array_key_exists('autocomplete', $this->options)) {
+                $this->fields = array_map(function ($field) {
+                    return "${field}.autocomplete";
+                },
                     $this->options['fields']
                 );
-            } else
-            {
-                foreach ($this->options['fields'] as $key => $value)
-                {
-                    if (is_string($key))
-                    {
+            } else {
+                foreach ($this->options['fields'] as $key => $value) {
+                    if (is_string($key)) {
                         $k = $key;
                         $v = $value;
-                    } else
-                    {
+                    } else {
                         // $key is the numerical index, so use $value as key
                         $k = $value;
                         $v = 'word';
@@ -98,17 +88,13 @@ class Query {
                 }
 
             }
-        } else
-        {
-            if (array_key_exists('autocomplete', $this->options))
-            {
-                $this->fields = array_map(function ($field)
-                    {
-                        return "${field}.autocomplete";
-                    },
+        } else {
+            if (array_key_exists('autocomplete', $this->options)) {
+                $this->fields = array_map(function ($field) {
+                    return "${field}.autocomplete";
+                },
                     Utils::findKey($this->proxy->getConfig(), 'autocomplete', []));
-            } else
-            {
+            } else {
                 $this->fields = ['_all'];
             }
         }
@@ -134,15 +120,12 @@ class Query {
      */
     private function getHighlight()
     {
-        if (Utils::findKey($this->options, 'highlight', false))
-        {
-            foreach ($this->fields as $field)
-            {
+        if (Utils::findKey($this->options, 'highlight', false)) {
+            foreach ($this->fields as $field) {
                 $this->payload['highlight']['fields'][$field] = new StdClass();
             }
 
-            if ($tag = Utils::findKey($this->options['highlight'], 'tag', false))
-            {
+            if ($tag = Utils::findKey($this->options['highlight'], 'tag', false)) {
                 $this->payload['highlight']['pre_tags'] = [$tag];
                 $this->payload['highlight']['post_tags'] = [preg_replace('/\A</', '</', $tag)];
             }
@@ -154,20 +137,16 @@ class Query {
      */
     private function getSuggest()
     {
-        if ($suggestions = Utils::findKey($this->options, 'suggest', false))
-        {
+        if ($suggestions = Utils::findKey($this->options, 'suggest', false)) {
             $suggest_fields = Utils::findKey($this->proxy->getConfig(), 'suggest', []);
 
-            if ($fields = Utils::findKey($this->options, 'fields', false))
-            {
+            if ($fields = Utils::findKey($this->options, 'fields', false)) {
                 $suggest_fields = array_intersect($suggest_fields, $fields);
             }
 
-            if (!empty($suggest_fields))
-            {
+            if ( ! empty($suggest_fields)) {
                 $this->payload['suggest'] = ['text' => $this->term];
-                foreach ($suggest_fields as $field)
-                {
+                foreach ($suggest_fields as $field) {
                     $this->payload['suggest'][$field] = ['phrase' => ['field' => "${field}.suggest"]];
                 }
             }
@@ -180,8 +159,7 @@ class Query {
      */
     private function getSort()
     {
-        if ($sort = Utils::findKey($this->options, 'sort', false))
-        {
+        if ($sort = Utils::findKey($this->options, 'sort', false)) {
             $this->payload['sort'] = $sort;
         }
     }
@@ -192,24 +170,24 @@ class Query {
     private function getPayload()
     {
         $payloads = [
-            'json' => Utils::findKey($this->options, 'json', false),
-            'query' => Utils::findKey($this->options, 'query', false),
-            'similar' => [
+            'json'         => Utils::findKey($this->options, 'json', false),
+            'query'        => Utils::findKey($this->options, 'query', false),
+            'similar'      => [
                 'query' => [
                     'more_like_this' => [
-                        'fields' => $this->fields,
-                        'like_text' => $this->term,
-                        'min_doc_freq' => 1,
+                        'fields'        => $this->fields,
+                        'like_text'     => $this->term,
+                        'min_doc_freq'  => 1,
                         'min_term_freq' => 1,
-                        'analyzer' => "larasearch_search2"
+                        'analyzer'      => "larasearch_search2"
                     ]
                 ]
             ],
             'autocomplete' => [
                 'query' => [
                     'multi_match' => [
-                        'fields' => $this->fields,
-                        'query' => $this->term,
+                        'fields'   => $this->fields,
+                        'query'    => $this->term,
                         'analyzer' => "larasearch_autocomplete_search"
                     ]
                 ]
@@ -221,37 +199,30 @@ class Query {
 
         $operator = Utils::findKey($this->options, 'operator', 'and');
 
-        if (count($payload_key) == 1)
-        {
+        if (count($payload_key) == 1) {
             $this->payload = array_merge($this->payload, $payloads[key($payload_key)]);
-        } elseif (count($payload_key) == 0)
-        {
-            if ($this->term == '*')
-            {
+        } elseif (count($payload_key) == 0) {
+            if ($this->term == '*') {
                 $payload = ['match_all' => []];
-            } else
-            {
+            } else {
                 $queries = [];
 
-                foreach ($this->fields as $field)
-                {
+                foreach ($this->fields as $field) {
                     $qs = [];
 
                     $shared_options = [
-                        'query' => $this->term,
+                        'query'    => $this->term,
                         'operator' => $operator,
-                        'boost' => 1
+                        'boost'    => 1
                     ];
 
-                    if ($field == '_all' || substr_compare($field, '.analyzed', -9, 9) === 0)
-                    {
+                    if ($field == '_all' || substr_compare($field, '.analyzed', -9, 9) === 0) {
                         $qs = array_merge($qs, [
                                 array_merge($shared_options, ['boost' => 10, 'analyzer' => "larasearch_search"]),
                                 array_merge($shared_options, ['boost' => 10, 'analyzer' => "larasearch_search2"])
                             ]
                         );
-                        if ($misspellings = Utils::findKey($this->options, 'misspellings', false))
-                        {
+                        if ($misspellings = Utils::findKey($this->options, 'misspellings', false)) {
                             $distance = 1;
                             $qs = array_merge($qs, [
                                     array_merge($shared_options, ['fuzziness' => $distance, 'max_expansions' => 3, 'analyzer' => "larasearch_search"]),
@@ -260,22 +231,19 @@ class Query {
                             );
 
                         }
-                    } elseif (substr_compare($field, '.exact', -6, 6) === 0)
-                    {
+                    } elseif (substr_compare($field, '.exact', -6, 6) === 0) {
                         $f = substr($field, 0, -6);
                         $queries[] = [
                             'match' => [
                                 $f => array_merge($shared_options, ['analyzer' => 'keyword'])
                             ]
                         ];
-                    } else
-                    {
+                    } else {
                         $analyzer = preg_match('/\.word_(start|middle|end)\z/', $field) ? "larasearch_word_search" : "larasearch_autocomplete_search";
                         $qs[] = array_merge($shared_options, ['analyzer' => $analyzer]);
                     }
 
-                    $queries = array_merge($queries, array_map(function ($q) use ($field)
-                    {
+                    $queries = array_merge($queries, array_map(function ($q) use ($field) {
                         return ['match' => [$field => $q]];
                     }, $qs));
                 }
@@ -284,17 +252,14 @@ class Query {
             }
 
             $this->payload['query'] = $payload;
-        } else
-        {
+        } else {
             // We have multiple query definitions, so abort
             throw new \InvalidArgumentException('Cannot use multiple query definitions.');
         }
 
-        if ($load = Utils::findKey($this->options, 'load', false))
-        {
+        if ($load = Utils::findKey($this->options, 'load', false)) {
             $this->payload['fields'] = is_array($load) ? $load : [];
-        } elseif ($select = Utils::findKey($this->options, 'select', false))
-        {
+        } elseif ($select = Utils::findKey($this->options, 'select', false)) {
             $this->payload['fields'] = $select;
         }
     }
@@ -316,8 +281,8 @@ class Query {
 
         $params = [
             'index' => Utils::findKey($this->options, 'index', false) ?: $this->proxy->getIndex()->getName(),
-            'type' => Utils::findKey($this->options, 'type', false) ?: $this->proxy->getType(),
-            'body' => $this->payload
+            'type'  => Utils::findKey($this->options, 'type', false) ?: $this->proxy->getType(),
+            'body'  => $this->payload
         ];
 
         return new Response($this->proxy->getModel(), $this->proxy->getClient()->search($params));

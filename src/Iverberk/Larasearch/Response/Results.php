@@ -1,10 +1,12 @@
-<?php namespace Iverberk\Larasearch\Response;
+<?php
 
-use Illuminate\Support\Collection;
+namespace Iverberk\Larasearch\Response;
+
 use Iverberk\Larasearch\Response;
+use Illuminate\Support\Collection;
 
-class Results extends Collection {
-
+class Results extends Collection
+{
     /**
      * Contains an Elasticsearch response wrapper
      *
@@ -24,8 +26,7 @@ class Results extends Collection {
 
         parent::__construct(
             array_map(
-                function ($hit)
-                {
+                function ($hit) {
                     return new Result($hit);
                 },
                 $this->response->getHits()

@@ -1,19 +1,26 @@
-<?php namespace Iverberk\Larasearch\Commands;
+<?php
 
-use Illuminate\Console\Command;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\File;
+namespace Iverberk\Larasearch\Commands;
+
 use Iverberk\Larasearch\Utils;
-use Symfony\Component\Console\Input\InputOption;
+use Illuminate\Console\Command;
+use Illuminate\Support\Facades\File;
+use Illuminate\Database\Eloquent\Model;
 
-class ReindexCommand extends Command {
-
+class ReindexCommand extends Command
+{
     /**
      * The console command name.
      *
      * @var string
      */
-    protected $name = 'larasearch:reindex';
+    protected $signature = 'larasearch:reindex
+                            {model? : Eloquent model to reindex}
+                            {--relations : Reindex related Eloquent models}
+                            {--mapping= : A file containing custom mappings}
+                            {--dir=* : Directory to scan for searchable models}
+                            {--batch=750 : The number of records to index in a single batch}
+                            {--force : Overwrite existing indices and documents}';
 
     /**
      * The console command description.
@@ -23,64 +30,42 @@ class ReindexCommand extends Command {
     protected $description = 'Reindex Eloquent models to Elasticsearch.';
 
     /**
+     * Create a new command instance.
+     *
+     * @return void
+     */
+    public function __construct()
+    {
+        parent::__construct();
+    }
+
+    /**
      * Execute the console command.
      *
      * @return mixed
      */
-    public function fire()
+    public function handle()
     {
         $directoryModels = [];
         $models = $this->argument('model');
 
-        foreach ($models as $model)
-        {
+        foreach ($models as $model) {
             $instance = $this->getModelInstance($model);
             $this->reindexModel($instance);
         }
 
-        if ($directories = $this->option('dir'))
-        {
+        if ($directories = $this->option('dir')) {
             $directoryModels = array_diff(Utils::findSearchableModels($directories), $models);
 
-            foreach ($directoryModels as $model)
-            {
+            foreach ($directoryModels as $model) {
                 $instance = $this->getModelInstance($model);
                 $this->reindexModel($instance);
             }
         }
 
-        if (empty($models) && empty($directoryModels))
-        {
+        if (empty($models) && empty($directoryModels)) {
             $this->info('No models found.');
         }
-    }
-
-    /**
-     * Get the console command arguments.
-     *
-     * @return array
-     */
-    protected function getArguments()
-    {
-        return array(
-            array('model', InputOption::VALUE_OPTIONAL, 'Eloquent model to reindex', null)
-        );
-    }
-
-    /**
-     * Get the console command options.
-     *
-     * @return array
-     */
-    protected function getOptions()
-    {
-        return array(
-            array('relations', null, InputOption::VALUE_NONE, 'Reindex related Eloquent models', null),
-            array('mapping', null, InputOption::VALUE_REQUIRED, 'A file containing custom mappings', null),
-            array('dir', null, InputOption::VALUE_IS_ARRAY | InputOption::VALUE_REQUIRED, 'Directory to scan for searchable models', null),
-            array('batch', null, InputOption::VALUE_OPTIONAL, 'The number of records to index in a single batch', 750),
-            array('force', null, InputOption::VALUE_NONE, 'Overwrite existing indices and documents', null),
-        );
     }
 
     /**
@@ -98,8 +83,7 @@ class ReindexCommand extends Command {
             $this->option('relations'),
             $this->option('batch'),
             $mapping,
-            function ($batch)
-            {
+            function ($batch) {
                 $this->info("* Batch ${batch}");
             }
         );

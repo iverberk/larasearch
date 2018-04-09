@@ -3,8 +3,8 @@
 use Illuminate\Database\Eloquent\Model;
 use Iverberk\Larasearch\Response\Results;
 
-class Response {
-
+class Response
+{
     /**
      * @var \Illuminate\Database\Eloquent\Model
      */
@@ -56,17 +56,14 @@ class Response {
      */
     public function getRecords()
     {
-        if (count($this->getHits()) > 0)
-        {
-            $ids = array_map(function ($hit)
-            {
+        if (count($this->getHits()) > 0) {
+            $ids = array_map(function ($hit) {
                 return $hit['_id'];
             }, $this->getHits());
 
-            return call_user_func_array(array($this->model, 'whereIn'), array('id', $ids))->get();
-        } else
-        {
-            return call_user_func(array($this->model, 'newCollection'));
+            return call_user_func_array([$this->model, 'whereIn'], ['id', $ids])->get();
+        } else {
+            return call_user_func([$this->model, 'newCollection']);
         }
     }
 
@@ -120,38 +117,34 @@ class Response {
 
     /**
      * @param array $fields
+     *
      * @return mixed
      */
     public function getSuggestions($fields = [])
     {
-        if (!empty($fields))
-        {
+        if ( ! empty($fields)) {
             $results = [];
-            foreach ($fields as $field)
-            {
-                foreach ($this->response['suggest'] as $key => $value)
-                {
-                    if (preg_match("/^${field}.*/", $key) !== false)
-                    {
+            foreach ($fields as $field) {
+                foreach ($this->response['suggest'] as $key => $value) {
+                    if (preg_match("/^${field}.*/", $key) !== false) {
                         $results[$field] = $value;
                     }
                 }
             }
 
             return $results;
-        } else
-        {
+        } else {
             return $this->response['suggest'];
         }
     }
 
     /**
      * @param string $name
+     *
      * @return array
      */
     public function getAggregations($name = '')
     {
         return empty($name) ? $this->response['aggregations'] : $this->response['aggregations'][$name];
     }
-
 }

@@ -1,20 +1,24 @@
 <?php namespace Iverberk\Larasearch\Commands;
 
+use Iverberk\Larasearch\Utils;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\File;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
-use Illuminate\Support\Facades\File;
-use Iverberk\Larasearch\Utils;
-use Symfony\Component\Console\Input\InputOption;
 
-class PathsCommand extends Command {
+class PathsCommand extends Command
+{
 
     /**
      * The console command name.
      *
      * @var string
      */
-    protected $name = 'larasearch:paths';
+    protected $signature = 'larasearch:paths
+                            {model? : Eloquent model to find paths for}
+                            {--dir=* : Directory to scan for searchable models}
+                            {--relations : Include related Eloquent models}
+                            {--write-config : Include the compiled paths in the package configuration}';
 
     /**
      * The console command description.
@@ -44,37 +48,42 @@ class PathsCommand extends Command {
     private $reversedPaths = [];
 
     /**
+     * Create a new command instance.
+     *
+     * @return void
+     */
+    public function __construct()
+    {
+        parent::__construct();
+    }
+
+    /**
      * Scan directories for Eloquent models that use the SearchableTrait.
      * Generate paths for all these models so that we can (re)index these
      * models.
      *
      * @return void
      */
-    public function fire()
+    public function handle()
     {
         $models = $this->argument('model');
 
-        foreach ($models as $model)
-        {
+        foreach ($models as $model) {
             $this->compilePaths(new $model);
         }
 
-        if ($directories = $this->option('dir'))
-        {
+        if ($directories = $this->option('dir')) {
             $directoryModels = array_diff(Utils::findSearchableModels($directories), $models);
 
-            foreach ($directoryModels as $model)
-            {
+            foreach ($directoryModels as $model) {
                 // Find paths for related models
                 $this->compilePaths(new $model);
             }
         }
 
-        if (!empty($models) || !empty($directoryModels))
-        {
+        if ( ! empty($models) || ! empty($directoryModels)) {
             $this->writeConfig();
-        } else
-        {
+        } else {
             $this->info('No models found.');
         }
     }
@@ -96,32 +105,6 @@ class PathsCommand extends Command {
     }
 
     /**
-     * Get the console command arguments.
-     *
-     * @return array
-     */
-    protected function getArguments()
-    {
-        return array(
-            array('model', InputOption::VALUE_OPTIONAL, 'Eloquent model to find paths for', null)
-        );
-    }
-
-    /**
-     * Get the console command options.
-     *
-     * @return array
-     */
-    protected function getOptions()
-    {
-        return array(
-            array('dir', null, InputOption::VALUE_IS_ARRAY | InputOption::VALUE_REQUIRED, 'Directory to scan for searchable models', null, ''),
-            array('relations', null, InputOption::VALUE_NONE, 'Include related Eloquent models', null),
-            array('write-config', null, InputOption::VALUE_NONE, 'Include the compiled paths in the package configuration', null),
-        );
-    }
-
-    /**
      * Inspect all relations and build a (reverse) path for every relation.
      * This information is used to quickly determine which relations need to
      * be eager loaded on a model when (re)indexing. It also defines the document
@@ -129,9 +112,9 @@ class PathsCommand extends Command {
      *
      * @param \Illuminate\Database\Eloquent\Model
      * @param string $ancestor
-     * @param array $path
-     * @param array $reversedPath
-     * @param null $start
+     * @param array  $path
+     * @param array  $reversedPath
+     * @param null   $start
      */
     protected function compilePaths(Model $model, $ancestor = null, $path = [], $reversedPath = [], $start = null)
     {
@@ -144,22 +127,19 @@ class PathsCommand extends Command {
         // Initialize the found relations to an empty array
         $relations = [];
 
-        if ($this->option('relations'))
-        {
+        if ($this->option('relations')) {
             // Find all related models
             $relatedModels = $this->getRelatedModels($model);
 
-            foreach ($relatedModels as $related)
-            {
+            foreach ($relatedModels as $related) {
                 $newPath = $path;
                 $newPath[] = $related['method']->name;
 
                 // Check if we need to recurse for this related model
-                if (!$related['model'] instanceof $ancestor &&
-                    !$related['model'] instanceof $start &&
+                if ( ! $related['model'] instanceof $ancestor &&
+                    ! $related['model'] instanceof $start &&
                     $this->checkDocHints($related['method']->getDocComment(), $start)
-                )
-                {
+                ) {
                     // Get the relations of the related model here, so
                     // that we can build a reversed path for this relation
                     $this->getRelatedModels($related['model']);
@@ -167,19 +147,15 @@ class PathsCommand extends Command {
                     $newReversedPath = $reversedPath;
 
                     // Check if a reciprocal relation is found back to the original model
-                    if (!isset($this->relationClassMethods[get_class($related['model'])][$modelClass]))
-                    {
+                    if ( ! isset($this->relationClassMethods[get_class($related['model'])][$modelClass])) {
                         // Check if we are possibly dealing with a polymorphic relation (reference to itself)
-                        if (array_key_exists(get_class($related['model']), $this->relationClassMethods[get_class($related['model'])]))
-                        {
+                        if (array_key_exists(get_class($related['model']), $this->relationClassMethods[get_class($related['model'])])) {
                             $model = get_class($related['model']);
                             $newReversedPath[] = $this->relationClassMethods[$model][$model];
-                        } else
-                        {
+                        } else {
                             throw new \RuntimeException("Reciprocal relation not found for model '" . get_class($related['model']) . "' from within '$modelClass' model");
                         }
-                    } else
-                    {
+                    } else {
                         $newReversedPath[] = $this->relationClassMethods[get_class($related['model'])][$modelClass];
                     }
 
@@ -196,14 +172,11 @@ class PathsCommand extends Command {
 
         // Found no more relations for this model so build the final path
         // and add the last inverse path segment
-        if (empty($relations))
-        {
+        if (empty($relations)) {
 
-            if (!empty($path))
-            {
+            if ( ! empty($path)) {
                 $this->paths[get_class($start)][] = implode('.', $path);
-            } else
-            {
+            } else {
                 $this->paths[get_class($start)] = [];
             }
 
@@ -217,6 +190,7 @@ class PathsCommand extends Command {
      *
      * @param string $docComment
      * @param        $model
+     *
      * @return bool
      */
     protected function checkDocHints($docComment, $model)
@@ -225,13 +199,11 @@ class PathsCommand extends Command {
         if (preg_match('/@follow\s+NEVER/', $docComment)) return false;
 
         // Check if we follow the relation from the 'base' model
-        if (preg_match('/@follow\s+UNLESS\s+' . str_replace('\\', '\\\\', get_class($model)) . '\b/', $docComment))
-        {
+        if (preg_match('/@follow\s+UNLESS\s+' . str_replace('\\', '\\\\', get_class($model)) . '\b/', $docComment)) {
             return false;
         }
 
-        if (preg_match('/@follow\s+FROM\b/', $docComment) && !preg_match('/@follow\s+FROM\s+' . str_replace('\\', '\\\\', get_class($model)) . '\b/', $docComment))
-        {
+        if (preg_match('/@follow\s+FROM\b/', $docComment) && ! preg_match('/@follow\s+FROM\s+' . str_replace('\\', '\\\\', get_class($model)) . '\b/', $docComment)) {
             return false;
         }
 
@@ -243,6 +215,7 @@ class PathsCommand extends Command {
      * Find related models from a base model
      *
      * @param $model
+     *
      * @return array
      */
     protected function getRelatedModels(Model $model)
@@ -251,28 +224,24 @@ class PathsCommand extends Command {
         $modelClass = get_class($model);
 
         // Check if we already know the related models for this model
-        if (!isset($this->relatedModels[$modelClass]))
-        {
+        if ( ! isset($this->relatedModels[$modelClass])) {
             $relatedModels = [];
 
             $methods = with(new \ReflectionClass($model))->getMethods();
 
             // Iterate all class methods
-            foreach ($methods as $method)
-            {
+            foreach ($methods as $method) {
                 // Check if this method returns an Eloquent relation
                 if ($method->class == $modelClass &&
                     preg_match('/@return\s+\\\\Illuminate\\\\Database\\\\Eloquent\\\\Relations/', $method->getDocComment())
-                )
-                {
+                ) {
                     // Get the method name, so that we can call it on the model
                     $relationMethod = $method->name;
 
                     // Find the relation
                     $relation = $model->$relationMethod();
 
-                    if ($relation instanceof Relation)
-                    {
+                    if ($relation instanceof Relation) {
                         // Find the related model
                         $related = $relation->getRelated();
 
@@ -289,8 +258,7 @@ class PathsCommand extends Command {
 
             // Return the related models
             return $relatedModels;
-        } else
-        {
+        } else {
             // Return from cache
             return $this->relatedModels[$modelClass];
         }
@@ -303,28 +271,19 @@ class PathsCommand extends Command {
      */
     private function writeConfig()
     {
-        if ($this->option('write-config'))
-        {
+        if ($this->option('write-config')) {
             $configFile = base_path() . '/config/larasearch.php';
 
-            if ($this->getLaravel())
-            {
-                if ( ! File::exists($configFile))
-                {
-                    if ($this->confirm('It appears that you have not yet published the larasearch config. Would you like to do this now?', false))
-                    {
+            if ($this->getLaravel()) {
+                if ( ! File::exists($configFile)) {
+                    if ($this->confirm('It appears that you have not yet published the larasearch config. Would you like to do this now?', false)) {
                         $this->call('vendor:publish', ['--provider' => 'Iverberk\\Larasearch\LarasearchServiceProvider', '--tag' => 'config']);
-                    }
-                    else
-                    {
+                    } else {
                         return;
                     }
                 }
-            }
-            else
-            {
-                if ( ! File::exists($configFile))
-                {
+            } else {
+                if ( ! File::exists($configFile)) {
                     $this->info('Lumen application detected. Please copy the config manually to config/larasearch.php.');
                 }
             }
@@ -332,9 +291,7 @@ class PathsCommand extends Command {
             File::put(dirname($configFile) . "/paths.json", json_encode(['paths' => $this->paths, 'reversedPaths' => $this->reversedPaths], JSON_PRETTY_PRINT));
 
             $this->info('Paths file written to local package configuration');
-        }
-        else
-        {
+        } else {
             $this->info(json_encode(['paths' => $this->paths, 'reversedPaths' => $this->reversedPaths], JSON_PRETTY_PRINT));
         }
     }

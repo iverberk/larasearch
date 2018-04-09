@@ -1,11 +1,11 @@
 <?php namespace Iverberk\Larasearch;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Database\Eloquent\Model;
 
-class Proxy {
-
+class Proxy
+{
     /**
      * @var array
      */
@@ -26,7 +26,7 @@ class Proxy {
         $this->config['type'] = str_singular($model->getTable());
 
         $this->config['client'] = App::make('Elasticsearch');
-        $this->config['index'] = App::make('iverberk.larasearch.index', array('proxy' => $this));
+        $this->config['index'] = App::makeWith('iverberk.larasearch.index', ['proxy' => $this]);
     }
 
     /**
@@ -72,11 +72,12 @@ class Proxy {
     /**
      * @param       $term
      * @param array $options
+     *
      * @return \Iverberk\Larasearch\Response
      */
-    public function search($term, $options = [])
+    public function elasticSearch($term, $options = [])
     {
-        return App::make('iverberk.larasearch.query', ['proxy' => $this, 'term' => $term, 'options' => $options])->execute();
+        return App::makeWith('iverberk.larasearch.query', ['proxy' => $this, 'term' => $term, 'options' => $options])->execute();
     }
 
     /**
@@ -84,38 +85,41 @@ class Proxy {
      *
      * @param array $query
      * @param array $options
+     *
      * @return \Iverberk\Larasearch\Response
      */
     public function searchByQuery($query, $options = [])
     {
         $options = array_merge(['query' => $query], $options);
 
-        return App::make('iverberk.larasearch.query', ['proxy' => $this, 'term' => null, 'options' => $options])->execute();
+        return App::makeWith('iverberk.larasearch.query', ['proxy' => $this, 'term' => null, 'options' => $options])->execute();
     }
 
     /**
      * Retrieves a single document by identifier
      *
      * @param $id
+     *
      * @return Result
      */
     public function searchById($id)
     {
-        return App::make('iverberk.larasearch.response.result', $this->config['client']->get(
-                [
-                    'index' => $this->getIndex()->getName(),
-                    'type' => $this->getType(),
-                    'id' => $id
-                ]
-            )
-        );
+        return App::makeWith('iverberk.larasearch.response.result', $this->config['client']->get(
+            [
+                'index' => $this->getIndex()->getName(),
+                'type'  => $this->getType(),
+                'id'    => $id
+            ]
+        )
+        )->getSource();
     }
 
     /**
-     * @param bool $relations
-     * @param int $batchSize
-     * @param array $mapping
+     * @param bool     $relations
+     * @param int      $batchSize
+     * @param array    $mapping
      * @param callable $callback
+     *
      * @internal param bool $force
      * @internal param array $params
      */
@@ -129,16 +133,14 @@ class Proxy {
 
         Index::clean($name);
 
-        $index = App::make('iverberk.larasearch.index', array('name' => $newName, 'proxy' => $this));
+        $index = App::make('iverberk.larasearch.index', ['name' => $newName, 'proxy' => $this]);
         $index->create($mapping);
 
-        if ($index->aliasExists($name))
-        {
+        if ($index->aliasExists($name)) {
             $index->import($model, $relations, $batchSize, $callback);
             $remove = [];
 
-            foreach (Index::getAlias($name) as $index => $aliases)
-            {
+            foreach (Index::getAlias($name) as $index => $aliases) {
                 $remove = [
                     'remove' => [
                         'index' => $index,
@@ -158,9 +160,10 @@ class Proxy {
 
             Index::updateAliases(['actions' => $actions]);
             Index::clean($name);
-        } else
-        {
-            if ($this->config['index']->exists()) $this->config['index']->delete();
+        } else {
+            if ($this->config['index']->exists()) {
+                $this->config['index']->delete();
+            }
 
             $actions[] =
                 [
@@ -198,10 +201,10 @@ class Proxy {
     {
         $this->config['client']->index(
             [
-                'id' => $model->getEsId(),
+                'id'    => $model->getEsId(),
                 'index' => $this->getIndex()->getName(),
-                'type' => $this->getType(),
-                'body' => $model->transform(true)
+                'type'  => $this->getType(),
+                'body'  => $model->transform()
             ]
         );
     }
@@ -215,9 +218,9 @@ class Proxy {
     {
         $this->config['client']->delete(
             [
-                'id' => $id,
+                'id'    => $id,
                 'index' => $this->getIndex()->getName(),
-                'type' => $this->getType()
+                'type'  => $this->getType()
             ]
         );
     }
@@ -241,5 +244,4 @@ class Proxy {
 
         $class::$__es_enable = false;
     }
-
 }

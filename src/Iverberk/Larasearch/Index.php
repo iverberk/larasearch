@@ -1,13 +1,13 @@
 <?php namespace Iverberk\Larasearch;
 
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Config;
-use Illuminate\Support\Str;
+use Illuminate\Database\Eloquent\Model;
 use Iverberk\Larasearch\Exceptions\ImportException;
 
-class Index {
-
+class Index
+{
     /**
      * Index name
      *
@@ -48,7 +48,7 @@ class Index {
 
 
     /**
-     * @param Proxy $proxy
+     * @param Proxy  $proxy
      * @param string $name
      */
     public function __construct(Proxy $proxy, $name = '')
@@ -62,18 +62,18 @@ class Index {
     /**
      * Import an Eloquent
      *
-     * @param Model $model
-     * @param array $relations
-     * @param int $batchSize
+     * @param Model    $model
+     * @param array    $relations
+     * @param int      $batchSize
      * @param callable $callback
+     *
      * @internal param $type
      */
     public function import(Model $model, $relations = [], $batchSize = 750, Callable $callback = null)
     {
         $batch = 0;
 
-        while (true)
-        {
+        while (true) {
             // Increase the batch number
             $batch += 1;
 
@@ -85,26 +85,26 @@ class Index {
                 ->get();
 
             // Break out of the loop if we are out of records
-            if (count($records) == 0) break;
+            if (count($records) == 0) {
+                break;
+            }
 
             // Call the callback function to provide feedback on the import process
-            if ($callback)
-            {
+            if ($callback) {
                 $callback($batch);
             }
 
             // Transform each record before sending it to Elasticsearch
             $data = [];
 
-            foreach ($records as $record)
-            {
+            foreach ($records as $record) {
                 $data[] = [
                     'index' => [
                         '_id' => $record->getEsId()
                     ]
                 ];
 
-                $data[] = $record->transform(!empty($relations));
+                $data[] = $record->transform(! empty($relations));
             }
 
             // Bulk import the data to Elasticsearch
@@ -116,12 +116,15 @@ class Index {
      * Set index name
      *
      * @param string
+     *
      * @return Index
      */
     public function setName($name)
     {
         $index_prefix = Config::get('larasearch.elasticsearch.index_prefix', '');
-        if ($index_prefix && !Str::startsWith($name, $index_prefix)) $name = $index_prefix . $name;
+        if ($index_prefix && ! Str::startsWith($name, $index_prefix)) {
+            $name = $index_prefix . $name;
+        }
 
         $this->name = $name;
 
@@ -142,6 +145,7 @@ class Index {
      * Set ElasticSearch Proxy for the index
      *
      * @param Proxy $proxy
+     *
      * @return \Iverberk\Larasearch\Proxy
      * @author Chris Nagle
      */
@@ -196,12 +200,15 @@ class Index {
      * Check if an alias exists
      *
      * @param $alias
+     *
      * @return bool
      */
     public function aliasExists($alias)
     {
         $index_prefix = Config::get('larasearch.elasticsearch.index_prefix', '');
-        if ($index_prefix && !Str::startsWith($alias, $index_prefix)) $alias = $index_prefix . $alias;
+        if ($index_prefix && ! Str::startsWith($alias, $index_prefix)) {
+            $alias = $index_prefix . $alias;
+        }
 
         return self::getClient()->indices()->existsAlias(['name' => $alias]);
     }
@@ -253,7 +260,7 @@ class Index {
      * Inspect tokens returned from the analyzer
      *
      * @param string $text
-     * @param array $options
+     * @param array  $options
      */
     public function tokens($text, $options = [])
     {
@@ -278,6 +285,7 @@ class Index {
 
     /**
      * @param $records
+     *
      * @throws ImportException
      */
     public function bulk($records)
@@ -288,14 +296,11 @@ class Index {
 
         $results = self::getClient()->bulk($params);
 
-        if ($results['errors'])
-        {
+        if ($results['errors']) {
             $errorItems = [];
 
-            foreach ($results['items'] as $item)
-            {
-                if (array_key_exists('error', $item['index']))
-                {
+            foreach ($results['items'] as $item) {
+                if (array_key_exists('error', $item['index'])) {
                     $errorItems[] = $item;
                 }
             }
@@ -312,13 +317,13 @@ class Index {
     public static function clean($name)
     {
         $index_prefix = Config::get('larasearch.elasticsearch.index_prefix', '');
-        if ($index_prefix && !Str::startsWith($name, $index_prefix)) $name = $index_prefix . $name;
+        if ($index_prefix && ! Str::startsWith($name, $index_prefix)) {
+            $name = $index_prefix . $name;
+        }
 
         $indices = self::getClient()->indices()->getAliases();
-        foreach ($indices as $index => $value)
-        {
-            if (empty($value['aliases']) && preg_match("/^${name}_\\d{14,17}$/", $index))
-            {
+        foreach ($indices as $index => $value) {
+            if (empty($value['aliases']) && preg_match("/^${name}_\\d{14,17}$/", $index)) {
                 self::getClient()->indices()->delete(['index' => $index]);
             }
         }
@@ -328,29 +333,35 @@ class Index {
      * Retrieve aliases
      *
      * @param $name
+     *
      * @return array
      */
     public static function getAlias($name)
     {
         $index_prefix = Config::get('larasearch.elasticsearch.index_prefix', '');
-        if ($index_prefix && !Str::startsWith($name, $index_prefix)) $name = $index_prefix . $name;
+        if ($index_prefix && ! Str::startsWith($name, $index_prefix)) {
+            $name = $index_prefix . $name;
+        }
 
         return self::getClient()->indices()->getAlias(['name' => $name]);
     }
 
     /**
      * @param array $actions
+     *
      * @return array
      */
     public static function updateAliases(array $actions)
     {
-        if (isset($actions['actions']) && ($index_prefix = Config::get('larasearch.elasticsearch.index_prefix', '')))
-        {
-            foreach ($actions['actions'] as &$action)
-            {
+        if (isset($actions['actions']) && ($index_prefix = Config::get('larasearch.elasticsearch.index_prefix', ''))) {
+            foreach ($actions['actions'] as &$action) {
                 list($verb, $data) = each($action);
-                if (!Str::startsWith($data['index'], $index_prefix)) $action[$verb]['index'] = $index_prefix . $data['index'];
-                if (!Str::startsWith($data['alias'], $index_prefix)) $action[$verb]['alias'] = $index_prefix . $data['alias'];
+                if ( ! Str::startsWith($data['index'], $index_prefix)) {
+                    $action[$verb]['index'] = $index_prefix . $data['index'];
+                }
+                if ( ! Str::startsWith($data['alias'], $index_prefix)) {
+                    $action[$verb]['alias'] = $index_prefix . $data['alias'];
+                }
             }
         }
 
@@ -361,12 +372,15 @@ class Index {
      * Refresh an index
      *
      * @param $index
+     *
      * @return array
      */
     public static function refresh($index)
     {
         $index_prefix = Config::get('larasearch.elasticsearch.index_prefix', '');
-        if ($index_prefix && !Str::startsWith($index, $index_prefix)) $index = $index_prefix . $index;
+        if ($index_prefix && ! Str::startsWith($index, $index_prefix)) {
+            $index = $index_prefix . $index;
+        }
 
         return self::getClient()->indices()->refresh(['index' => $index]);
     }
@@ -384,27 +398,24 @@ class Index {
 
         $mapping_options = array_combine(
             $analyzers,
-            array_map(function ($type)
-                {
-                    $config = $this->getProxy()->getConfig();
+            array_map(function ($type) {
+                $config = $this->getProxy()->getConfig();
 
-                    // Maintain backwards compatibility by allowing a plain array of analyzer => fields
-                    $field_mappings = Utils::findKey($config, $type, false) ?: [];
+                // Maintain backwards compatibility by allowing a plain array of analyzer => fields
+                $field_mappings = Utils::findKey($config, $type, false) ?: [];
 
-                    // Also read from a dedicated array key called 'analyzers'
-                    if (isset($config['analyzers']))
-                    {
-                        $field_mappings = array_merge($field_mappings, Utils::findKey($config['analyzers'], $type, false) ?: []);
-                    }
+                // Also read from a dedicated array key called 'analyzers'
+                if (isset($config['analyzers'])) {
+                    $field_mappings = array_merge($field_mappings, Utils::findKey($config['analyzers'], $type, false) ?: []);
+                }
 
-                    return $field_mappings;
-                },
+                return $field_mappings;
+            },
                 $analyzers
             )
         );
 
-        foreach (array_unique(array_flatten(array_values($mapping_options))) as $field)
-        {
+        foreach (array_unique(array_flatten(array_values($mapping_options))) as $field) {
             // Extract path segments from dot separated field
             $pathSegments = explode('.', $field);
 
@@ -413,45 +424,43 @@ class Index {
 
             // Apply default field mapping
             $fieldMapping = [
-                'type' => "multi_field",
+                'type'   => "multi_field",
                 'fields' => [
                     $fieldName => [
-                        'type' => 'string',
+                        'type'  => 'string',
                         'index' => 'not_analyzed'
                     ],
                     'analyzed' => [
-                        'type' => 'string',
+                        'type'  => 'string',
                         'index' => 'analyzed'
                     ]
                 ]
             ];
 
             // Check if we need to add additional mappings
-            foreach ($mapping_options as $type => $fields)
-            {
-                if (in_array($field, $fields))
-                {
+            foreach ($mapping_options as $type => $fields) {
+                if (in_array($field, $fields)) {
                     $fieldMapping['fields'][$type] = [
-                        'type' => 'string',
-                        'index' => 'analyzed',
+                        'type'     => 'string',
+                        'index'    => 'analyzed',
                         'analyzer' => "larasearch_${type}_index"
                     ];
                 }
             }
 
-            if (!empty($pathSegments))
-            {
+            if ( ! empty($pathSegments)) {
                 $mapping = Utils::array_merge_recursive_distinct(
                     $mapping,
                     $this->getNestedFieldMapping($fieldName, $fieldMapping, $pathSegments)
                 );
-            } else
-            {
+            } else {
                 $mapping[$fieldName] = $fieldMapping;
             }
         }
 
-        if (!empty($mapping)) $params['mappings']['_default_']['properties'] = $mapping;
+        if ( ! empty($mapping)) {
+            $params['mappings']['_default_']['properties'] = $mapping;
+        }
 
         $params['index'] = $this->getName();
         $params['type'] = $this->getProxy()->getType();
@@ -463,6 +472,7 @@ class Index {
      * @param $fieldName
      * @param $fieldMapping
      * @param $pathSegments
+     *
      * @return array
      */
     private function getNestedFieldMapping($fieldName, $fieldMapping, $pathSegments)
@@ -472,17 +482,16 @@ class Index {
 
         // Create the first level
         $nested[$current] = [
-            'type' => 'object',
+            'type'       => 'object',
             'properties' => [
                 $fieldName => $fieldMapping
             ]
         ];
 
         // Add any additional levels
-        foreach (array_reverse($pathSegments) as $pathSegment)
-        {
+        foreach (array_reverse($pathSegments) as $pathSegment) {
             $nested[$pathSegment] = [
-                'type' => 'object',
+                'type'       => 'object',
                 'properties' => $nested
             ];
 
@@ -492,5 +501,4 @@ class Index {
 
         return $nested;
     }
-
 }
